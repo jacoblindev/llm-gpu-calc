@@ -15,12 +15,27 @@
   - [ ] 0.3 Agree dependency rule (ADR required for new runtime deps)
 
 - [ ] 1.0 Domain: vRAM estimation engine
+  - [ ] 1.1 GQA-aware KV per-token formula; decouple weight vs KV dtypes
+  - [ ] 1.2 Replication overhead for weights; configurable
+  - [ ] 1.3 Per-GPU aggregator supporting overlapping deployments
+  - [ ] 1.4 Suggestions: `--max-model-len` / `--max-num-seqs`
+  - [ ] 1.5 Validation and fit checks (warnings/errors)
+
 - [ ] 2.0 Data catalogs: GPUs and Models (JSON + typed access)
-- [ ] 3.0 UI: GPU and Model selection steps (Stepper UX)
-- [ ] 4.0 UI: Per-GPU segmented bar visualization
-- [ ] 5.0 Config inputs: TP degree, headroom, KV options (+ validation)
-- [ ] 6.0 Results: Fit/over-capacity logic, warnings, and summaries
- - [ ] 7.0 Recommendations: compute suggested `--max-model-len` / `--max-num-seq` from memory budget
+  - [ ] 2.1 Add `numKeyValueHeads` to models; verify a few real entries
+
+- [ ] 3.0 UI/App: Deployment roster + Stepper
+  - [ ] 3.1 Create deployments, assign GPUs, set TP, dtypes, overheads
+  - [ ] 3.2 Global config: utilization U [0..1], runtime reserve (GB)
+  - [ ] 3.3 Validation: tp ≤ assigned GPUs; soft warnings for mixed capacities
+
+- [ ] 4.0 Visualization: Per-GPU stacked bars
+  - [ ] 4.1 Segments per deployment (weights/KV) + reserve/unallocated/free
+  - [ ] 4.2 Legend and bar labels with GB and %
+
+- [ ] 5.0 Results & Recommendations
+  - [ ] 5.1 Fit/over-capacity status per GPU with reasons
+  - [ ] 5.2 Suggestions per deployment (`--max-model-len` / `--max-num-seqs`)
 
 - [ ] X.0 Align & prune tests
   - [ ] X.1 Retire tests mismatching updated requirements (same PR)
