@@ -49,4 +49,3 @@ The v1 calculator must estimate per-GPU VRAM usage for locally hosted vLLM deplo
 - Extend model catalog to include `numKeyValueHeads` for GQA-aware sizing.
 - Add validations: `tp ≤ assignedGpuIds.length`; warn when mixed GPU capacities are used within a TP group.
 - Add unit tests covering formula sanity checks and overlapping deployment aggregation.
-

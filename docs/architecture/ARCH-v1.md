@@ -16,6 +16,7 @@ Allowed imports: UI→App; App→Domain|Data|Shared; Domain→Shared; Data→Sha
 
 - Types (shared/types.ts)
   - `Gpu { id: string; name: string; vramGB: number }`
+  - `UnitPreference = 'GiB'|'GB'`
   - `Model { id: string; name: string; paramsB: number; layers: number; hiddenSize: number; heads: number; numKeyValueHeads: number; defaultWeightDtype: DType; defaultKvDtype: KvDType }`
   - `DType = 'fp16'|'bf16'|'fp32'|'q8'|'q4'`
   - `KvDType = 'fp16'|'bf16'|'fp8'|'int8'`
@@ -38,6 +39,12 @@ Allowed imports: UI→App; App→Domain|Data|Shared; Domain→Shared; Data→Sha
   - `listModels(): Model[]`
   - `getModelById(id: string): Model | undefined`
 
+- Shared utils (shared/units.ts)
+  - `bytesToGiB(bytes: number): number`
+  - `bytesToGB(bytes: number): number`
+  - `formatBytes(bytes: number, unit: UnitPreference, decimals = 1): string`
+  - All domain calculations use bytes; formatting happens in UI/App using these helpers.
+
 ## Data Flow
 
 UI (forms/stepper & deployment roster) → App (state + validation) → Domain (pure estimates, per‑GPU aggregation) → App (compose results) → UI (bars)
@@ -51,9 +58,10 @@ State lives in App. Domain is stateless. Data is static JSON read at startup.
 - Testability: Unit tests in domain cover formulas and edge cases; light UI smoke tests.
 - Accessibility: Bars have ARIA roles and text equivalents.
 
-## Tech Choices (see ADR‑0001)
+## Tech Choices (see ADR‑0001, ADR‑0003)
 
 - Vue 3 + Vite + TypeScript + Pinia for a simple SPA.
+- Tailwind CSS for utilities and layout; semantic colors via CSS variables (Appendix in PRD) configured in Tailwind.
 - No chart library initially; SVG bars implemented in UI.
 - No backend in v1.
 

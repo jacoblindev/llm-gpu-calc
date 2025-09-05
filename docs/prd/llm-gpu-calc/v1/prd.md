@@ -50,6 +50,7 @@ Sizing vLLM deployments is tricky: vRAM usage depends on model weights, tensor p
 - Global inputs: GPU memory utilization `U ∈ [0,1]` (default 0.90), runtime reserve per GPU (GB), validation warnings when `U > 0.95`.
 - The calculator computes per‑GPU memory breakdown and fit (OK/Over capacity) using formulas below, including GQA‑aware KV sizing and replication overhead for weights.
 - Visualization renders one bar per GPU, segmented by deployment and by component (weights, KV, reserve, unallocated (1−U), free); labels show GB and %.
+- Units toggle: Default GiB; user can switch to GB. Bars and labels follow the selected unit. Capacity lines/labels show both (e.g., “80 GB (74.5 GiB)”). All internal math remains in bytes.
 - Warnings/Errors:
   - Warn if `U > 0.95` about increased OOM risk.
   - Error if summed per‑GPU weights `ΣW` exceed budget `B = U × capacity − reserve`.
@@ -63,6 +64,21 @@ Sizing vLLM deployments is tricky: vRAM usage depends on model weights, tensor p
 - Stepper layout: 1) Select GPU(s) → 2) Select Model → 3) Configure Workload → 4) Results.
 - Results view: grid of GPU bars with a legend and a summary (fit status, min/max free GB across GPUs).
 - Accessibility: keyboard navigable, sufficient contrast, ARIA labels for segmented bars.
+
+## UI/UX Styles (v1)
+
+- Framework: Tailwind CSS utilities with a thin layer of CSS variables for theme tokens. See Appendix for tokens.
+- Color semantics:
+  - Weights: blue (primary)
+  - KV cache: amber (attention)
+  - Reserve: zinc/neutral (medium)
+  - Unallocated (1−U): zinc/neutral (light)
+  - Free: emerald/green (success)
+- Typography: System UI stack, base size 14–16px; use monospace for numeric labels within bars.
+- Number formatting: Show values with 1 decimal and percentages with ≤1 decimal; units follow the toggle (GiB default). Capacity labels show both units.
+- Interaction: Hover highlights a deployment’s segments; clicking a bar focuses that GPU and lists contributing deployments. Provide visible focus rings for keyboard users.
+- Dark mode: Token-driven (CSS variables) with Tailwind’s dark class; maintain WCAG AA contrast.
+- Accessibility: Bars have role=img with aria-label summarizing segments; legend is keyboard-focusable and toggles highlighting.
 
 ## Risks & Assumptions
 
@@ -233,3 +249,34 @@ Notes: Approximations assume even sharding under tensor parallelism; minor repli
 - KV cache: Attention key/value tensors stored per token per layer for decoding.
 - GPU memory utilization (U): Fraction of total GPU memory reserved for model weights and KV (e.g., 0.90).
 - Replication overhead: Safety factor modeling unsharded/replicated params and runtime buffers on each GPU.
+
+---
+
+## Appendix: UI Tokens (v1)
+
+CSS variables (used by Tailwind via `:root` and `.dark` overrides):
+
+- Colors
+  - `--color-weights`: rgb(37 99 235)   [Tailwind `blue-600`]
+  - `--color-kv`:      rgb(245 158 11)  [Tailwind `amber-500`]
+  - `--color-reserve`: rgb(113 113 122) [Tailwind `zinc-500`]
+  - `--color-unalloc`: rgb(212 212 216) [Tailwind `zinc-300`]
+  - `--color-free`:    rgb(16 185 129)  [Tailwind `emerald-500`]
+- Typography
+  - `--font-sans`: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, Noto Sans, "Apple Color Emoji", "Segoe UI Emoji";
+  - `--font-mono`: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New";
+- Sizing & spacing
+  - `--bar-height`: 20px
+  - `--radius-sm`: 6px
+  - `--gap-sm`: 8px
+
+Dark mode color overrides (suggested):
+
+- `--color-unalloc`: rgb(63 63 70)  [zinc-700]
+- `--color-reserve`: rgb(161 161 170) [zinc-400]
+
+Formatting conventions:
+
+- Units: Display GiB by default; allow toggling to GB. When GiB, convert bytes → GiB using 1024^3.
+- Precision: 1 decimal for GiB and percentage values inside bars and legends.
+- Truncation: If a segment < 2px width, collapse label and show full value on hover/tooltip and in aria-label.

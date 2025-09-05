@@ -13,6 +13,7 @@
   - [ ] 0.1 Create directory layout & stubs from PRD Module Plan (ui/app/domain/data/shared)
   - [ ] 0.2 Align code with ARCH-v1 boundaries; add/update ADR if deviating
   - [ ] 0.3 Agree dependency rule (ADR required for new runtime deps)
+  - [ ] 0.4 Add Tailwind CSS, base `tokens.css`, and Tailwind config mapping to PRD tokens (ADR-0003)
 
 - [ ] 1.0 Domain: vRAM estimation engine
   - [ ] 1.1 GQA-aware KV per-token formula; decouple weight vs KV dtypes
@@ -28,10 +29,13 @@
   - [ ] 3.1 Create deployments, assign GPUs, set TP, dtypes, overheads
   - [ ] 3.2 Global config: utilization U [0..1], runtime reserve (GB)
   - [ ] 3.3 Validation: tp ≤ assigned GPUs; soft warnings for mixed capacities
+  - [ ] 3.4 Units toggle (GiB|GB) with localStorage persistence; capacity labels show both
 
 - [ ] 4.0 Visualization: Per-GPU stacked bars
   - [ ] 4.1 Segments per deployment (weights/KV) + reserve/unallocated/free
   - [ ] 4.2 Legend and bar labels with GB and %
+  - [ ] 4.3 Apply Tailwind utilities and tokens for consistent styling; dark mode variant
+  - [ ] 4.4 Re-render bars/legend on unit change; tooltips/aria-labels show precise values
 
 - [ ] 5.0 Results & Recommendations
   - [ ] 5.1 Fit/over-capacity status per GPU with reasons
