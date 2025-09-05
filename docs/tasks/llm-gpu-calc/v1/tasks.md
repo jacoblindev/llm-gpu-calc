@@ -33,7 +33,7 @@
 
 - [ ] 4.0 Visualization: Per-GPU stacked bars
   - [ ] 4.1 Segments per deployment (weights/KV) + reserve/unallocated/free
-  - [ ] 4.2 Legend and bar labels with GB and %
+  - [ ] 4.2 Legend and bar labels with selected unit (GiB/GB) and %
   - [ ] 4.3 Apply Tailwind utilities and tokens for consistent styling; dark mode variant
   - [ ] 4.4 Re-render bars/legend on unit change; tooltips/aria-labels show precise values
 

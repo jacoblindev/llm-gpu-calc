@@ -15,7 +15,7 @@ Allowed imports: UI→App; App→Domain|Data|Shared; Domain→Shared; Data→Sha
 ## Key Contracts
 
 - Types (shared/types.ts)
-  - `Gpu { id: string; name: string; vramGB: number }`
+  - `Gpu { id: string; name: string; vramBytes: number }`
   - `UnitPreference = 'GiB'|'GB'`
   - `Model { id: string; name: string; paramsB: number; layers: number; hiddenSize: number; heads: number; numKeyValueHeads: number; defaultWeightDtype: DType; defaultKvDtype: KvDType }`
   - `DType = 'fp16'|'bf16'|'fp32'|'q8'|'q4'`

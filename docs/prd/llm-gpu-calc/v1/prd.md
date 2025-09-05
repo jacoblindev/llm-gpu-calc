@@ -117,7 +117,7 @@ Modules
 
 - domain/memory.ts
   - Responsibility: Estimate weights, KV cache, reserved, per‑GPU usage.
-  - Public API: `estimateWeights(params, dtype, tp)`, `estimateKV(tokens, hidden, layers, bytes, tp, overheadPct)`, `estimatePerGpu(...)`.
+  - Public API: `weightBytesPerGpu(paramsB, dtype, tp, replicationOverheadPct)`, `kvBytesPerTokenPerGpu(layers, hiddenSize, heads, numKeyValueHeads, kvDtype, tp, kvOverheadPct)`, `aggregatePerGpu(deployments, gpus, models, utilization, reserveBytes)`, `suggestMaxModelLen(...)`, `suggestMaxNumSeq(...)`.
   - Internal: Constants for bytes per dtype; guards; rounding.
   - Files: 1–2 TS files, ~200–300 lines total.
 
@@ -153,16 +153,18 @@ Modules
 ## Test Strategy
 
 - Unit tests for `domain/memory.ts` covering:
-  - Weight memory: params × bytes_per_param ÷ TP.
-  - KV cache memory per token: 2 × hidden_size × bytes × layers; total = per_token × tokens × (1/TP) × (1+overhead).
-  - Per‑GPU totals and clamping; headroom application.
+  - Weight memory per GPU: `(paramsB×1e9 × bytesPerParam(dtype) ÷ tp) × (1 + replicationOverheadPct)`.
+  - KV per token per GPU (GQA‑aware): `2 × layers × numKvHeads × (hidden/heads) × bytesPerKvElem(kvDtype) ÷ tp × (1 + kvOverheadPct)`.
+  - Aggregation across overlapping deployments per GPU; headroom (`U`) and runtime reserve application; fit checks.
+  - Suggestions: `max_model_len` and `max_num_seqs` computed from available KV budget.
+  - Units: domain remains in bytes; formatting utils convert to GiB/GB for UI.
 - UI smoke tests for stepper flow and bar rendering with deterministic inputs.
 - Update or remove obsolete tests in the same PR as requirements change.
 
 ## Dependency Policy
 
 - New runtime deps require a short ADR and approval under `docs/adr/`.
-- v1 proposes Vue 3 + Pinia + Vite (see ADR‑0001). Chart libraries are deferred; revisit via ADR if needed.
+- v1 uses Vue 3 + Pinia + Vite (see ADR‑0001) and Tailwind CSS with tokens (see ADR‑0003). Chart libraries are deferred; revisit via ADR if needed.
 
 ---
 
