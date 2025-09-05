@@ -26,7 +26,7 @@ Allowed imports: UI→App; App→Domain|Data|Shared; Domain→Shared; Data→Sha
   - `bytesPerParam(dtype: DType): number`
   - `bytesPerKvElem(dtype: KvDType): number`
   - `weightBytesPerGpu(paramsB: number, dtype: DType, tp: number, replicationOverheadPct: number): number`
-  - `kvBytesPerTokenPerGpu(layers: number, hidden: number, heads: number, numKvHeads: number, kvDtype: KvDType, tp: number, kvOverheadPct: number): number`
+  - `kvBytesPerTokenPerGpu(layers: number, hidden: number, heads: number, numKeyValueHeads: number, kvDtype: KvDType, tp: number, kvOverheadPct: number): number`
   - `budgetBytesPerGpu(capacityBytes: number, utilization: number, reserveBytes: number): number`
   - `kvTotalBytesPerGpu(tokensTotal: number, perTokBytesPerGpu: number): number`
   - `aggregatePerGpu(deployments: Deployment[], gpus: Gpu[], models: Record<string, Model>, utilization: number, reserveBytes: number): Map<string, { used: number; free: number; parts: Array<{deploymentId: string; weights: number; kv: number}> }>`

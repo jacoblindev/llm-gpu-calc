@@ -3,7 +3,7 @@
 ## Snapshot
 
 - Repo: simple docs + rules; no app code yet.
-- Stack (proposed): Vue 3 + Pinia + TS + Vite (ADR-0001).
+- Stack: Vue 3 + Pinia + TS + Vite (ADR-0001) + Tailwind CSS (ADR-0003).
 - Test command (planned): `pnpm test` or `npm test` once scaffolded; domain unit tests first.
 - Notable risks: estimation fidelity; catalog accuracy; dependency approvals.
 

@@ -49,7 +49,7 @@ Sizing vLLM deployments is tricky: vRAM usage depends on model weights, tensor p
 - Multiple deployments can share GPUs; per‑GPU totals are the sum of all deployments mapped to that GPU.
 - Global inputs: GPU memory utilization `U ∈ [0,1]` (default 0.90), runtime reserve per GPU (GB), validation warnings when `U > 0.95`.
 - The calculator computes per‑GPU memory breakdown and fit (OK/Over capacity) using formulas below, including GQA‑aware KV sizing and replication overhead for weights.
-- Visualization renders one bar per GPU, segmented by deployment and by component (weights, KV, reserve, unallocated (1−U), free); labels show GB and %.
+- Visualization renders one bar per GPU, segmented by deployment and by component (weights, KV, reserve, unallocated (1−U), free); labels show the selected unit (GiB/GB) and %.
 - Units toggle: Default GiB; user can switch to GB. Bars and labels follow the selected unit. Capacity lines/labels show both (e.g., “80 GB (74.5 GiB)”). All internal math remains in bytes.
 - Warnings/Errors:
   - Warn if `U > 0.95` about increased OOM risk.
@@ -166,7 +166,7 @@ Modules
 - ui/*
   - Responsibility: Presentational components and forms for steps and bars.
   - Public API: Components; accept props only; no cross‑module imports beyond `app/`.
-  - Files: ~5–8 TSX files.
+  - Files: ~5–8 Vue SFCs.
 
 - shared/*
   - Responsibility: Types and formatting utilities; read‑only.
@@ -184,7 +184,7 @@ Modules
 
 - Unit tests for `domain/memory.ts` covering:
   - Weight memory per GPU: `(paramsB×1e9 × bytesPerParam(dtype) ÷ tp) × (1 + replicationOverheadPct)`.
-  - KV per token per GPU (GQA‑aware): `2 × layers × numKvHeads × (hidden/heads) × bytesPerKvElem(kvDtype) ÷ tp × (1 + kvOverheadPct)`.
+  - KV per token per GPU (GQA‑aware): `2 × layers × numKeyValueHeads × (hidden/heads) × bytesPerKvElem(kvDtype) ÷ tp × (1 + kvOverheadPct)`.
   - Aggregation across overlapping deployments per GPU; headroom (`U`) and runtime reserve application; fit checks.
   - Suggestions: `max_model_len` and `max_num_seqs` computed from available KV budget.
   - Units: domain remains in bytes; formatting utils convert to GiB/GB for UI.
