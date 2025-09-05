@@ -24,6 +24,8 @@
 
 - [ ] 2.0 Data catalogs: GPUs and Models (JSON + typed access)
   - [ ] 2.1 Add `numKeyValueHeads` to models; verify a few real entries
+  - [ ] 2.2 Seed `data/models.json` and `data/gpus.json` with the initial lists from PRD (capacities confirmed)
+  - [ ] 2.3 Include both A100 variants (80GB/40GB), RTX 6000 Ada 48GB, RTX A6000 48GB, RTX Pro 6000 Blackwell 96GB, RTX 5090 32GB, H200 141GB
 
 - [ ] 3.0 UI/App: Deployment roster + Stepper
   - [ ] 3.1 Create deployments, assign GPUs, set TP, dtypes, overheads

@@ -80,6 +80,36 @@ Sizing vLLM deployments is tricky: vRAM usage depends on model weights, tensor p
 - Dark mode: Token-driven (CSS variables) with Tailwind’s dark class; maintain WCAG AA contrast.
 - Accessibility: Bars have role=img with aria-label summarizing segments; legend is keyboard-focusable and toggles highlighting.
 
+## Initial Catalog (v1)
+
+- Models (include `numKeyValueHeads`):
+  - `BAAI/bge-m3`
+  - `BAAI/bge-reranker-v2-m3`
+  - `microsoft/phi-4`
+  - `google/gemma-3-27b-it`
+  - `mistralai/Mistral-Small-3.2-24B-Instruct-2506`
+  - `openai/gpt-oss-20b`
+  - `openai/gpt-oss-120b`
+  - `Qwen/Qwen2.5-7B-Instruct`
+  - `meta-llama/Llama-3.1-8B-Instruct`
+
+- GPUs (store capacity as `vramBytes`):
+  - `H200 141GB`
+  - `H100 80GB`
+  - `A100 80GB`
+  - `A100 40GB`
+  - `L40S 48GB`
+  - `L4 24GB`
+  - `RTX A6000 48GB`
+  - `RTX 6000 Ada 48GB`
+  - `RTX Pro 6000 Blackwell 96GB`
+  - `RTX 5090 32GB`
+  - `RTX 4090 24GB`
+
+Notes:
+
+- We’ll seed `models.json` and `gpus.json` with these entries; fields include ids, names, and required metadata. Capacities above are confirmed and will be converted to bytes.
+
 ## Risks & Assumptions
 
 - Approximation risk: Real vLLM memory differs due to fragmentation, loaders, and replication nuances. Mitigate via adjustable utilization (U), KV overhead %, and clear disclaimers.

@@ -38,6 +38,10 @@ Allowed imports: UI→App; App→Domain|Data|Shared; Domain→Shared; Data→Sha
   - `listGpus(): Gpu[]`
   - `listModels(): Model[]`
   - `getModelById(id: string): Model | undefined`
+  - JSON schema:
+    - GPUs (`data/gpus.json`): `{ id: string, name: string, vendor?: string, vramBytes: number }`
+    - Models (`data/models.json`): `{ id: string, name: string, paramsB: number, layers: number, hiddenSize: number, heads: number, numKeyValueHeads: number, defaultWeightDtype: DType, defaultKvDtype: KvDType }`
+  - Seed entries: as listed in PRD “Initial Catalog (v1)”. Ambiguous capacities are added as placeholders pending confirmation.
 
 - Shared utils (shared/units.ts)
   - `bytesToGiB(bytes: number): number`
