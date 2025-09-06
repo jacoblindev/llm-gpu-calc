@@ -7,7 +7,7 @@ Primary drivers: simple, fast, and predictable per-GPU vRAM estimation for vLLM 
 - ui/: Vue components; presentational only. Imports from app/ only.
 - app/: State and orchestration. Imports domain/, data/, shared/.
 - domain/: Pure TypeScript functions for memory estimates. Imports shared/ only.
-- data/: Read‑only catalogs for GPUs and models. Imports shared/ only.
+- data/: Read-only catalogs for GPUs and models. Imports shared/ only.
 - shared/: Types, constants, and units utilities. No external deps.
 
 Allowed imports: UI→App; App→Domain|Data|Shared; Domain→Shared; Data→Shared. No back‑edges.
