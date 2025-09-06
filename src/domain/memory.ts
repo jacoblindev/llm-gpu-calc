@@ -1,11 +1,32 @@
 import type { DType, Deployment, Gpu, KvDType, Model } from '@shared/types';
 
 export function bytesPerParam(_dtype: DType): number {
-  return 0;
+  switch (_dtype) {
+    case 'fp32':
+      return 4;
+    case 'fp16':
+    case 'bf16':
+      return 2;
+    case 'q8':
+      return 1;
+    case 'q4':
+      return 0.5;
+    default:
+      return 0;
+  }
 }
 
 export function bytesPerKvElem(_dtype: KvDType): number {
-  return 0;
+  switch (_dtype) {
+    case 'fp16':
+    case 'bf16':
+      return 2;
+    case 'fp8':
+    case 'int8':
+      return 1;
+    default:
+      return 0;
+  }
 }
 
 export function weightBytesPerGpu(
@@ -26,7 +47,12 @@ export function kvBytesPerTokenPerGpu(
   _tp: number,
   _kvOverheadPct: number,
 ): number {
-  return 0;
+  if (_tp <= 0 || _heads <= 0) return 0;
+  const headDim = _hidden / _heads;
+  const bytes = bytesPerKvElem(_kvDtype);
+  const base = 2 * _layers * _numKeyValueHeads * headDim * bytes;
+  const perGpu = base / _tp;
+  return perGpu * (1 + _kvOverheadPct);
 }
 
 export function budgetBytesPerGpu(
