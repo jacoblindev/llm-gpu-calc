@@ -1,0 +1,41 @@
+:root {
+  /* Colors */
+  --color-bg: #ffffff;
+  --color-surface: #f7f7f8;
+  --color-text: #0f172a; /* slate-900 */
+  --color-muted: #64748b; /* slate-500 */
+  --color-primary: #2563eb; /* blue-600 */
+  --color-success: #16a34a; /* green-600 */
+  --color-warning: #ca8a04; /* amber-600 */
+  --color-danger: #dc2626; /* red-600 */
+
+  /* Domain colors */
+  --color-weights: #7c3aed; /* violet-600 */
+  --color-kv: #059669; /* emerald-600 */
+  --color-reserve: #f59e0b; /* amber-500 */
+  --color-unallocated: #94a3b8; /* slate-400 */
+  --color-free: #22d3ee; /* cyan-400 */
+
+  /* Radii */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+}
+
+.dark {
+  --color-bg: #0b1220; /* near slate-950 */
+  --color-surface: #111827; /* gray-900 */
+  --color-text: #e5e7eb; /* gray-200 */
+  --color-muted: #94a3b8; /* slate-400 */
+  --color-primary: #3b82f6; /* blue-500 */
+  --color-success: #22c55e; /* green-500 */
+  --color-warning: #f59e0b; /* amber-500 */
+  --color-danger: #ef4444; /* red-500 */
+
+  /* Domain colors (dark variants) */
+  --color-weights: #8b5cf6; /* violet-500 */
+  --color-kv: #10b981; /* emerald-500 */
+  --color-reserve: #fbbf24; /* amber-400 */
+  --color-unallocated: #64748b; /* slate-500 */
+  --color-free: #67e8f9; /* cyan-300 */
+}

@@ -1,0 +1,12 @@
+@import './tokens.css';
+@import "tailwindcss";
+
+@layer base {
+  html, body, #app-root {
+    height: 100%;
+  }
+  body {
+    background-color: var(--color-bg);
+    color: var(--color-text);
+  }
+}

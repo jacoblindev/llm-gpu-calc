@@ -1,0 +1,28 @@
+{
+  "name": "llm-gpu-calc",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "typecheck": "vue-tsc --noEmit -p tsconfig.json"
+  },
+  "dependencies": {
+    "pinia": "^2.1.7",
+    "tailwindcss": "^4.0.0",
+    "vue": "^3.4.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.30",
+    "@tailwindcss/vite": "^4.0.0",
+    "@vitejs/plugin-vue": "^6.0.1",
+    "typescript": "^5.5.4",
+    "vite": "^7.1.4",
+    "vue-tsc": "^2.0.29"
+  },
+  "overrides": {
+    "esbuild": ">=0.24.4"
+  }
+}

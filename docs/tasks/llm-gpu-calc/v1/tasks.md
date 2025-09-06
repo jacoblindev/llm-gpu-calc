@@ -9,23 +9,23 @@
 
 ## Parent Tasks
 
-- [ ] 0.0 Establish architecture scaffolding
-  - [ ] 0.1 Create directory layout & stubs from PRD Module Plan (ui/app/domain/data/shared)
+- [x] 0.0 Establish architecture scaffolding
+  - [x] 0.1 Create directory layout & stubs from PRD Module Plan (ui/app/domain/data/shared)
     - Acceptance: Folders created; minimal index files exporting public types/APIs; build passes with empty stubs.
     - Gates: Boundaries respected per ARCH-v1; no runtime deps added.
     - Traceability: PRD Module Decomposition; ARCH Key Contracts.
     - Est: 1–2h
-  - [ ] 0.2 Align code with ARCH-v1 boundaries; add/update ADR if deviating
+  - [x] 0.2 Align code with ARCH-v1 boundaries; add/update ADR if deviating
     - Acceptance: eslint/tsconfig path aliases (if used) align with allowed imports; any deviation documented via ADR.
     - Gates: Boundaries; Dependency ADRs if introduced.
     - Traceability: ARCH Modules and Boundaries.
     - Est: 1h
-  - [ ] 0.3 Agree dependency rule (ADR required for new runtime deps)
+  - [x] 0.3 Agree dependency rule (ADR required for new runtime deps)
     - Acceptance: Dependency policy acknowledged in repo docs; ADR process noted.
     - Gates: Dependency.
     - Traceability: PRD Dependency Policy; ADR-0001/0003.
     - Est: 0.5h
-  - [ ] 0.4 Add Tailwind CSS, base `tokens.css`, and Tailwind config mapping to PRD tokens (ADR-0003)
+  - [x] 0.4 Add Tailwind CSS, base `tokens.css`, and Tailwind config mapping to PRD tokens (ADR-0003)
     - Acceptance: Tailwind configured; `tokens.css` defines :root/.dark variables; sample component renders with tokens.
     - Gates: Dependency ADR already accepted; Boundaries unaffected.
     - Traceability: PRD UI Tokens; ADR-0003.
