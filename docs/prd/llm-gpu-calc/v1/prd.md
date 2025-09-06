@@ -11,7 +11,7 @@ Slug: llm-gpu-calc (proposed)
 3) Precision: Distinguish weight dtype vs KV cache dtype. Support fp16/bf16 (2B), and fp8/int8 (1B) for KV. Weights default fp16/bf16; weight quant (q8/q4) optional later.
 4) Workload inputs: Model length is modeled via `max_model_len` and `max_num_seqs` (concurrency). No separate input/output tokens in v1.
 5) Multi‑GPU & sharing: Tensor parallel (TP) sharding per deployment. Multiple deployments can share the same GPU(s); usages add up per GPU.
-6) GPU memory utilization: Global per‑GPU utilization `U ∈ [0,1]`, default 0.90, plus a fixed runtime reserve GB per GPU to avoid OOM.
+6) GPU memory utilization: Global per-GPU utilization `U ∈ [0,1]`, default 0.90, plus a fixed runtime reserve GB per GPU to avoid OOM.
 7) Visualization: Custom lightweight SVG segmented bars; no third‑party chart libs in v1.
 8) Platform: Web app (Vue 3 + TS + Vite); state via Pinia.
 
