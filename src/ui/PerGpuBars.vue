@@ -108,10 +108,11 @@ function onFocus(s: { kind: 'weights'|'kv'|'reserve'|'free'; bytes: number; mode
 function onKeyNav(e: KeyboardEvent) {
   if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return
   const current = e.currentTarget as HTMLElement | null
-  const parent = current?.parentElement
+  if (!current) return
+  const parent = current.parentElement
   if (!parent) return
   const segments = Array.from(parent.querySelectorAll('[data-segment]')) as HTMLElement[]
-  const idx = segments.indexOf(current as HTMLElement)
+  const idx = segments.indexOf(current!)
   const delta = e.key === 'ArrowLeft' ? -1 : 1
   const next = segments[idx + delta]
   if (next) {
