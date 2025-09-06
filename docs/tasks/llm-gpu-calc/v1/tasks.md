@@ -31,7 +31,7 @@
     - Traceability: PRD UI Tokens; ADR-0003.
     - Est: 1–2h
 
-- [ ] 1.0 Domain: vRAM estimation engine
+- [x] 1.0 Domain: vRAM estimation engine
   - [x] 1.1 GQA-aware KV per-token formula; decouple weight vs KV dtypes
     - Acceptance: `kvBytesPerTokenPerGpu(...)` implemented per ARCH; unit tests cover a few models/head configs and kv dtypes (fp16/fp8/int8).
     - Gates: Tests; Boundaries (domain→shared only).
@@ -52,7 +52,7 @@
     - Gates: Tests.
     - Traceability: PRD Recommendations.
     - Est: 1–2h
-  - [ ] 1.5 Validation and fit checks (warnings/errors)
+  - [x] 1.5 Validation and fit checks (warnings/errors)
     - Acceptance: Functions compute fit status and reasons per GPU; warnings for `U>0.95`; minimal KV viability checks per deployment; unit tests cover fail/warn paths.
     - Gates: Tests; Boundaries.
     - Traceability: PRD GPU Memory Utilization & Safeties.

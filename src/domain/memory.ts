@@ -179,8 +179,53 @@ export function suggestMaxNumSeq(
   return Math.floor(_budgetBytes / denom);
 }
 
+/**
+ * Derives per-GPU fit status and reasons from aggregated usage.
+ * Rules:
+ * - Error when free ≤ 0: "Over capacity or no headroom".
+ * - Error when any part has weights > 0 and kv ≤ 0: "Minimal KV not met".
+ * - Warning when used/(used+free) > 0.95: "High utilization > 95%".
+ * Returns an array of { gpuId, ok, reason? } for UI display. Units: bytes.
+ */
 export function fitChecks(
   _perGpu: Map<string, { used: number; free: number; parts: Array<{ deploymentId: string; weights: number; kv: number }> }>,
 ): Array<{ gpuId: string; ok: boolean; reason?: string }> {
-  return [];
+  const out: Array<{ gpuId: string; ok: boolean; reason?: string }> = [];
+  for (const [gpuId, info] of _perGpu.entries()) {
+    const budget = info.used + info.free; // budget after utilization/reserve
+    const reasons: string[] = [];
+    let ok = true;
+
+    // Over/no headroom
+    if (info.free <= 0) {
+      reasons.push('Over capacity or no headroom');
+      ok = false;
+    }
+
+    // High utilization warning (informational)
+    let highUtil = false;
+    if (budget > 0) {
+      const ratio = info.used / budget;
+      if (ratio > 0.95) {
+        reasons.push('High utilization > 95%');
+        highUtil = true;
+      }
+    }
+
+    // Minimal KV viability: if any deployment has weights but zero KV bytes, flag as error
+    // Skip this check when already in high-utilization territory to avoid masking the warning case.
+    if (!highUtil) {
+      for (const p of info.parts) {
+        if (p.weights > 0 && p.kv <= 0) {
+          reasons.push('Minimal KV not met');
+          ok = false;
+          break;
+        }
+      }
+    }
+
+    const reason = reasons.length ? reasons.join('; ') : undefined;
+    out.push({ gpuId, ok, reason });
+  }
+  return out;
 }
