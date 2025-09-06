@@ -1,0 +1,14 @@
+[
+  { "id": "h200-141gb", "name": "H200 141GB", "vramBytes": 141000000000, "vendor": "NVIDIA" },
+  { "id": "h100-80gb", "name": "H100 80GB", "vramBytes": 80000000000, "vendor": "NVIDIA" },
+  { "id": "a100-80gb", "name": "A100 80GB", "vramBytes": 80000000000, "vendor": "NVIDIA" },
+  { "id": "a100-40gb", "name": "A100 40GB", "vramBytes": 40000000000, "vendor": "NVIDIA" },
+  { "id": "l40s-48gb", "name": "L40S 48GB", "vramBytes": 48000000000, "vendor": "NVIDIA" },
+  { "id": "l4-24gb", "name": "L4 24GB", "vramBytes": 24000000000, "vendor": "NVIDIA" },
+  { "id": "rtx-a6000-48gb", "name": "RTX A6000 48GB", "vramBytes": 48000000000, "vendor": "NVIDIA" },
+  { "id": "rtx-6000-ada-48gb", "name": "RTX 6000 Ada 48GB", "vramBytes": 48000000000, "vendor": "NVIDIA" },
+  { "id": "rtx-pro-6000-blackwell-96gb", "name": "RTX Pro 6000 Blackwell 96GB", "vramBytes": 96000000000, "vendor": "NVIDIA" },
+  { "id": "rtx-5090-32gb", "name": "RTX 5090 32GB", "vramBytes": 32000000000, "vendor": "NVIDIA" },
+  { "id": "rtx-4090-24gb", "name": "RTX 4090 24GB", "vramBytes": 24000000000, "vendor": "NVIDIA" }
+]
+

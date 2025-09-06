@@ -58,18 +58,18 @@
     - Traceability: PRD GPU Memory Utilization & Safeties.
     - Est: 2h
 
-- [ ] 2.0 Data catalogs: GPUs and Models (JSON + typed access)
-  - [ ] 2.1 Add `numKeyValueHeads` to models; verify a few real entries
+- [x] 2.0 Data catalogs: GPUs and Models (JSON + typed access)
+  - [x] 2.1 Add `numKeyValueHeads` to models; verify a few real entries
     - Acceptance: `models.json` schema includes `numKeyValueHeads`; sample entries populated (e.g., Llama-3.1-8B, Gemma-3-27B, Phi-4) with reasonable values.
     - Gates: Boundaries; Tests (basic data load/shape checks).
     - Traceability: PRD Initial Catalog; ARCH Data schema.
     - Est: 1–2h
-  - [ ] 2.2 Seed `data/models.json` and `data/gpus.json` with the initial lists from PRD (capacities confirmed)
+  - [x] 2.2 Seed `data/models.json` and `data/gpus.json` with the initial lists from PRD (capacities confirmed)
     - Acceptance: All listed models/GPUs present with consistent ids/names; GPU capacities stored as `vramBytes`; simple loader returns typed arrays.
     - Gates: Boundaries.
     - Traceability: PRD Initial Catalog; ARCH Data schema.
     - Est: 1–2h
-  - [ ] 2.3 Include both A100 variants (80GB/40GB), RTX 6000 Ada 48GB, RTX A6000 48GB, RTX Pro 6000 Blackwell 96GB, RTX 5090 32GB, H200 141GB
+  - [x] 2.3 Include both A100 variants (80GB/40GB), RTX 6000 Ada 48GB, RTX A6000 48GB, RTX Pro 6000 Blackwell 96GB, RTX 5090 32GB, H200 141GB
     - Acceptance: Variants appear distinctly and selectable; docs note variant differences.
     - Gates: Boundaries.
     - Traceability: PRD Initial Catalog.

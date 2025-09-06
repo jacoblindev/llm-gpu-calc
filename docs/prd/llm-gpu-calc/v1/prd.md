@@ -106,6 +106,11 @@ Sizing vLLM deployments is tricky: vRAM usage depends on model weights, tensor p
   - `RTX 5090 32GB`
   - `RTX 4090 24GB`
 
+  Variant notes:
+  - A100 80GB vs 40GB are distinct SKUs with different HBM capacity; both must be selectable.
+  - RTX 6000 Ada (Ada‑generation) is distinct from RTX A6000 (Ampere‑generation) despite similar capacity.
+  - Desktop RTX variants (e.g., 4090/5090) differ from data‑center parts in VRAM size and stability expectations.
+
 Notes:
 
 - We’ll seed `models.json` and `gpus.json` with these entries; fields include ids, names, and required metadata. Capacities above are confirmed and will be converted to bytes.
