@@ -18,6 +18,11 @@
             <span class="text-muted">Approx used (weights+KV):</span>
             <span class="font-medium">{{ format(r.used) }} ({{ ((r.used / r.capacityBytes) * 100).toFixed(0) }}%)</span>
           </div>
+          <div v-if="fit[r.gpuId]" class="mt-1 text-sm">
+            <span class="text-muted">Status:</span>
+            <span :class="fit[r.gpuId].ok ? 'text-success' : 'text-danger'">{{ fit[r.gpuId].ok ? 'OK' : 'Over' }}</span>
+            <span v-if="fit[r.gpuId].reason" class="ml-2 text-muted">{{ fit[r.gpuId].reason }}</span>
+          </div>
         </li>
       </ul>
     </div>
@@ -42,6 +47,17 @@
             <span class="font-medium">{{ assignedGpuNames(d).join(', ') || '—' }}</span>
           </div>
         </div>
+        <div class="mt-2 flex flex-wrap gap-2 text-sm">
+          <span class="text-muted">Suggestions:</span>
+          <button class="px-2 py-1 rounded bg-surface border border-muted/30"
+            @click="applyLen(d.id)">
+            max_model_len = {{ suggest(d.id).maxModelLen }}
+          </button>
+          <button class="px-2 py-1 rounded bg-surface border border-muted/30"
+            @click="applySeq(d.id)">
+            max_num_seqs = {{ suggest(d.id).maxNumSeqs }}
+          </button>
+        </div>
         <div class="mt-2 text-sm">
           <span v-if="errors(d).length" class="text-danger">{{ errors(d).join('; ') }}</span>
           <span v-else-if="warnings(d).length" class="text-warning">{{ warnings(d).join('; ') }}</span>
@@ -53,7 +69,7 @@
 
 <script setup lang="ts">
 import type { AppState } from '@app/state'
-import { validateDeployment, utilizationByGpu, impliedReserveByGpu, computeResultsStub } from '@app/controller'
+import { validateDeployment, utilizationByGpu, impliedReserveByGpu, computeResultsStub, buildPerGpuFitStatus, computeDeploymentSuggestions, applySuggestedMaxModelLen, applySuggestedMaxNumSeqs } from '@app/controller'
 import { formatBytes } from '@shared/units'
 import { computed } from 'vue'
 
@@ -68,6 +84,7 @@ const results = computed(() => computeResultsStub(props.state).map(r => ({
   util: r.utilizationSum,
   reserve: r.impliedReserveFrac,
 })))
+const fit = computed(() => Object.fromEntries(buildPerGpuFitStatus(props.state).map(s => [s.gpuId, s]))) as unknown as Record<string, { ok: boolean; reason?: string; used: number; free: number }>
 function format(bytes: number) { return formatBytes(bytes, props.state.unit, 1) }
 
 function capacity(g: AppState['gpus'][number]) { return formatBytes(g.vramBytes, props.state.unit, 1) }
@@ -80,6 +97,9 @@ function assignedGpuNames(d: AppState['deployments'][number]) {
 function errors(d: AppState['deployments'][number]) { return validateDeployment(d, props.state.gpus).errors }
 function warnings(d: AppState['deployments'][number]) { return validateDeployment(d, props.state.gpus).warnings }
 function uShare(d: AppState['deployments'][number]) { return d.utilizationShare ?? 0 }
+function suggest(id: string) { return computeDeploymentSuggestions(props.state, id) }
+function applyLen(id: string) { applySuggestedMaxModelLen(props.state, id) }
+function applySeq(id: string) { applySuggestedMaxNumSeqs(props.state, id) }
 </script>
 
 <style scoped>
