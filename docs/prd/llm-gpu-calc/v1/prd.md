@@ -23,7 +23,7 @@ Sizing vLLM deployments is tricky: vRAM usage depends on model weights, tensor p
 
 ## Goals
 
-- Provide an interactive calculator to estimate per‑GPU vRAM usage for local vLLM inference.
+- Provide an interactive calculator to estimate per-GPU vRAM usage for local vLLM inference.
 - Allow multiple deployments (models) that can share one or more GPUs; each deployment may use TP across its assigned GPUs.
 - Support selecting GPUs from a predefined catalog and models with metadata (params, layers, hidden size, heads, numKeyValueHeads, default dtypes).
 - Accept workload/config inputs affecting KV cache (max_model_len, max_num_seqs), per‑deployment dtypes and overheads, global GPU memory utilization, and per‑GPU runtime reserve.
