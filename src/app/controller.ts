@@ -220,7 +220,9 @@ export function computeDeploymentSuggestions(state: AppState, deploymentId: stri
   const tp = Math.max(1, d.assignedGpuIds.length);
   const util = utilizationByGpu(state);
   const perTok = kvBytesPerTokenPerGpu(model.layers, model.hiddenSize, model.heads, model.numKeyValueHeads, d.kvDtype, tp, d.kvOverheadPct);
+  const weightsD = weightBytesPerGpu(model.paramsB, d.weightDtype, tp, d.replicationOverheadPct);
 
+  const SAFETY = 0.98; // leave headroom so fitChecks doesn't flag zero-free as over
   let bestLen = Infinity;
   let bestSeq = Infinity;
   for (const gid of d.assignedGpuIds) {
@@ -230,18 +232,24 @@ export function computeDeploymentSuggestions(state: AppState, deploymentId: stri
     const sumU = util.get(gid) || 0;
     const reserveBytes = Math.max(0, 1 - sumU) * capacity;
     const budgetBytes = Math.max(0, capacity - reserveBytes);
-    // Sum weights of all deployments on this GPU (regardless of which deployment)
-    let sumWeights = 0;
+    // Sum usage of OTHER deployments on this GPU (weights + KV), exclude current deployment d
+    let usedByOthers = 0;
     for (const other of state.deployments) {
-      if (!other.assignedGpuIds.includes(gid)) continue;
+      if (!other.assignedGpuIds.includes(gid) || other.id === d.id) continue;
       const omodel = modelsById[other.modelId];
       if (!omodel) continue;
       const otp = Math.max(1, other.assignedGpuIds.length);
-      sumWeights += weightBytesPerGpu(omodel.paramsB, other.weightDtype, otp, other.replicationOverheadPct);
+      const oWeights = weightBytesPerGpu(omodel.paramsB, other.weightDtype, otp, other.replicationOverheadPct);
+      const oPerTok = kvBytesPerTokenPerGpu(omodel.layers, omodel.hiddenSize, omodel.heads, omodel.numKeyValueHeads, other.kvDtype, otp, other.kvOverheadPct);
+      const oTokens = other.maxModelLen * other.maxNumSeqs;
+      const oKv = kvTotalBytesPerGpu(oTokens, oPerTok);
+      usedByOthers += oWeights + oKv;
     }
-    const kvBudget = Math.max(0, budgetBytes - sumWeights);
-    const len = suggestMaxModelLen(kvBudget, perTok, d.maxNumSeqs);
-    const seq = suggestMaxNumSeq(kvBudget, perTok, d.maxModelLen);
+    // Available for d's KV = budget - others' usage - d's weights
+    const kvBudget = Math.max(0, budgetBytes - usedByOthers - weightsD);
+    const safeKvBudget = kvBudget * SAFETY;
+    const len = suggestMaxModelLen(safeKvBudget, perTok, d.maxNumSeqs);
+    const seq = suggestMaxNumSeq(safeKvBudget, perTok, d.maxModelLen);
     if (Number.isFinite(len)) bestLen = Math.min(bestLen, len);
     if (Number.isFinite(seq)) bestSeq = Math.min(bestSeq, seq);
   }
