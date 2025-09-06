@@ -129,7 +129,7 @@ export function computeResultsStub(state: AppState): Array<{
 }> {
   const util = utilizationByGpu(state);
   const res = impliedReserveByGpu(state);
-  const modelsById = Object.fromEntries(state.models.map(m => [m.id, m] as const)) as Record<string, Model>;
+  const modelsById = Object.fromEntries(state.models.map(m => [m.id, m] as const));
   const out: Array<{ gpuId: string; gpuName: string; capacityBytes: number; utilizationSum: number; impliedReserveFrac: number; usedBytes: number; parts: Array<{ deploymentId: string; modelName: string; weights: number; kv: number }> }> = [];
   for (const g of state.gpus) {
     let used = 0;
