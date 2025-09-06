@@ -38,14 +38,21 @@ export function bytesPerKvElem(_dtype: KvDType): number {
       return 0;
   }
 }
-
+/**
+ * Per-GPU bytes for model weights under TP and replication overhead.
+ * Formula: (paramsB × 1e9 × bytesPerParam(dtype) ÷ tp) × (1 + replicationOverheadPct).
+ * Units: bytes. replicationOverheadPct is a fraction (e.g., 0.02 = 2%).
+ */
 export function weightBytesPerGpu(
   _paramsB: number,
   _dtype: DType,
   _tp: number,
   _replicationOverheadPct: number,
 ): number {
-  return 0;
+  if (_tp <= 0) return 0;
+  const totalParamBytes = _paramsB * 1e9 * bytesPerParam(_dtype);
+  const perGpu = totalParamBytes / _tp;
+  return perGpu * (1 + _replicationOverheadPct);
 }
 
 /**

@@ -37,7 +37,7 @@
     - Gates: Tests; Boundaries (domain→shared only).
     - Traceability: PRD Estimation Formulas; ARCH Domain contracts.
     - Est: 2–3h
-  - [ ] 1.2 Replication overhead for weights; configurable
+  - [x] 1.2 Replication overhead for weights; configurable
     - Acceptance: `weightBytesPerGpu(...)` includes `replicationOverheadPct` (default 2%); unit tests verify scaling across tp and overhead values.
     - Gates: Tests; Boundaries.
     - Traceability: PRD Detailed Inputs; ADR-0002.
