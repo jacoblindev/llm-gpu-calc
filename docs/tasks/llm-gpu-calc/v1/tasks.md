@@ -31,28 +31,28 @@
     - Traceability: PRD UI Tokens; ADR-0003.
     - Est: 1–2h
 
-- [ ] 1.0 Domain: vRAM estimation engine
-  - [ ] 1.1 GQA-aware KV per-token formula; decouple weight vs KV dtypes
+- [x] 1.0 Domain: vRAM estimation engine
+  - [x] 1.1 GQA-aware KV per-token formula; decouple weight vs KV dtypes
     - Acceptance: `kvBytesPerTokenPerGpu(...)` implemented per ARCH; unit tests cover a few models/head configs and kv dtypes (fp16/fp8/int8).
     - Gates: Tests; Boundaries (domain→shared only).
     - Traceability: PRD Estimation Formulas; ARCH Domain contracts.
     - Est: 2–3h
-  - [ ] 1.2 Replication overhead for weights; configurable
+  - [x] 1.2 Replication overhead for weights; configurable
     - Acceptance: `weightBytesPerGpu(...)` includes `replicationOverheadPct` (default 2%); unit tests verify scaling across tp and overhead values.
     - Gates: Tests; Boundaries.
     - Traceability: PRD Detailed Inputs; ADR-0002.
     - Est: 1–2h
-  - [ ] 1.3 Per-GPU aggregator supporting overlapping deployments
+  - [x] 1.3 Per-GPU aggregator supporting overlapping deployments
     - Acceptance: `aggregatePerGpu(...)` sums weights/KV across deployments for shared GPUs; returns used/free and per-deployment parts; unit tests include overlap and edge cases.
     - Gates: Tests; Boundaries.
     - Traceability: PRD Multi-GPU Behavior; ARCH Data Flow.
     - Est: 2–3h
-  - [ ] 1.4 Suggestions: `--max-model-len` / `--max-num-seqs`
+  - [x] 1.4 Suggestions: `--max-model-len` / `--max-num-seqs`
     - Acceptance: `suggestMaxModelLen` and `suggestMaxNumSeq` return integers and respect budgets; unit tests cover representative budgets.
     - Gates: Tests.
     - Traceability: PRD Recommendations.
     - Est: 1–2h
-  - [ ] 1.5 Validation and fit checks (warnings/errors)
+  - [x] 1.5 Validation and fit checks (warnings/errors)
     - Acceptance: Functions compute fit status and reasons per GPU; warnings for `U>0.95`; minimal KV viability checks per deployment; unit tests cover fail/warn paths.
     - Gates: Tests; Boundaries.
     - Traceability: PRD GPU Memory Utilization & Safeties.
