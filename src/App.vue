@@ -9,22 +9,62 @@
         Toggle {{ dark ? 'Light' : 'Dark' }}
       </button>
     </div>
-    <section class="mt-4">
-      <Sample />
+    <section class="mt-4 space-y-4">
+      <Stepper :steps="steps" :current="currentStep" />
+      <div v-if="currentStep === 0" class="space-y-4">
+        <GpuSelector :state="state" />
+      </div>
+      <div v-else-if="currentStep === 1">
+        <DeploymentModels :state="state" @add="onAdd" @remove="onRemove" />
+      </div>
+      <div v-else-if="currentStep === 2">
+        <DeploymentWorkload :state="state" />
+      </div>
+      <div v-else class="space-y-4">
+        <GlobalControls :state="state" />
+        <ResultsStub :state="state" />
+      </div>
+      <div class="flex items-center justify-between pt-2">
+        <button class="px-3 py-1.5 rounded bg-surface border border-muted/30" :disabled="currentStep === 0" @click="prev">Back</button>
+        <button class="px-3 py-1.5 rounded bg-primary text-white disabled:opacity-50" :disabled="!canNext" @click="next">{{ currentStep < steps.length - 1 ? 'Next' : 'Done' }}</button>
+      </div>
     </section>
   </main>
 </template>
 
 <script setup lang="ts">
-import { onMounted, watch, ref } from 'vue'
-import Sample from '@ui/Sample.vue'
+import { onMounted, watch, ref, reactive, computed } from 'vue'
+import GlobalControls from '@ui/GlobalControls.vue'
+import DeploymentModels from '@ui/DeploymentModels.vue'
+import DeploymentWorkload from '@ui/DeploymentWorkload.vue'
+import ResultsStub from '@ui/ResultsStub.vue'
+import Stepper from '@ui/Stepper.vue'
+import GpuSelector from '@ui/GpuSelector.vue'
+import { createInitialState } from '@app/state'
+import { addDeployment, removeDeployment, init, loadUnitPreference } from '@app/controller'
 
 const dark = ref(false)
+const state = reactive(createInitialState())
+const steps = ['Select GPUs', 'Select Models', 'Configure Workload', 'Results']
 onMounted(() => {
   if (window.matchMedia('(prefers-color-scheme: dark)').matches) dark.value = true
+  init(state)
+  loadUnitPreference(state)
 })
 watch(dark, (v) => {
   document.documentElement.classList.toggle('dark', v)
 })
-</script>
 
+function onAdd() { addDeployment(state) }
+function onRemove(id: string) { removeDeployment(state, id) }
+
+const currentStep = ref(0)
+const canNext = computed(() => {
+  if (currentStep.value === 0) return state.gpus.length > 0
+  if (currentStep.value === 1) return state.deployments.length > 0 && state.deployments.every(d => !!d.modelId)
+  if (currentStep.value === 2) return state.deployments.every(d => d.assignedGpuIds.length > 0)
+  return true
+})
+function next() { if (canNext.value && currentStep.value < steps.length - 1) currentStep.value++ }
+function prev() { if (currentStep.value > 0) currentStep.value-- }
+</script>

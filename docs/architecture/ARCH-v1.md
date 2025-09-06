@@ -14,15 +14,15 @@ Allowed imports: UI→App; App→Domain|Data|Shared; Domain→Shared; Data→Sha
 
 ## Key Contracts
 
-- Types (shared/types.ts)
+- Types (`src/shared/types.ts`)
   - `Gpu { id: string; name: string; vramBytes: number }`
   - `UnitPreference = 'GiB'|'GB'`
   - `Model { id: string; name: string; paramsB: number; layers: number; hiddenSize: number; heads: number; numKeyValueHeads: number; defaultWeightDtype: DType; defaultKvDtype: KvDType }`
   - `DType = 'fp16'|'bf16'|'fp32'|'q8'|'q4'`
   - `KvDType = 'fp16'|'bf16'|'fp8'|'int8'`
-  - `Deployment { id: string; modelId: string; assignedGpuIds: string[]; tp: number; weightDtype: DType; kvDtype: KvDType; kvOverheadPct: number; replicationOverheadPct: number; maxModelLen: number; maxNumSeqs: number }`
+  - `Deployment { id: string; modelId: string; assignedGpuIds: string[]; tp: number; weightDtype: DType; kvDtype: KvDType; kvOverheadPct: number; replicationOverheadPct: number; maxModelLen: number; maxNumSeqs: number; utilizationShare?: number }`
 
-- Domain (domain/memory.ts)
+- Domain (`src/domain/memory.ts`)
   - `bytesPerParam(dtype: DType): number`
   - `bytesPerKvElem(dtype: KvDType): number`
   - `weightBytesPerGpu(paramsB: number, dtype: DType, tp: number, replicationOverheadPct: number): number`
@@ -34,16 +34,16 @@ Allowed imports: UI→App; App→Domain|Data|Shared; Domain→Shared; Data→Sha
   - `suggestMaxNumSeq(budgetBytes: number, kvPerTokenPerGpu: number, modelLen: number): number`
   - `fitChecks(perGpu: Map<string, ...>): Array<{gpuId: string; ok: boolean; reason?: string}>`
 
-- Data (data/catalog.ts)
+- Data (`src/data/catalog.ts`)
   - `listGpus(): Gpu[]`
   - `listModels(): Model[]`
   - `getModelById(id: string): Model | undefined`
   - JSON schema:
-    - GPUs (`data/gpus.json`): `{ id: string, name: string, vendor?: string, vramBytes: number }`
-    - Models (`data/models.json`): `{ id: string, name: string, paramsB: number, layers: number, hiddenSize: number, heads: number, numKeyValueHeads: number, defaultWeightDtype: DType, defaultKvDtype: KvDType }`
+    - GPUs (`src/data/gpus.json`): `{ id: string, name: string, vendor?: string, vramBytes: number }`
+    - Models (`src/data/models.json`): `{ id: string, name: string, paramsB: number, layers: number, hiddenSize: number, heads: number, numKeyValueHeads: number, defaultWeightDtype: DType, defaultKvDtype: KvDType }`
   - Seed entries: as listed in PRD “Initial Catalog (v1)”. Ambiguous capacities are added as placeholders pending confirmation.
 
-- Shared utils (shared/units.ts)
+- Shared utils (`src/shared/units.ts`)
   - `bytesToGiB(bytes: number): number`
   - `bytesToGB(bytes: number): number`
   - `formatBytes(bytes: number, unit: UnitPreference, decimals = 1): string`
@@ -51,7 +51,7 @@ Allowed imports: UI→App; App→Domain|Data|Shared; Domain→Shared; Data→Sha
 
 ## Data Flow
 
-UI (forms/stepper & deployment roster) → App (state + validation) → Domain (pure estimates, per‑GPU aggregation) → App (compose results) → UI (bars)
+UI (stepper: GPUs → Models (with U share) → Workload → Results) → App (state + validation + derived ΣU/reserve) → Domain (pure estimates, per‑GPU aggregation) → App (compose results) → UI (bars)
 
 State lives in App. Domain is stateless. Data is static JSON read at startup.
 

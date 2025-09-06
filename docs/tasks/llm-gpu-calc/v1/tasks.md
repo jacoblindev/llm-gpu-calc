@@ -64,7 +64,7 @@
     - Gates: Boundaries; Tests (basic data load/shape checks).
     - Traceability: PRD Initial Catalog; ARCH Data schema.
     - Est: 1–2h
-  - [x] 2.2 Seed `data/models.json` and `data/gpus.json` with the initial lists from PRD (capacities confirmed)
+  - [x] 2.2 Seed `src/data/models.json` and `src/data/gpus.json` with the initial lists from PRD (capacities confirmed)
     - Acceptance: All listed models/GPUs present with consistent ids/names; GPU capacities stored as `vramBytes`; simple loader returns typed arrays.
     - Gates: Boundaries.
     - Traceability: PRD Initial Catalog; ARCH Data schema.
@@ -75,30 +75,30 @@
     - Traceability: PRD Initial Catalog.
     - Est: 0.5–1h
 
-- [ ] 3.0 UI/App: Deployment roster + Stepper
-  - [ ] 3.1 Create deployments, assign GPUs, set TP, dtypes, overheads
+- [x] 3.0 UI/App: Deployment roster + Stepper
+  - [x] 3.1 Create deployments, assign GPUs, set TP, dtypes, overheads
     - Acceptance: Users can add/edit/remove deployments; assign GPUs; set TP, weight/kv dtypes, overheads, `max_model_len`, `max_num_seqs`.
     - Gates: Boundaries; No new runtime deps.
     - Traceability: PRD User Stories; PRD Acceptance Criteria (Deployment).
     - Est: 2–4h
-  - [ ] 3.2 Global config: utilization U [0..1], runtime reserve (GB)
-    - Acceptance: Global `U` slider/input and runtime reserve input wired into state; defaults applied (U=0.90, reserve=2GB).
+  - [x] 3.2 Utilization shares and implied reserve
+    - Acceptance: Each deployment has a `U` share [0..1] set during model selection; Results show per‑GPU ΣU and implied reserve `1−ΣU`. See ADR‑0005.
     - Gates: Boundaries.
-    - Traceability: PRD Detailed Inputs; UI Styles.
+    - Traceability: PRD Detailed Inputs; ADR‑0005.
     - Est: 1–2h
-  - [ ] 3.3 Validation: tp ≤ assigned GPUs; soft warnings for mixed capacities
+  - [x] 3.3 Validation: tp ≤ assigned GPUs; soft warnings for mixed capacities
     - Acceptance: Hard validation blocks TP > assigned; soft warning banner for mixed capacities; states are testable.
     - Gates: Boundaries.
     - Traceability: PRD Multi-GPU Behavior.
     - Est: 1–2h
-  - [ ] 3.4 Units toggle (GiB|GB) with localStorage persistence; capacity labels show both
-    - Acceptance: Toggle persists; re-renders values; capacity shows dual label (e.g., 80 GB (74.5 GiB)).
+  - [x] 3.4 Units toggle (GiB|GB) with localStorage persistence; results reflect unit
+    - Acceptance: Toggle persists; re-renders values; capacity displays in selected unit in Results; bars/legend will follow in 4.0.
     - Gates: Boundaries.
     - Traceability: PRD Acceptance Criteria (Units toggle); UI Styles; ARCH shared units.
     - Est: 1–2h
 
 - [ ] 4.0 Visualization: Per-GPU stacked bars
-  - [ ] 4.1 Segments per deployment (weights/KV) + reserve/unallocated/free
+  - [ ] 4.1 Segments per deployment (weights/KV) + implied reserve/free
     - Acceptance: Bars reflect per‑GPU aggregator output; segment colors match tokens; small segments collapse labels and show values on hover.
     - Gates: Boundaries; Accessibility basics.
     - Traceability: PRD Visualization; UI Tokens.

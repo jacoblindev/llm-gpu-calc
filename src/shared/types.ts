@@ -33,5 +33,5 @@ export interface Deployment {
   replicationOverheadPct: number;
   maxModelLen: number;
   maxNumSeqs: number;
+  utilizationShare?: number; // fraction [0..1] of per-GPU capacity allocated to this deployment
 }
-
