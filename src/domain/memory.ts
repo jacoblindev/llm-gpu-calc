@@ -78,21 +78,38 @@ export function kvBytesPerTokenPerGpu(
   return perGpu * (1 + _kvOverheadPct);
 }
 
+/**
+ * Effective per-GPU memory budget after utilization headroom and fixed reserve.
+ * Formula: budget = utilization × capacityBytes − reserveBytes.
+ * Units: bytes. utilization ∈ [0,1].
+ */
 export function budgetBytesPerGpu(
   _capacityBytes: number,
   _utilization: number,
   _reserveBytes: number,
 ): number {
-  return 0;
+  return _utilization * _capacityBytes - _reserveBytes;
 }
 
+/**
+ * Total KV cache bytes per GPU given total active tokens across sequences.
+ * Formula: tokensTotal × perTokBytesPerGpu. Guards non-positive inputs.
+ * Units: bytes.
+ */
 export function kvTotalBytesPerGpu(
   _tokensTotal: number,
   _perTokBytesPerGpu: number,
 ): number {
-  return 0;
+  if (_tokensTotal <= 0 || _perTokBytesPerGpu <= 0) return 0;
+  return _tokensTotal * _perTokBytesPerGpu;
 }
 
+/**
+ * Aggregates per-GPU memory usage across possibly overlapping deployments.
+ * For each GPU, sums weights and KV from deployments assigned to it and computes free = max(budget − used, 0).
+ * Returns Map gpuId → { used, free, parts[] }, where parts hold per-deployment breakdowns.
+ * Units: bytes. Formulas per ADR-0002.
+ */
 export function aggregatePerGpu(
   _deployments: Deployment[],
   _gpus: Gpu[],
@@ -100,7 +117,34 @@ export function aggregatePerGpu(
   _utilization: number,
   _reserveBytes: number,
 ): Map<string, { used: number; free: number; parts: Array<{ deploymentId: string; weights: number; kv: number }> }> {
-  return new Map();
+  const result = new Map<string, { used: number; free: number; parts: Array<{ deploymentId: string; weights: number; kv: number }> }>();
+  for (const gpu of _gpus) {
+    const budget = budgetBytesPerGpu(gpu.vramBytes, _utilization, _reserveBytes);
+    let used = 0;
+    const parts: Array<{ deploymentId: string; weights: number; kv: number }> = [];
+    for (const d of _deployments) {
+      if (!d.assignedGpuIds.includes(gpu.id)) continue;
+      const model = _models[d.modelId];
+      if (!model) continue;
+      const weights = weightBytesPerGpu(model.paramsB, d.weightDtype, d.tp, d.replicationOverheadPct);
+      const perTok = kvBytesPerTokenPerGpu(
+        model.layers,
+        model.hiddenSize,
+        model.heads,
+        model.numKeyValueHeads,
+        d.kvDtype,
+        d.tp,
+        d.kvOverheadPct,
+      );
+      const tokensTotal = d.maxModelLen * d.maxNumSeqs;
+      const kv = kvTotalBytesPerGpu(tokensTotal, perTok);
+      used += weights + kv;
+      parts.push({ deploymentId: d.id, weights, kv });
+    }
+    const free = Math.max(budget - used, 0);
+    result.set(gpu.id, { used, free, parts });
+  }
+  return result;
 }
 
 export function suggestMaxModelLen(

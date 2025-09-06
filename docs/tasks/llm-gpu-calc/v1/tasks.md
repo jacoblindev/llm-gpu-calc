@@ -42,7 +42,7 @@
     - Gates: Tests; Boundaries.
     - Traceability: PRD Detailed Inputs; ADR-0002.
     - Est: 1–2h
-  - [ ] 1.3 Per-GPU aggregator supporting overlapping deployments
+  - [x] 1.3 Per-GPU aggregator supporting overlapping deployments
     - Acceptance: `aggregatePerGpu(...)` sums weights/KV across deployments for shared GPUs; returns used/free and per-deployment parts; unit tests include overlap and edge cases.
     - Gates: Tests; Boundaries.
     - Traceability: PRD Multi-GPU Behavior; ARCH Data Flow.
