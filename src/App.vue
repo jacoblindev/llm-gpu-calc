@@ -23,6 +23,8 @@
       <div v-else class="space-y-4">
         <GlobalControls :state="state" />
         <ResultsStub :state="state" />
+        <Legend />
+        <PerGpuBars :state="state" />
       </div>
       <div class="flex items-center justify-between pt-2">
         <button class="px-3 py-1.5 rounded bg-surface border border-muted/30" :disabled="currentStep === 0" @click="prev">Back</button>
@@ -38,6 +40,8 @@ import GlobalControls from '@ui/GlobalControls.vue'
 import DeploymentModels from '@ui/DeploymentModels.vue'
 import DeploymentWorkload from '@ui/DeploymentWorkload.vue'
 import ResultsStub from '@ui/ResultsStub.vue'
+import PerGpuBars from '@ui/PerGpuBars.vue'
+import Legend from '@ui/Legend.vue'
 import Stepper from '@ui/Stepper.vue'
 import GpuSelector from '@ui/GpuSelector.vue'
 import { createInitialState } from '@app/state'

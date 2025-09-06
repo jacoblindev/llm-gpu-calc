@@ -1,0 +1,125 @@
+<template>
+  <div class="space-y-3">
+    <div v-for="b in bars" :key="b.gpuId" class="border border-muted/30 rounded p-3 bg-surface">
+      <div class="flex items-center justify-between mb-2">
+        <div class="font-medium">{{ b.gpuName }}</div>
+        <div class="text-sm text-muted">Capacity: {{ format(b.capacityBytes) }}</div>
+      </div>
+      <div class="w-full h-5 rounded bg-bg overflow-hidden border border-muted/30 relative">
+        <div
+          v-for="(s, idx) in b.segments"
+          :key="idx"
+          class="h-full absolute flex items-center"
+          :style="segmentStyle(b.capacityBytes, s, idx, b.segments)"
+          :aria-label="segmentTitle(s)"
+          role="img"
+          data-segment
+          tabindex="0"
+          @focus="onFocus(s, $event)"
+          @blur="onLeave"
+          @mouseenter="onEnter(s, $event)"
+          @mousemove="onMove($event)"
+          @mouseleave="onLeave"
+          @keydown="onKeyNav"
+        >
+          <span
+            v-if="widthPct(b.capacityBytes, s.bytes) >= 10"
+            class="ml-1 px-1 py-[1px] rounded text-[10px] font-medium text-white shadow"
+          >{{ segmentLabel(b.capacityBytes, s) }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div v-if="tip.visible" class="fixed z-50 pointer-events-none px-2 py-1 text-xs rounded bg-surface text-text border border-muted/30 shadow" :style="{ left: tip.x + 'px', top: tip.y + 'px' }">
+    {{ tip.text }}
+  </div>
+</template>
+
+<script setup lang="ts">
+import type { AppState } from '@app/state'
+import { buildPerGpuBars } from '@app/controller'
+import { computed, reactive } from 'vue'
+import { formatBytes } from '@shared/units'
+
+const props = defineProps<{ state: AppState }>()
+
+const bars = computed(() => buildPerGpuBars(props.state))
+
+function colorFor(kind: 'weights'|'kv'|'reserve'|'free') {
+  switch (kind) {
+    case 'weights': return 'var(--color-weights)'
+    case 'kv': return 'var(--color-kv)'
+    case 'reserve': return 'var(--color-reserve)'
+    case 'free': return 'var(--color-free)'
+  }
+}
+
+function segmentStyle(capacity: number, s: { bytes: number; kind: 'weights'|'kv'|'reserve'|'free' }, idx: number, all: { bytes: number; kind: any }[]) {
+  const total = capacity || 1
+  const start = all.slice(0, idx).reduce((a, c) => a + c.bytes, 0)
+  const leftPct = (start / total) * 100
+  const widthPct = (s.bytes / total) * 100
+  return {
+    left: `${leftPct}%`,
+    width: `${widthPct}%`,
+    backgroundColor: colorFor(s.kind),
+  }
+}
+
+function segmentTitle(s: { kind: 'weights'|'kv'|'reserve'|'free'; bytes: number; modelName?: string }) {
+  const label = s.kind === 'weights' || s.kind === 'kv' ? `${s.modelName ?? ''} ${s.kind}`.trim() : s.kind
+  return `${label}: ${format(s.bytes)}`
+}
+
+function segmentLabel(capacity: number, s: { kind: 'weights'|'kv'|'reserve'|'free'; bytes: number }) {
+  const pct = ((s.bytes / (capacity || 1)) * 100).toFixed(0)
+  return `${format(s.bytes)} (${pct}%)`
+}
+
+function widthPct(capacity: number, bytes: number) {
+  return (bytes / (capacity || 1)) * 100
+}
+
+function format(b: number) { return formatBytes(b, props.state.unit, 1) }
+
+// Instant tooltip (faster than native title)
+const tip = reactive({ visible: false, text: '', x: 0, y: 0 })
+function onEnter(s: { kind: 'weights'|'kv'|'reserve'|'free'; bytes: number; modelName?: string }, e: MouseEvent) {
+  tip.visible = true
+  tip.text = segmentTitle(s)
+  onMove(e)
+}
+function onMove(e: MouseEvent) {
+  tip.x = e.clientX + 12
+  tip.y = e.clientY + 12
+}
+function onLeave() { tip.visible = false }
+
+// Keyboard focus support
+function onFocus(s: { kind: 'weights'|'kv'|'reserve'|'free'; bytes: number; modelName?: string }, e: FocusEvent) {
+  tip.visible = true
+  tip.text = segmentTitle(s)
+  const el = e.target as HTMLElement
+  const rect = el.getBoundingClientRect()
+  tip.x = rect.left + rect.width / 2
+  tip.y = rect.top - 8
+}
+
+function onKeyNav(e: KeyboardEvent) {
+  if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return
+  const current = e.currentTarget as HTMLElement | null
+  const parent = current?.parentElement
+  if (!parent) return
+  const segments = Array.from(parent.querySelectorAll('[data-segment]')) as HTMLElement[]
+  const idx = segments.indexOf(current as HTMLElement)
+  const delta = e.key === 'ArrowLeft' ? -1 : 1
+  const next = segments[idx + delta]
+  if (next) {
+    next.focus()
+    e.preventDefault()
+  }
+}
+</script>
+
+<style scoped>
+</style>

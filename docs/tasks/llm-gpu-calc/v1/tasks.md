@@ -97,23 +97,23 @@
     - Traceability: PRD Acceptance Criteria (Units toggle); UI Styles; ARCH shared units.
     - Est: 1–2h
 
-- [ ] 4.0 Visualization: Per-GPU stacked bars
-  - [ ] 4.1 Segments per deployment (weights/KV) + implied reserve/free
+- [x] 4.0 Visualization: Per-GPU stacked bars
+  - [x] 4.1 Segments per deployment (weights/KV) + implied reserve/free
     - Acceptance: Bars reflect per‑GPU aggregator output; segment colors match tokens; small segments collapse labels and show values on hover.
     - Gates: Boundaries; Accessibility basics.
     - Traceability: PRD Visualization; UI Tokens.
     - Est: 2–3h
-  - [ ] 4.2 Legend and bar labels with selected unit (GiB/GB) and %
+  - [x] 4.2 Legend and bar labels with selected unit (GiB/GB) and %
     - Acceptance: Legend entries map to segments; labels formatted with 1 decimal and selected unit; percent displayed.
     - Gates: Boundaries; Formatting consistency.
     - Traceability: PRD UI Styles (number formatting).
     - Est: 1–2h
-  - [ ] 4.3 Apply Tailwind utilities and tokens for consistent styling; dark mode variant
+  - [x] 4.3 Apply Tailwind utilities and tokens for consistent styling; dark mode variant
     - Acceptance: Components use Tailwind with semantic token classes/vars; dark mode supported via `.dark`.
     - Gates: Dependency (already configured); Accessibility contrast.
     - Traceability: ADR‑0003; PRD UI Tokens.
     - Est: 1–2h
-  - [ ] 4.4 Re-render bars/legend on unit change; tooltips/aria-labels show precise values
+  - [x] 4.4 Re-render bars/legend on unit change; tooltips/aria-labels show precise values
     - Acceptance: Unit toggle triggers re-render; aria-label summarizes segments; tooltip shows exact bytes + formatted values.
     - Gates: Accessibility; Boundaries.
     - Traceability: PRD UI Styles; ARCH Shared utils.

@@ -159,6 +159,33 @@ export function computeResultsStub(state: AppState): Array<{
   return out;
 }
 
+export function buildPerGpuBars(state: AppState): Array<{
+  gpuId: string;
+  gpuName: string;
+  capacityBytes: number;
+  segments: Array<{
+    kind: 'weights' | 'kv' | 'reserve' | 'free';
+    bytes: number;
+    deploymentId?: string;
+    modelName?: string;
+  }>;
+}> {
+  const results = computeResultsStub(state);
+  return results.map((r) => {
+    const reserveBytes = Math.max(0, r.impliedReserveFrac * r.capacityBytes);
+    const used = Math.max(0, r.usedBytes);
+    const freeBytes = Math.max(0, r.capacityBytes - reserveBytes - used);
+    const segments: Array<{ kind: 'weights' | 'kv' | 'reserve' | 'free'; bytes: number; deploymentId?: string; modelName?: string }> = [];
+    for (const p of r.parts) {
+      if (p.weights > 0) segments.push({ kind: 'weights', bytes: p.weights, deploymentId: p.deploymentId, modelName: p.modelName });
+      if (p.kv > 0) segments.push({ kind: 'kv', bytes: p.kv, deploymentId: p.deploymentId, modelName: p.modelName });
+    }
+    if (reserveBytes > 0) segments.push({ kind: 'reserve', bytes: reserveBytes });
+    if (freeBytes > 0) segments.push({ kind: 'free', bytes: freeBytes });
+    return { gpuId: r.gpuId, gpuName: r.gpuName, capacityBytes: r.capacityBytes, segments };
+  });
+}
+
 export function validateDeployment(d: Deployment, gpus: Gpu[]): { errors: string[]; warnings: string[] } {
   const errors: string[] = [];
   const warnings: string[] = [];
