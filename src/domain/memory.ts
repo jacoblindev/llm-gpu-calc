@@ -147,20 +147,36 @@ export function aggregatePerGpu(
   return result;
 }
 
+/**
+ * Suggests max_model_len given remaining KV budget, KV bytes per token per GPU, and number of sequences.
+ * Formula: floor(budgetBytes / (kvPerTokenPerGpu × numSeq)). Returns 0 if inputs are non-positive.
+ * Units: returns tokens (integer ≥ 0).
+ */
 export function suggestMaxModelLen(
   _budgetBytes: number,
   _kvPerTokenPerGpu: number,
   _numSeq: number,
 ): number {
-  return 0;
+  if (_budgetBytes <= 0 || _kvPerTokenPerGpu <= 0 || _numSeq <= 0) return 0;
+  const denom = _kvPerTokenPerGpu * _numSeq;
+  if (denom <= 0) return 0;
+  return Math.floor(_budgetBytes / denom);
 }
 
+/**
+ * Suggests max_num_seqs given remaining KV budget, KV bytes per token per GPU, and model length.
+ * Formula: floor(budgetBytes / (kvPerTokenPerGpu × modelLen)). Returns 0 if inputs are non-positive.
+ * Units: returns sequences (integer ≥ 0).
+ */
 export function suggestMaxNumSeq(
   _budgetBytes: number,
   _kvPerTokenPerGpu: number,
   _modelLen: number,
 ): number {
-  return 0;
+  if (_budgetBytes <= 0 || _kvPerTokenPerGpu <= 0 || _modelLen <= 0) return 0;
+  const denom = _kvPerTokenPerGpu * _modelLen;
+  if (denom <= 0) return 0;
+  return Math.floor(_budgetBytes / denom);
 }
 
 export function fitChecks(

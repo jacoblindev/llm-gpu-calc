@@ -47,7 +47,7 @@
     - Gates: Tests; Boundaries.
     - Traceability: PRD Multi-GPU Behavior; ARCH Data Flow.
     - Est: 2–3h
-  - [ ] 1.4 Suggestions: `--max-model-len` / `--max-num-seqs`
+  - [x] 1.4 Suggestions: `--max-model-len` / `--max-num-seqs`
     - Acceptance: `suggestMaxModelLen` and `suggestMaxNumSeq` return integers and respect budgets; unit tests cover representative budgets.
     - Gates: Tests.
     - Traceability: PRD Recommendations.
