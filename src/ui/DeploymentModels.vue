@@ -43,8 +43,9 @@ function onModelChange(d: AppState['deployments'][number], e: Event) {
   }
 }
 function onUChange(d: AppState['deployments'][number], e: Event) {
-  const v = Math.max(0, Math.min(1, parseFloat((e.target as HTMLInputElement).value)))
-  d.utilizationShare = Number.isFinite(v) ? v : 0
+  let raw = parseFloat((e.target as HTMLInputElement).value);
+  let v = Number.isFinite(raw) ? Math.max(0, Math.min(1, raw)) : 0;
+  d.utilizationShare = v;
 }
 </script>
 
