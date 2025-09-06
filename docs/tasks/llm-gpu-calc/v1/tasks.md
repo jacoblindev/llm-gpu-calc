@@ -89,7 +89,7 @@
   - [ ] 3.3 Validation: tp ≤ assigned GPUs; soft warnings for mixed capacities
     - Acceptance: Hard validation blocks TP > assigned; soft warning banner for mixed capacities; states are testable.
     - Gates: Boundaries.
-    - Traceability: PRD Multi‑GPU Behavior.
+    - Traceability: PRD Multi-GPU Behavior.
     - Est: 1–2h
   - [ ] 3.4 Units toggle (GiB|GB) with localStorage persistence; capacity labels show both
     - Acceptance: Toggle persists; re-renders values; capacity shows dual label (e.g., 80 GB (74.5 GiB)).
