@@ -18,7 +18,7 @@
           </select>
         </div>
         <div>
-          <label class="block text-sm text-muted">Utilization U [0..1]</label>
+          <label class="block text-sm text-muted">Utilization Share (0 to 1)</label>
           <input class="mt-1 w-full px-2 py-1 bg-bg border border-muted/30 rounded" type="number" min="0" max="1" step="0.01" :value="d.utilizationShare" @input="onUChange(d, $event)" />
         </div>
         <div class="self-end text-sm text-muted">Selected GPUs: {{ state.gpus.length }}</div>
