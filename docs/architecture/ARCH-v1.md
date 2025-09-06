@@ -1,6 +1,6 @@
 # Architecture Overview (v1)
 
-Primary drivers: simple, fast, and predictable per‑GPU vRAM estimation for vLLM inference, with clear module boundaries that keep calculations pure and testable.
+Primary drivers: simple, fast, and predictable per-GPU vRAM estimation for vLLM inference, with clear module boundaries that keep calculations pure and testable.
 
 ## Modules and Boundaries
 
