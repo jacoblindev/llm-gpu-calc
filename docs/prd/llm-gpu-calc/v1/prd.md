@@ -11,7 +11,7 @@ Slug: llm-gpu-calc (proposed)
 3) Precision: Distinguish weight dtype vs KV cache dtype. Support fp16/bf16 (2B), and fp8/int8 (1B) for KV. Weights default fp16/bf16; weight quant (q8/q4) optional later.
 4) Workload inputs: Model length is modeled via `max_model_len` and `max_num_seqs` (concurrency). No separate input/output tokens in v1.
 5) Multi‑GPU & sharing: Tensor parallel (TP) sharding per deployment. Multiple deployments can share the same GPU(s); usages add up per GPU.
-6) GPU memory utilization: Global per-GPU utilization `U ∈ [0,1]`, default 0.90, plus a fixed runtime reserve GB per GPU to avoid OOM.
+6) GPU memory utilization: Per‑deployment utilization shares `U_d ∈ [0,1]` set during model selection. Per‑GPU implied reserve is `max(0, 1 − Σ_d U_d)` across deployments (see ADR‑0005).
 7) Visualization: Custom lightweight SVG segmented bars; no third‑party chart libs in v1.
 8) Platform: Web app (Vue 3 + TS + Vite); state via Pinia.
 
@@ -26,7 +26,7 @@ Sizing vLLM deployments is tricky: vRAM usage depends on model weights, tensor p
 - Provide an interactive calculator to estimate per-GPU vRAM usage for local vLLM inference.
 - Allow multiple deployments (models) that can share one or more GPUs; each deployment may use TP across its assigned GPUs.
 - Support selecting GPUs from a predefined catalog and models with metadata (params, layers, hidden size, heads, numKeyValueHeads, default dtypes).
-- Accept workload/config inputs affecting KV cache (max_model_len, max_num_seqs), per‑deployment dtypes and overheads, global GPU memory utilization, and per‑GPU runtime reserve.
+- Accept workload/config inputs affecting KV cache (max_model_len, max_num_seqs), per‑deployment dtypes and overheads, per‑deployment utilization shares; reserve is implied per GPU as `1 − Σ U_d`.
 - Visualize, per GPU, the breakdown aggregated across deployments: weights, KV cache, reserved/runtime headroom, and remaining free capacity.
 
 ## Non‑Goals
@@ -39,7 +39,7 @@ Sizing vLLM deployments is tricky: vRAM usage depends on model weights, tensor p
 ## User Stories
 
 - As an ML platform engineer, I deploy a 70B model on 2×H100 with TP=2 and, on the same GPUs, add two small models (each TP=1) to see aggregate vRAM usage and fit.
-- As a dev, I adjust `utilization U` from 0.90 to 0.95 and set a 2 GB runtime reserve to review OOM risk vs. capacity.
+- As a dev, I set per‑deployment utilization shares and review the implied reserve per GPU (remaining headroom) to understand OOM risk.
 - As a PM, I compare L40S vs H100 capacities to understand feasibility for a target `max_model_len` and `max_num_seqs`.
 
 ## Acceptance Criteria
@@ -47,10 +47,10 @@ Sizing vLLM deployments is tricky: vRAM usage depends on model weights, tensor p
 - GPU selection allows one or more GPUs from a predefined list (e.g., H100 80GB, L40S 48GB); shows capacity per GPU.
 - A “Deployment” represents a model instance with its own TP degree and settings: `{ modelId, assignedGpuIds[], tp, weightDtype, kvDtype, kvOverheadPct, replicationOverheadPct, max_model_len, max_num_seqs }`.
 - Multiple deployments can share GPUs; per‑GPU totals are the sum of all deployments mapped to that GPU.
-- Global inputs: GPU memory utilization `U ∈ [0,1]` (default 0.90), runtime reserve per GPU (GB), validation warnings when `U > 0.95`.
+- Utilization inputs: Each deployment has a utilization share `U_d ∈ [0,1]` (default 0.90 for a single deployment). Per‑GPU implied reserve is `1 − Σ_d U_d`. Warn when `Σ_d U_d > 0.95` and highlight when `Σ_d U_d > 1`.
 - The calculator computes per‑GPU memory breakdown and fit (OK/Over capacity) using formulas below, including GQA‑aware KV sizing and replication overhead for weights.
-- Visualization renders one bar per GPU, segmented by deployment and by component (weights, KV, reserve, unallocated (1−U), free); labels show the selected unit (GiB/GB) and %.
-- Units toggle: Default GiB; user can switch to GB. Bars and labels follow the selected unit. Capacity lines/labels show both (e.g., “80 GB (74.5 GiB)”). All internal math remains in bytes.
+- Visualization renders one bar per GPU, segmented by deployment and by component (weights, KV) plus an implied reserve segment `(1 − Σ U_d)` and remaining free; labels show the selected unit (GiB/GB) and %.
+- Units toggle: Default GiB; user can switch to GB. Bars and labels follow the selected unit. Capacity labels use the selected unit; a summary can still present both where helpful. All internal math remains in bytes. The toggle is placed in the Results step.
 - Warnings/Errors:
   - Warn if `U > 0.95` about increased OOM risk.
   - Error if summed per‑GPU weights `ΣW` exceed budget `B = U × capacity − reserve`.
@@ -214,8 +214,8 @@ Modules
   - KV cache dtype: bf16/fp16 (2B), fp8/int8 (1B).
 - KV overhead %: Accounts for allocator/paging/metadata overhead in KV cache (default 10%).
 - Replication overhead %: Inflates per‑GPU weight bytes to account for unsharded/replicated params and buffers (default 2%).
-- GPU memory utilization `U` (0..1): Fraction of each GPU’s capacity available to workloads (weights + KV). Default 0.90; warn if `U > 0.95`.
-- Runtime reserve (GB per GPU): Fixed safety headroom subtracted after utilization (e.g., 2 GB).
+- Per‑deployment utilization `U_d` (0..1): Fractional share of each GPU’s capacity allocated to deployment d. Default 0.90 when only one deployment exists; users can rebalance across deployments that share GPUs. Warn if `Σ_d U_d > 0.95` on any GPU.
+- Implied reserve (per GPU): Computed as `max(0, 1 − Σ_d U_d)`; represents headroom not allocated to any deployment.
 
 Computation mapping (per deployment d, per GPU g):
 
@@ -246,10 +246,10 @@ Notes:
 
 ### GPU Memory Utilization & Safeties (detailed)
 
-- Utilization `U` and runtime reserve control the budget: `B_g = U × capacity_bytes_g − reserve_bytes`.
-- Warning: If `U > 0.95`, show increased OOM risk due to fragmentation and runtime variance.
-- Errors:
-  - Weight budget: If `Σ_d W_{d,g} > B_g`, show “Insufficient memory for model weights under current utilization.”
+- Per‑deployment shares determine headroom: For GPU g, `Σ_d U_d` is the allocated fraction; implied reserve is `1 − Σ_d U_d`.
+- Warnings: If `Σ_d U_d > 0.95` on any GPU, show increased OOM risk; if `Σ_d U_d > 1`, highlight overallocation.
+- Errors (applied once budgets are computed in 4.x):
+  - Weight budget: If `Σ_d W_{d,g}` exceeds the usable budget `B_g`, show “Insufficient memory for model weights under current utilization.”
   - Minimal KV viability (per deployment d on g): Let `T_min = 1` token per sequence and `S_min = max(1, max_num_seqs_d)`. If `B_g − Σ_d W_{d,g} < Σ_d (K_tok_{d,g} × T_min × S_min)`, show “Insufficient memory for minimal KV cache.”
 
 ### Recommendations (derive vLLM flags)
@@ -273,7 +273,7 @@ For deployment d on GPU g, let `L_g = max(B_g − Σ_d W_{d,g}, 0)` and consider
 - Weight bytes per GPU: `(paramsB×1e9 × bytesPerParam(weightDtype) / tp) × (1 + replicationOverheadPct)`
 - KV bytes per token per GPU: `2 × layers × numKeyValueHeads × headDim × bytesPerKvElem(kvDtype) / tp × (1 + kvOverheadPct)`
 - Total KV per GPU (deployment d): `kvPerTokPerGpu × (max_model_len × max_num_seqs)`
-- Usable budget per GPU: `B_g = U × gpu_capacity_bytes − reserve_bytes`
+- Usable budget per GPU (domain formula): `B_g = U × gpu_capacity_bytes − reserve_bytes`. Note: The UI collects per‑deployment shares `U_d`; in 4.x the app will map `Σ_d U_d` and implied reserve into domain budgets (see ADR‑0005).
 - Fit condition per GPU: `Σ_d weights_d + Σ_d kv_d ≤ B_g`
 
 Notes: Approximations assume even sharding under tensor parallelism; minor replicated modules are covered by the replication overhead term.
