@@ -119,13 +119,13 @@
     - Traceability: PRD UI Styles; ARCH Shared utils.
     - Est: 1–2h
 
-- [ ] 5.0 Results & Recommendations
-  - [ ] 5.1 Fit/over-capacity status per GPU with reasons
+- [x] 5.0 Results & Recommendations
+  - [x] 5.1 Fit/over-capacity status per GPU with reasons
     - Acceptance: GPU cards show OK/Over with reasons (weights over budget, minimal KV unmet, etc.); state is testable.
     - Gates: Boundaries; Tests (unit or component-level where feasible).
     - Traceability: PRD Acceptance Criteria (Warnings/Errors).
     - Est: 1–2h
-  - [ ] 5.2 Suggestions per deployment (`--max-model-len` / `--max-num-seqs`)
+  - [x] 5.2 Suggestions per deployment (`--max-model-len` / `--max-num-seqs`)
     - Acceptance: Per-deployment suggestion chips display computed values; “Apply” updates inputs; formatting matches unit toggle.
     - Gates: Boundaries.
     - Traceability: PRD Recommendations.
