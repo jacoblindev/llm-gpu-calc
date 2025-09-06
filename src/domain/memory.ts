@@ -1,5 +1,10 @@
 import type { DType, Deployment, Gpu, KvDType, Model } from '@shared/types';
 
+/**
+ * Bytes per model parameter for a given weight dtype.
+ * Units: bytes per parameter. Examples — fp32: 4, fp16/bf16: 2, q8: 1, q4: 0.5.
+ * See ADR-0002 for dtype assumptions.
+ */
 export function bytesPerParam(_dtype: DType): number {
   switch (_dtype) {
     case 'fp32':
@@ -16,6 +21,11 @@ export function bytesPerParam(_dtype: DType): number {
   }
 }
 
+/**
+ * Bytes per KV cache element for a given KV dtype.
+ * Units: bytes per element. Examples — fp16/bf16: 2, fp8/int8: 1.
+ * See ADR-0002 for dtype assumptions.
+ */
 export function bytesPerKvElem(_dtype: KvDType): number {
   switch (_dtype) {
     case 'fp16':
@@ -38,6 +48,12 @@ export function weightBytesPerGpu(
   return 0;
 }
 
+/**
+ * GQA-aware KV cache bytes per token per GPU.
+ * Formula: 2 × layers × numKeyValueHeads × (hidden/heads) × bytesPerKvElem(kvDtype) ÷ tp × (1 + kvOverheadPct).
+ * Units: bytes per token per GPU. Percentages are fractions (e.g., 0.10 = 10%).
+ * See ADR-0002 and ARCH-v1 Domain contracts.
+ */
 export function kvBytesPerTokenPerGpu(
   _layers: number,
   _hidden: number,

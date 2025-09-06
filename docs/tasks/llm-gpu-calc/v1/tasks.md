@@ -32,7 +32,7 @@
     - Est: 1–2h
 
 - [ ] 1.0 Domain: vRAM estimation engine
-  - [ ] 1.1 GQA-aware KV per-token formula; decouple weight vs KV dtypes
+  - [x] 1.1 GQA-aware KV per-token formula; decouple weight vs KV dtypes
     - Acceptance: `kvBytesPerTokenPerGpu(...)` implemented per ARCH; unit tests cover a few models/head configs and kv dtypes (fp16/fp8/int8).
     - Gates: Tests; Boundaries (domain→shared only).
     - Traceability: PRD Estimation Formulas; ARCH Domain contracts.
