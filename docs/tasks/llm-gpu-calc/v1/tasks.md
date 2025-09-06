@@ -60,7 +60,7 @@
 
 - [ ] 2.0 Data catalogs: GPUs and Models (JSON + typed access)
   - [ ] 2.1 Add `numKeyValueHeads` to models; verify a few real entries
-    - Acceptance: `models.json` schema includes `numKeyValueHeads`; sample entries populated (e.g., Llama‑3.1‑8B, Gemma‑3‑27B, Phi‑4) with reasonable values.
+    - Acceptance: `models.json` schema includes `numKeyValueHeads`; sample entries populated (e.g., Llama-3.1-8B, Gemma-3-27B, Phi-4) with reasonable values.
     - Gates: Boundaries; Tests (basic data load/shape checks).
     - Traceability: PRD Initial Catalog; ARCH Data schema.
     - Est: 1–2h
