@@ -1,7 +1,9 @@
 import type { Deployment, Gpu, Model, UnitPreference } from '@shared/types';
 
 export interface AppState {
-  gpus: Gpu[];
+  gpuCatalog: Gpu[];
+  gpus: Gpu[]; // selected GPU instances
+  gpuCounts: Record<string, number>; // typeId -> count
   models: Model[];
   deployments: Deployment[];
   utilization: number; // U in [0,1]
@@ -11,7 +13,9 @@ export interface AppState {
 
 export function createInitialState(): AppState {
   return {
+    gpuCatalog: [],
     gpus: [],
+    gpuCounts: {},
     models: [],
     deployments: [],
     utilization: 0.9,
