@@ -13,7 +13,7 @@ Slug: llm-gpu-calc (proposed)
 5) Multi‑GPU & sharing: Tensor parallel (TP) sharding per deployment. Multiple deployments can share the same GPU(s); usages add up per GPU.
 6) GPU memory utilization: Per‑deployment utilization shares `U_d ∈ [0,1]` set during model selection. Per‑GPU implied reserve is `max(0, 1 − Σ_d U_d)` across deployments (see ADR‑0005).
 7) Visualization: Custom lightweight SVG segmented bars; no third‑party chart libs in v1.
-8) Platform: Web app (Vue 3 + TS + Vite); state via Pinia.
+8) Platform: Web app (Vue 3 + TS + Vite); state via Pinia. Hosted on GitHub Pages; CI/CD via GitHub Actions.
 
 ---
 
@@ -58,6 +58,10 @@ Sizing vLLM deployments is tricky: vRAM usage depends on model weights, tensor p
 - TP constraints: For a deployment, require `tp ≤ assignedGpuIds.length`; recommend identical GPU types/capacities within the deployment’s TP group (soft warning only in v1).
 - Recommendations: For each deployment, show suggested `--max-model-len` (given `max_num_seqs`) and `--max-num-seqs` (given `max_model_len`) with an “Apply” action.
 - All domain calculations covered by unit tests; UI behavior smoke‑tested.
+
+- CI/CD:
+  - CI (PRs and pushes): `npm ci && npm run typecheck && npm test` pass on Node 20.
+  - CD (main branch): build with Vite and publish `dist/` to GitHub Pages via Actions; page is reachable at the repository’s Pages URL with correct asset paths.
 
 ## UX Notes
 
@@ -196,10 +200,19 @@ Modules
 - UI smoke tests for stepper flow and bar rendering with deterministic inputs.
 - Update or remove obsolete tests in the same PR as requirements change.
 
+CI Integration (v1):
+
+- GitHub Actions run on PRs and `main` pushes:
+  - PR: install (npm ci), typecheck, unit tests, cache npm deps; report status.
+  - Main: same checks, then build and deploy `dist/` to GitHub Pages using `actions/upload-pages-artifact` and `actions/deploy-pages`.
+  - Use Node 20.x and cache: npm.
+  - Ensure Vite `base` is configured for Pages (either `'/'` for user/organization site or `'/<repo>/'` for project site).
+
 ## Dependency Policy
 
 - New runtime deps require a short ADR and approval under `docs/adr/`.
 - v1 uses Vue 3 + Pinia + Vite (see ADR‑0001) and Tailwind CSS with tokens (see ADR‑0003). Chart libraries are deferred; revisit via ADR if needed.
+- CI/CD uses GitHub Actions’ maintained actions only; no new runtime dependencies are introduced.
 
 ---
 
