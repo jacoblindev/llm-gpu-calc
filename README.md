@@ -45,5 +45,4 @@ Vite base path for Pages:
 
 Deployment URL:
 
-- For project pages: `https://<user>.github.io/<repo>/`
-- For user/org pages or custom domains, set `VITE_BASE` to `'/'` and configure the domain in repo settings.
+- For project pages: `https://jacoblindev.github.io/llm-gpu-calc/`

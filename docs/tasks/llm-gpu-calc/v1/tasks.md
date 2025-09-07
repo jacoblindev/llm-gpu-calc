@@ -155,29 +155,16 @@
     - Gates: Boundaries; no runtime deps.
     - Traceability: ARCH Build & Release.
     - Est: 0.5h
-  - [ ] 6.4 Repo settings & docs
+  - [x] 6.4 Repo settings & docs
     - Acceptance: Pages enabled (Source: GitHub Actions), environment `github-pages` created; README updated with deployment URL and local build instructions.
     - Gates: N/A.
     - Traceability: PRD Acceptance (CI/CD).
     - Est: 0.5h
-  - [ ] 6.5 Branch protection for `main` (enforce CI)
+  - [x] 6.5 Branch protection for `main` (enforce CI)
     - Acceptance: A branch ruleset (or classic branch protection rule) exists for `main` requiring status checks to pass; the required check is the CI workflow job (e.g., `CI / test`). Optional: require PR review and up-to-date branches.
     - How-to (Rulesets UI - preferred): Settings → Rules → Rulesets → New ruleset → Type: Branch → Targets: Include `main` → Add rule “Require status checks to pass” and select the CI check (appears as `CI / test` after one PR run). Optionally add “Require a pull request before merging” and “Require branches to be up to date”. Save and enable.
     - How-to (Classic UI): Settings → Branches → Add rule → Branch pattern `main` → enable “Require status checks to pass” and select `CI / test`. Optionally require PR reviews and up-to-date branches. Save.
     - Tip: Push/raise a PR first so the exact status check name appears in the picker.
-    - API alternative (admin token):
-
-      ```sh
-      curl -X PUT -H "Authorization: token <PAT>" -H "Accept: application/vnd.github+json" \
-        https://api.github.com/repos/<owner>/<repo>/branches/main/protection \
-        -d '{
-          "required_status_checks": { "strict": true, "contexts": ["CI / test"] },
-          "enforce_admins": true,
-          "required_pull_request_reviews": { "required_approving_review_count": 1 },
-          "restrictions": null
-        }'
-      ```
-
     - Gates: N/A.
     - Est: 0.5h
 
