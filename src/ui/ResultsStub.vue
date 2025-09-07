@@ -84,7 +84,7 @@ const results = computed(() => computeResultsStub(props.state).map(r => ({
   util: r.utilizationSum,
   reserve: r.impliedReserveFrac,
 })))
-const fit = computed(() => Object.fromEntries(buildPerGpuFitStatus(props.state).map(s => [s.gpuId, s]))) as unknown as Record<string, { ok: boolean; reason?: string; used: number; free: number }>
+const fit = computed(() => Object.fromEntries(buildPerGpuFitStatus(props.state).map(s => [s.gpuId, s])));
 function format(bytes: number) { return formatBytes(bytes, props.state.unit, 1) }
 
 function capacity(g: AppState['gpus'][number]) { return formatBytes(g.vramBytes, props.state.unit, 1) }
