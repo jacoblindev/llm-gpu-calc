@@ -1,4 +1,7 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, afterEach, vi } from 'vitest';
+afterEach(() => {
+  vi.unstubAllGlobals();
+});
 import { listModels, getModelById, listGpus } from './catalog';
 
 describe('data/catalog models (2.1)', () => {

@@ -1,4 +1,8 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+// Ensure any stubbed globals (e.g., localStorage) are reset between tests
+afterEach(() => {
+  vi.unstubAllGlobals();
+});
 import {
   utilizationByGpu,
   impliedReserveByGpu,
@@ -8,7 +12,6 @@ import {
   validateDeployment,
   setGpuCount,
   incrementGpu,
-  newDeployment,
   setUnit,
   loadUnitPreference,
   gpuCapacityLabel,

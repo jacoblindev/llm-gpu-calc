@@ -1,4 +1,7 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, afterEach, vi } from 'vitest';
+afterEach(() => {
+  vi.unstubAllGlobals();
+});
 import { aggregatePerGpu, budgetBytesPerGpu, kvTotalBytesPerGpu } from '@domain/memory';
 import type { Deployment, Gpu, Model } from '@shared/types';
 
@@ -110,4 +113,3 @@ describe('aggregatePerGpu', () => {
     expect(B.free).toBe(26973785600);
   });
 });
-

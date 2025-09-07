@@ -1,4 +1,7 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, afterEach, vi } from 'vitest';
+afterEach(() => {
+  vi.unstubAllGlobals();
+});
 import { bytesPerParam, weightBytesPerGpu } from '@domain/memory';
 
 describe('bytesPerParam (weights)', () => {
@@ -46,4 +49,3 @@ describe('weightBytesPerGpu', () => {
     expect(weightBytesPerGpu(7, 'fp16', -1, 0.02)).toBe(0);
   });
 });
-

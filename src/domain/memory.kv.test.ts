@@ -1,4 +1,7 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, afterEach, vi } from 'vitest';
+afterEach(() => {
+  vi.unstubAllGlobals();
+});
 import { bytesPerKvElem, kvBytesPerTokenPerGpu } from '@domain/memory';
 
 describe('bytesPerKvElem', () => {
@@ -70,4 +73,3 @@ describe('kvBytesPerTokenPerGpu (GQA-aware)', () => {
     expect(withOverhead).toBeCloseTo(base * 1.1, 6);
   });
 });
-

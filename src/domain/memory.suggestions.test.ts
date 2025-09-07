@@ -1,4 +1,7 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, afterEach, vi } from 'vitest';
+afterEach(() => {
+  vi.unstubAllGlobals();
+});
 import { suggestMaxModelLen, suggestMaxNumSeq } from '@domain/memory';
 
 describe('suggestMaxModelLen', () => {
@@ -32,4 +35,3 @@ describe('suggestMaxNumSeq', () => {
     expect(suggestMaxNumSeq(1000, 1, 0)).toBe(0);
   });
 });
-
