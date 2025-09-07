@@ -4,15 +4,19 @@ import { listGpus, listModels } from '@data/catalog';
 import { bytesToGB, bytesToGiB } from '@shared/units';
 import { kvBytesPerTokenPerGpu, kvTotalBytesPerGpu, weightBytesPerGpu, fitChecks, suggestMaxModelLen, suggestMaxNumSeq } from '@domain/memory';
 
+/**
+ * Initializes the application state with static catalogs.
+ * Populates `gpuCatalog` and `models` from data sources.
+ */
 export function init(state: AppState): void {
   state.gpuCatalog = listGpus();
   state.models = listModels();
 }
 
-export function recompute(_state: AppState): void {
-  // aggregation and results will be implemented in 4.x/5.x
-}
-
+/**
+ * Creates a new Deployment with sensible defaults based on the first model,
+ * including dtypes, overheads, and initial workload and utilization share.
+ */
 export function newDeployment(state: AppState): Deployment {
   const model = state.models[0] as Model | undefined;
   const id = `dep_${Math.random().toString(36).slice(2, 8)}`;
@@ -31,19 +35,31 @@ export function newDeployment(state: AppState): Deployment {
   };
 }
 
+/**
+ * Appends a new default deployment to state.
+ */
 export function addDeployment(state: AppState): void {
   state.deployments.push(newDeployment(state));
 }
 
+/**
+ * Removes a deployment by id.
+ */
 export function removeDeployment(state: AppState, id: string): void {
   state.deployments = state.deployments.filter((d) => d.id !== id);
 }
 
+/**
+ * Sets the preferred display unit and persists to localStorage (best-effort).
+ */
 export function setUnit(state: AppState, unit: UnitPreference): void {
   state.unit = unit;
   try { localStorage.setItem('unitPreference', unit); } catch {}
 }
 
+/**
+ * Loads a persisted unit preference (if any) from localStorage.
+ */
 export function loadUnitPreference(state: AppState): void {
   try {
     const u = localStorage.getItem('unitPreference') as UnitPreference | null;
@@ -53,12 +69,16 @@ export function loadUnitPreference(state: AppState): void {
 
 // Utilization handling has moved to per-deployment. Runtime reserve is implied as 1 - Σ U on each GPU.
 
+/**
+ * Returns a human-readable GPU capacity label, e.g. "80.0 GB (74.5 GiB)".
+ */
 export function gpuCapacityLabel(gpu: Gpu): string {
   const gb = bytesToGB(gpu.vramBytes).toFixed(1);
   const gib = bytesToGiB(gpu.vramBytes).toFixed(1);
   return `${gb} GB (${gib} GiB)`;
 }
 
+/** Creates `count` instances of a GPU type with numbered ids/names. */
 function makeGpuInstances(type: Gpu, count: number): Gpu[] {
   const out: Gpu[] = [];
   for (let i = 0; i < count; i++) {
@@ -72,6 +92,10 @@ function makeGpuInstances(type: Gpu, count: number): Gpu[] {
   return out;
 }
 
+/**
+ * Rebuilds `state.gpus` based on `gpuCatalog` and `gpuCounts` and
+ * clamps each deployment's assigned GPU ids and tensor-parallel degree.
+ */
 function rebuildSelectedGpus(state: AppState): void {
   const result: Gpu[] = [];
   for (const t of state.gpuCatalog) {
@@ -86,16 +110,22 @@ function rebuildSelectedGpus(state: AppState): void {
   }
 }
 
+/** Sets the selected count for a GPU type and rebuilds GPU instances. */
 export function setGpuCount(state: AppState, typeId: string, count: number): void {
   state.gpuCounts[typeId] = Math.max(0, Math.floor(Number.isFinite(count) ? count : 0));
   rebuildSelectedGpus(state);
 }
 
+/** Increments the selected count for a GPU type by `delta`. */
 export function incrementGpu(state: AppState, typeId: string, delta: number): void {
   const next = Math.max(0, (state.gpuCounts[typeId] ?? 0) + delta);
   setGpuCount(state, typeId, next);
 }
 
+/**
+ * Computes Σ utilization shares per GPU across all deployments assigned to it.
+ * Returns a map of gpuId → sum(U) where U ∈ [0,1].
+ */
 export function utilizationByGpu(state: AppState): Map<string, number> {
   // Sum utilization shares across deployments that included the GPU
   const map = new Map<string, number>();
@@ -103,12 +133,15 @@ export function utilizationByGpu(state: AppState): Map<string, number> {
   for (const d of state.deployments) {
     for (const gid of d.assignedGpuIds) {
       if (!map.has(gid)) continue;
-      map.set(gid, (map.get(gid) || 0) + (d.utilizationShare || 0));
+      map.set(gid, (map.get(gid) ?? 0) + (d.utilizationShare ?? 0));
     }
   }
   return map;
 }
 
+/**
+ * Derives the implied runtime reserve fraction per GPU as max(0, 1 − ΣU).
+ */
 export function impliedReserveByGpu(state: AppState): Map<string, number> {
   const u = utilizationByGpu(state);
   const res = new Map<string, number>();
@@ -118,6 +151,10 @@ export function impliedReserveByGpu(state: AppState): Map<string, number> {
   return res;
 }
 
+/**
+ * Builds an intermediate per-GPU result used by the Results and bars views.
+ * Includes capacity, ΣU, implied reserve fraction, total used bytes, and per‑deployment parts.
+ */
 export function computeResultsStub(state: AppState): Array<{
   gpuId: string;
   gpuName: string;
@@ -159,6 +196,9 @@ export function computeResultsStub(state: AppState): Array<{
   return out;
 }
 
+/**
+ * Constructs per-GPU bar segment data (weights, KV, reserve, free) for visualization.
+ */
 export function buildPerGpuBars(state: AppState): Array<{
   gpuId: string;
   gpuName: string;
@@ -186,6 +226,10 @@ export function buildPerGpuBars(state: AppState): Array<{
   });
 }
 
+/**
+ * Computes per-GPU fit status using domain fitChecks and attaches used/free bytes
+ * for display in the UI.
+ */
 export function buildPerGpuFitStatus(state: AppState): Array<{
   gpuId: string;
   ok: boolean;
@@ -209,7 +253,7 @@ export function buildPerGpuFitStatus(state: AppState): Array<{
   });
 }
 
-// Helper function to validate deployment and model for suggestions
+/** Validates that a deployment and model exist and has ≥1 assigned GPU. */
 function validateDeploymentForSuggestions(
   deployment: Deployment | undefined,
   model: Model | undefined
@@ -220,7 +264,7 @@ function validateDeploymentForSuggestions(
   return { isValid: true, deployment, model };
 }
 
-// Helper function to calculate memory usage by other deployments on a specific GPU
+/** Sums weights+KV bytes used by other deployments on a specific GPU. */
 function calculateOtherDeploymentsUsage(
   gpuId: string,
   currentDeploymentId: string,
@@ -262,7 +306,10 @@ function calculateOtherDeploymentsUsage(
   return usedByOthers;
 }
 
-// Helper function to calculate available KV budget for a deployment on a specific GPU
+/**
+ * Calculates the available KV budget (bytes) for a deployment on a GPU after
+ * implied reserve and other deployments’ usage, applying a safety factor.
+ */
 function calculateKvBudgetForGpu(
   gpu: Gpu,
   deployment: Deployment,
@@ -275,7 +322,7 @@ function calculateKvBudgetForGpu(
   const capacity = gpu.vramBytes;
   const sumUtilization = utilizationMap.get(gpu.id) || 0;
   const reserveBytes = Math.max(0, (1 - sumUtilization) * capacity);
-  const budgetBytes = Math.max(0, capacity - reserveBytes);
+  const budgetBytes = Math.max(0, capacity - reserveBytes); // == max(0, sumUtilization * capacity)
   
   const usedByOthers = calculateOtherDeploymentsUsage(
     gpu.id,
@@ -288,11 +335,12 @@ function calculateKvBudgetForGpu(
   return kvBudget * safetyFactor;
 }
 
-// Helper function to compute suggestions for a single GPU
+/**
+ * Computes suggestions (max_model_len, max_num_seqs) for a single GPU.
+ */
 function computeSuggestionsForGpu(
   gpu: Gpu,
   deployment: Deployment,
-  model: Model,
   deploymentWeights: number,
   perTokenBytes: number,
   utilizationMap: Map<string, number>,
@@ -317,6 +365,11 @@ function computeSuggestionsForGpu(
   };
 }
 
+/**
+ * Computes per-deployment suggestions by evaluating all assigned GPUs and
+ * taking the most constraining values (min across GPUs). Returns 0/0 when
+ * the deployment/model is missing or has no assigned GPUs.
+ */
 export function computeDeploymentSuggestions(
   state: AppState,
   deploymentId: string
@@ -333,6 +386,8 @@ export function computeDeploymentSuggestions(
   }
   
   const { deployment: validDeployment, model: validModel } = validation;
+  // Use assigned GPU count as effective TP for suggestions.
+  // This aligns with how memory is actually sharded across the selected GPUs.
   const tp = Math.max(1, validDeployment.assignedGpuIds.length);
   const utilizationMap = utilizationByGpu(state);
   
@@ -364,7 +419,6 @@ export function computeDeploymentSuggestions(
     const suggestions = computeSuggestionsForGpu(
       gpu,
       validDeployment,
-      validModel,
       deploymentWeights,
       perTokenBytes,
       utilizationMap,
@@ -386,18 +440,25 @@ export function computeDeploymentSuggestions(
   };
 }
 
+/** Applies the suggested max_model_len to a deployment in-place. */
 export function applySuggestedMaxModelLen(state: AppState, deploymentId: string): void {
   const s = computeDeploymentSuggestions(state, deploymentId);
   const d = state.deployments.find(x => x.id === deploymentId);
   if (d) d.maxModelLen = s.maxModelLen;
 }
 
+/** Applies the suggested max_num_seqs to a deployment in-place. */
 export function applySuggestedMaxNumSeqs(state: AppState, deploymentId: string): void {
   const s = computeDeploymentSuggestions(state, deploymentId);
   const d = state.deployments.find(x => x.id === deploymentId);
   if (d) d.maxNumSeqs = s.maxNumSeqs;
 }
 
+/**
+ * Validates a deployment against selected GPUs.
+ * - Error when tp > assigned GPUs.
+ * - Warning when assigned GPUs have mixed capacities.
+ */
 export function validateDeployment(d: Deployment, gpus: Gpu[]): { errors: string[]; warnings: string[] } {
   const errors: string[] = [];
   const warnings: string[] = [];
