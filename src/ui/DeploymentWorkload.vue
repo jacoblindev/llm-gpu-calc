@@ -17,7 +17,7 @@
         </div>
         <div>
           <label class="block text-sm text-muted">Weight dtype</label>
-          <select class="mt-1 w-full px-2 py-1 bg-bg border border-muted/30 rounded" :value="d.weightDtype" @change="onField(d, 'weightDtype', $event)">
+          <select class="mt-1 w-full px-2 py-1 bg-bg border border-muted/30 rounded" :value="d.weightDtype" @change="onWeightDtype(d, $event)">
             <option value="bf16">bf16</option>
             <option value="fp16">fp16</option>
             <option value="fp32">fp32</option>
@@ -27,7 +27,7 @@
         </div>
         <div>
           <label class="block text-sm text-muted">KV dtype</label>
-          <select class="mt-1 w-full px-2 py-1 bg-bg border border-muted/30 rounded" :value="d.kvDtype" @change="onField(d, 'kvDtype', $event)">
+          <select class="mt-1 w-full px-2 py-1 bg-bg border border-muted/30 rounded" :value="d.kvDtype" @change="onKvDtype(d, $event)">
             <option value="bf16">bf16</option>
             <option value="fp16">fp16</option>
             <option value="fp8">fp8</option>
@@ -44,11 +44,11 @@
         </div>
         <div>
           <label class="block text-sm text-muted">max_model_len</label>
-          <input class="mt-1 w-full px-2 py-1 bg-bg border border-muted/30 rounded" type="number" min="0" step="128" :value="d.maxModelLen" @input="onField(d, 'maxModelLen', $event)" />
+          <input class="mt-1 w-full px-2 py-1 bg-bg border border-muted/30 rounded" type="number" min="0" step="128" :value="d.maxModelLen" @input="onMaxModelLen(d, $event)" />
         </div>
         <div>
           <label class="block text-sm text-muted">max_num_seqs</label>
-          <input class="mt-1 w-full px-2 py-1 bg-bg border border-muted/30 rounded" type="number" min="1" step="1" :value="d.maxNumSeqs" @input="onField(d, 'maxNumSeqs', $event)" />
+          <input class="mt-1 w-full px-2 py-1 bg-bg border border-muted/30 rounded" type="number" min="1" step="1" :value="d.maxNumSeqs" @input="onMaxNumSeqs(d, $event)" />
         </div>
       </div>
       <div class="mt-3">
@@ -62,17 +62,24 @@
 <script setup lang="ts">
 import type { AppState } from '@app/state'
 import { validateDeployment } from '@app/controller'
+import type { DType, KvDType } from '@shared/types'
 
 const props = defineProps<{ state: AppState }>()
 
 function modelName(id: string) {
   return props.state.models.find(m => m.id === id)?.name
 }
-function onField<T extends keyof AppState['deployments'][number]>(d: AppState['deployments'][number], key: T, e: Event) {
-  const el = e.target as HTMLInputElement | HTMLSelectElement
-  const v = el instanceof HTMLInputElement && el.type === 'number' ? Number(el.value) : (el as HTMLSelectElement).value
-  // @ts-expect-error generic assignment
-  d[key] = v
+function onWeightDtype(d: AppState['deployments'][number], e: Event) {
+  d.weightDtype = (e.target as HTMLSelectElement).value as DType
+}
+function onKvDtype(d: AppState['deployments'][number], e: Event) {
+  d.kvDtype = (e.target as HTMLSelectElement).value as KvDType
+}
+function onMaxModelLen(d: AppState['deployments'][number], e: Event) {
+  d.maxModelLen = Math.max(0, Number((e.target as HTMLInputElement).value) || 0)
+}
+function onMaxNumSeqs(d: AppState['deployments'][number], e: Event) {
+  d.maxNumSeqs = Math.max(1, Math.floor(Number((e.target as HTMLInputElement).value) || 1))
 }
 function onPct<T extends 'kvOverheadPct'|'replicationOverheadPct'>(d: AppState['deployments'][number], key: T, e: Event) {
   const v = Math.max(0, Number((e.target as HTMLInputElement).value) || 0) / 100
@@ -94,4 +101,3 @@ function warnings(d: AppState['deployments'][number]) { return validateDeploymen
 .text-danger { color: #dc2626; }
 .text-warning { color: #b45309; }
 </style>
-

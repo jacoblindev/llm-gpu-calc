@@ -29,11 +29,11 @@
         </div>
         <div>
           <label class="block text-sm text-muted">TP</label>
-          <input class="mt-1 w-full px-2 py-1 bg-bg border border-muted/30 rounded" type="number" min="1" step="1" :value="d.tp" @input="onField(d, 'tp', $event)" />
+          <input class="mt-1 w-full px-2 py-1 bg-bg border border-muted/30 rounded" type="number" min="1" step="1" :value="d.tp" @input="onTp(d, $event)" />
         </div>
         <div>
           <label class="block text-sm text-muted">Weight dtype</label>
-          <select class="mt-1 w-full px-2 py-1 bg-bg border border-muted/30 rounded" :value="d.weightDtype" @change="onField(d, 'weightDtype', $event)">
+          <select class="mt-1 w-full px-2 py-1 bg-bg border border-muted/30 rounded" :value="d.weightDtype" @change="onWeightDtype(d, $event)">
             <option value="bf16">bf16</option>
             <option value="fp16">fp16</option>
             <option value="fp32">fp32</option>
@@ -43,7 +43,7 @@
         </div>
         <div>
           <label class="block text-sm text-muted">KV dtype</label>
-          <select class="mt-1 w-full px-2 py-1 bg-bg border border-muted/30 rounded" :value="d.kvDtype" @change="onField(d, 'kvDtype', $event)">
+          <select class="mt-1 w-full px-2 py-1 bg-bg border border-muted/30 rounded" :value="d.kvDtype" @change="onKvDtype(d, $event)">
             <option value="bf16">bf16</option>
             <option value="fp16">fp16</option>
             <option value="fp8">fp8</option>
@@ -60,11 +60,11 @@
         </div>
         <div>
           <label class="block text-sm text-muted">max_model_len</label>
-          <input class="mt-1 w-full px-2 py-1 bg-bg border border-muted/30 rounded" type="number" min="0" step="128" :value="d.maxModelLen" @input="onField(d, 'maxModelLen', $event)" />
+          <input class="mt-1 w-full px-2 py-1 bg-bg border border-muted/30 rounded" type="number" min="0" step="128" :value="d.maxModelLen" @input="onMaxModelLen(d, $event)" />
         </div>
         <div>
           <label class="block text-sm text-muted">max_num_seqs</label>
-          <input class="mt-1 w-full px-2 py-1 bg-bg border border-muted/30 rounded" type="number" min="1" step="1" :value="d.maxNumSeqs" @input="onField(d, 'maxNumSeqs', $event)" />
+          <input class="mt-1 w-full px-2 py-1 bg-bg border border-muted/30 rounded" type="number" min="1" step="1" :value="d.maxNumSeqs" @input="onMaxNumSeqs(d, $event)" />
         </div>
       </div>
 
@@ -79,6 +79,7 @@
 <script setup lang="ts">
 import type { AppState } from '@app/state'
 import { validateDeployment, gpuCapacityLabel } from '@app/controller'
+import type { DType, KvDType } from '@shared/types'
 
 type Deployment = AppState['deployments'][number]
 type Gpu = AppState['gpus'][number]
@@ -106,15 +107,22 @@ function onGpuToggle(d: Deployment, id: string, e: Event) {
   // auto-align TP with number of assigned GPUs as requested
   d.tp = Math.max(1, d.assignedGpuIds.length)
 }
-function onField<T extends keyof Deployment>(d: Deployment, key: T, e: Event) {
-  const el = e.target as HTMLInputElement | HTMLSelectElement
-  const v = el instanceof HTMLInputElement && el.type === 'number' ? Number(el.value) : (el as HTMLSelectElement).value
-  // @ts-expect-error generic assignment
-  d[key] = v
-  if (key === 'tp') {
-    const max = d.assignedGpuIds.length || 1
-    d.tp = Math.max(1, Math.min(d.tp, max))
-  }
+function onTp(d: Deployment, e: Event) {
+  const v = Math.max(1, Math.floor(Number((e.target as HTMLInputElement).value) || 1))
+  const max = d.assignedGpuIds.length || 1
+  d.tp = Math.max(1, Math.min(v, max))
+}
+function onWeightDtype(d: Deployment, e: Event) {
+  d.weightDtype = (e.target as HTMLSelectElement).value as DType
+}
+function onKvDtype(d: Deployment, e: Event) {
+  d.kvDtype = (e.target as HTMLSelectElement).value as KvDType
+}
+function onMaxModelLen(d: Deployment, e: Event) {
+  d.maxModelLen = Math.max(0, Number((e.target as HTMLInputElement).value) || 0)
+}
+function onMaxNumSeqs(d: Deployment, e: Event) {
+  d.maxNumSeqs = Math.max(1, Math.floor(Number((e.target as HTMLInputElement).value) || 1))
 }
 function onPct<T extends 'kvOverheadPct'|'replicationOverheadPct'>(d: Deployment, key: T, e: Event) {
   const v = Math.max(0, Number((e.target as HTMLInputElement).value) || 0) / 100
