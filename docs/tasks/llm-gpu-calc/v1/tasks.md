@@ -125,11 +125,11 @@
     - Gates: Boundaries; Tests (unit or component-level where feasible).
     - Traceability: PRD Acceptance Criteria (Warnings/Errors).
     - Est: 1–2h
-- [x] 5.2 Suggestions per deployment (`--max-model-len` / `--max-num-seqs`)
-  - Acceptance: Per-deployment suggestion chips display computed values; “Apply” updates inputs; formatting matches unit toggle.
-  - Gates: Boundaries.
-  - Traceability: PRD Recommendations.
-  - Est: 1–2h
+  - [x] 5.2 Suggestions per deployment (`--max-model-len` / `--max-num-seqs`)
+    - Acceptance: Per-deployment suggestion chips display computed values; “Apply” updates inputs; formatting matches unit toggle.
+    - Gates: Boundaries.
+    - Traceability: PRD Recommendations.
+    - Est: 1–2h
 
 - [x] X.0 Align & prune tests
   - [x] X.1 Retire tests mismatching updated requirements (same PR)
