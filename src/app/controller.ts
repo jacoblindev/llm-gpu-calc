@@ -274,7 +274,7 @@ function calculateKvBudgetForGpu(
 ): number {
   const capacity = gpu.vramBytes;
   const sumUtilization = utilizationMap.get(gpu.id) || 0;
-  const reserveBytes = Math.max(0, 1 - sumUtilization) * capacity;
+  const reserveBytes = Math.max(0, (1 - sumUtilization) * capacity);
   const budgetBytes = Math.max(0, capacity - reserveBytes);
   
   const usedByOthers = calculateOtherDeploymentsUsage(
