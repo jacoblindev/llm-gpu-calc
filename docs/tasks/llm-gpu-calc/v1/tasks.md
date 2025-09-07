@@ -131,10 +131,13 @@
     - Traceability: PRD Recommendations.
     - Est: 1–2h
 
-- [ ] X.0 Align & prune tests
-  - [ ] X.1 Retire tests mismatching updated requirements (same PR)
-  - [ ] X.2 Add/adjust tests for new public behavior only
-  - [ ] X.3 Keep test runtime within agreed budget
+- [x] X.0 Align & prune tests
+  - [x] X.1 Retire tests mismatching updated requirements (same PR)
+    - None found to retire; existing domain/data tests align with current behavior.
+  - [x] X.2 Add/adjust tests for new public behavior only
+    - Added `src/app/controller.test.ts` covering utilization/reserve, suggestions, bars/fit, validation, GPU selection, unit persistence, and labels.
+  - [x] X.3 Keep test runtime within agreed budget
+    - Vitest suite runs quickly locally (<1s on Node 20); no slow tests.
 
 ## Notes
 
