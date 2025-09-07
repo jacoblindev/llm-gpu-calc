@@ -139,18 +139,18 @@
   - [x] X.3 Keep test runtime within agreed budget
     - Vitest suite runs quickly locally (<1s on Node 20); no slow tests.
 
-- [ ] 6.0 CI/CD & Hosting (GitHub Pages)
-  - [ ] 6.1 CI: Add `ci.yml` for PRs and `main`
+- [x] 6.0 CI/CD & Hosting (GitHub Pages)
+  - [x] 6.1 CI: Add `ci.yml` for PRs and `main`
     - Acceptance: Workflow runs on PRs and pushes to `main` and executes `npm ci`, `npm run typecheck`, and `npm test` on Node 20 with npm cache.
     - Gates: Tests must pass; Boundaries unaffected; no runtime deps added.
     - Traceability: PRD Acceptance (CI/CD), ARCH Build & Release.
     - Est: 0.5–1h
-  - [ ] 6.2 CD: Add `deploy-pages.yml` to build and publish to GitHub Pages on `main`
+  - [x] 6.2 CD: Add `deploy-pages.yml` to build and publish to GitHub Pages on `main`
     - Acceptance: On push to `main`, workflow builds the app and deploys `dist/` to Pages using `actions/upload-pages-artifact` and `actions/deploy-pages`; site is reachable at the Pages URL.
     - Gates: Boundaries unaffected; no runtime deps added; Pages permissions configured (`pages: write`, `id-token: write`).
     - Traceability: PRD Acceptance (CI/CD), ARCH Build & Release.
     - Est: 0.5–1h
-  - [ ] 6.3 Vite base path for Pages
+  - [x] 6.3 Vite base path for Pages
     - Acceptance: `vite.config.ts` sets `base` appropriately for project pages (e.g., `base: '/<repo>/'`) or conditionally via env (e.g., `GITHUB_PAGES`), documented in README.
     - Gates: Boundaries; no runtime deps.
     - Traceability: ARCH Build & Release.
@@ -159,6 +159,26 @@
     - Acceptance: Pages enabled (Source: GitHub Actions), environment `github-pages` created; README updated with deployment URL and local build instructions.
     - Gates: N/A.
     - Traceability: PRD Acceptance (CI/CD).
+    - Est: 0.5h
+  - [ ] 6.5 Branch protection for `main` (enforce CI)
+    - Acceptance: A branch ruleset (or classic branch protection rule) exists for `main` requiring status checks to pass; the required check is the CI workflow job (e.g., `CI / test`). Optional: require PR review and up-to-date branches.
+    - How-to (Rulesets UI - preferred): Settings → Rules → Rulesets → New ruleset → Type: Branch → Targets: Include `main` → Add rule “Require status checks to pass” and select the CI check (appears as `CI / test` after one PR run). Optionally add “Require a pull request before merging” and “Require branches to be up to date”. Save and enable.
+    - How-to (Classic UI): Settings → Branches → Add rule → Branch pattern `main` → enable “Require status checks to pass” and select `CI / test`. Optionally require PR reviews and up-to-date branches. Save.
+    - Tip: Push/raise a PR first so the exact status check name appears in the picker.
+    - API alternative (admin token):
+
+      ```sh
+      curl -X PUT -H "Authorization: token <PAT>" -H "Accept: application/vnd.github+json" \
+        https://api.github.com/repos/<owner>/<repo>/branches/main/protection \
+        -d '{
+          "required_status_checks": { "strict": true, "contexts": ["CI / test"] },
+          "enforce_admins": true,
+          "required_pull_request_reviews": { "required_approving_review_count": 1 },
+          "restrictions": null
+        }'
+      ```
+
+    - Gates: N/A.
     - Est: 0.5h
 
 ## Notes
