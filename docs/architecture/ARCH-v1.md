@@ -62,6 +62,23 @@ State lives in App. Domain is stateless. Data is static JSON read at startup.
 - Testability: Unit tests in domain cover formulas and edge cases; light UI smoke tests.
 - Accessibility: Bars have ARIA roles and text equivalents.
 
+## Build & Release (CI/CD)
+
+- CI (Validation): GitHub Actions workflow `ci.yml` runs on pull requests and pushes to `main`.
+  - Environment: Node 20.x.
+  - Steps: checkout, setup-node with npm cache, `npm ci`, `npm run typecheck`, `npm test`.
+  - Boundaries: purely dev tooling; no runtime deps added.
+
+- CD (Deployment to Pages): GitHub Actions workflow `deploy-pages.yml` runs on pushes to `main`.
+  - Steps: checkout, setup-node, `npm ci`, `npm run build`, `actions/upload-pages-artifact` (from `dist/`), `actions/deploy-pages` to the `github-pages` environment.
+  - Permissions: `pages: write`, `id-token: write`.
+  - Concurrency: group by workflow to serialize deployments.
+  - Vite base path: Configure Vite `base` for GitHub Pages project pages (`'/${repo}/'`) or keep `'/'` if using a user/organization site; document choice in README.
+
+- Repository settings:
+  - Pages: Source = GitHub Actions; Environment = `github-pages`.
+  - Branch protection (recommended): require CI checks on `main`.
+
 ## Tech Choices (see ADR‑0001, ADR‑0003)
 
 - Vue 3 + Vite + TypeScript + Pinia for a simple SPA.

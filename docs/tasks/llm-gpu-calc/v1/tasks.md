@@ -139,6 +139,28 @@
   - [x] X.3 Keep test runtime within agreed budget
     - Vitest suite runs quickly locally (<1s on Node 20); no slow tests.
 
+- [ ] 6.0 CI/CD & Hosting (GitHub Pages)
+  - [ ] 6.1 CI: Add `ci.yml` for PRs and `main`
+    - Acceptance: Workflow runs on PRs and pushes to `main` and executes `npm ci`, `npm run typecheck`, and `npm test` on Node 20 with npm cache.
+    - Gates: Tests must pass; Boundaries unaffected; no runtime deps added.
+    - Traceability: PRD Acceptance (CI/CD), ARCH Build & Release.
+    - Est: 0.5–1h
+  - [ ] 6.2 CD: Add `deploy-pages.yml` to build and publish to GitHub Pages on `main`
+    - Acceptance: On push to `main`, workflow builds the app and deploys `dist/` to Pages using `actions/upload-pages-artifact` and `actions/deploy-pages`; site is reachable at the Pages URL.
+    - Gates: Boundaries unaffected; no runtime deps added; Pages permissions configured (`pages: write`, `id-token: write`).
+    - Traceability: PRD Acceptance (CI/CD), ARCH Build & Release.
+    - Est: 0.5–1h
+  - [ ] 6.3 Vite base path for Pages
+    - Acceptance: `vite.config.ts` sets `base` appropriately for project pages (e.g., `base: '/<repo>/'`) or conditionally via env (e.g., `GITHUB_PAGES`), documented in README.
+    - Gates: Boundaries; no runtime deps.
+    - Traceability: ARCH Build & Release.
+    - Est: 0.5h
+  - [ ] 6.4 Repo settings & docs
+    - Acceptance: Pages enabled (Source: GitHub Actions), environment `github-pages` created; README updated with deployment URL and local build instructions.
+    - Gates: N/A.
+    - Traceability: PRD Acceptance (CI/CD).
+    - Est: 0.5h
+
 ## Notes
 
 - Traceability: See PRD `docs/prd/llm-gpu-calc/v1/prd.md` and ARCH `docs/architecture/ARCH-v1.md`.
