@@ -212,7 +212,7 @@ export function buildPerGpuFitStatus(state: AppState): Array<{
 export function computeDeploymentSuggestions(state: AppState, deploymentId: string): { maxModelLen: number; maxNumSeqs: number } {
   const d = state.deployments.find(x => x.id === deploymentId);
   if (!d) return { maxModelLen: 0, maxNumSeqs: 0 };
-  const modelsById = Object.fromEntries(state.models.map(m => [m.id, m] as const)) as Record<string, Model>;
+  const modelsById: Record<string, Model | undefined> = Object.fromEntries(state.models.map(m => [m.id, m] as const));
   const model = modelsById[d.modelId];
   if (!model || d.assignedGpuIds.length === 0) return { maxModelLen: 0, maxNumSeqs: 0 };
 
