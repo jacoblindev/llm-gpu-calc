@@ -1,0 +1,102 @@
+[
+  {
+    "id": "meta-llama/Llama-3.1-8B-Instruct",
+    "name": "Llama 3.1 8B Instruct",
+    "paramsB": 8,
+    "layers": 32,
+    "hiddenSize": 4096,
+    "heads": 32,
+    "numKeyValueHeads": 8,
+    "defaultWeightDtype": "bf16",
+    "defaultKvDtype": "fp16"
+  },
+  {
+    "id": "google/gemma-3-27b-it",
+    "name": "Gemma 3 27B Instruct",
+    "paramsB": 27,
+    "layers": 48,
+    "hiddenSize": 6144,
+    "heads": 48,
+    "numKeyValueHeads": 12,
+    "defaultWeightDtype": "bf16",
+    "defaultKvDtype": "fp16"
+  },
+  {
+    "id": "microsoft/phi-4",
+    "name": "Phi-4",
+    "paramsB": 14,
+    "layers": 40,
+    "hiddenSize": 5120,
+    "heads": 40,
+    "numKeyValueHeads": 10,
+    "defaultWeightDtype": "bf16",
+    "defaultKvDtype": "fp16"
+  },
+  {
+    "id": "BAAI/bge-m3",
+    "name": "BAAI bge-m3",
+    "paramsB": 3,
+    "layers": 24,
+    "hiddenSize": 3072,
+    "heads": 24,
+    "numKeyValueHeads": 6,
+    "defaultWeightDtype": "bf16",
+    "defaultKvDtype": "fp16"
+  },
+  {
+    "id": "BAAI/bge-reranker-v2-m3",
+    "name": "BAAI bge-reranker-v2-m3",
+    "paramsB": 0.5,
+    "layers": 12,
+    "hiddenSize": 768,
+    "heads": 12,
+    "numKeyValueHeads": 4,
+    "defaultWeightDtype": "bf16",
+    "defaultKvDtype": "fp16"
+  },
+  {
+    "id": "mistralai/Mistral-Small-3.2-24B-Instruct-2506",
+    "name": "Mistral Small 3.2 24B Instruct (2506)",
+    "paramsB": 24,
+    "layers": 40,
+    "hiddenSize": 6144,
+    "heads": 48,
+    "numKeyValueHeads": 12,
+    "defaultWeightDtype": "bf16",
+    "defaultKvDtype": "fp16"
+  },
+  {
+    "id": "openai/gpt-oss-20b",
+    "name": "OpenAI GPT-OSS 20B",
+    "paramsB": 20,
+    "layers": 44,
+    "hiddenSize": 6144,
+    "heads": 48,
+    "numKeyValueHeads": 12,
+    "defaultWeightDtype": "bf16",
+    "defaultKvDtype": "fp16"
+  },
+  {
+    "id": "openai/gpt-oss-120b",
+    "name": "OpenAI GPT-OSS 120B",
+    "paramsB": 120,
+    "layers": 80,
+    "hiddenSize": 8192,
+    "heads": 64,
+    "numKeyValueHeads": 8,
+    "defaultWeightDtype": "bf16",
+    "defaultKvDtype": "fp16"
+  },
+  {
+    "id": "Qwen/Qwen2.5-7B-Instruct",
+    "name": "Qwen2.5 7B Instruct",
+    "paramsB": 7,
+    "layers": 32,
+    "hiddenSize": 4096,
+    "heads": 32,
+    "numKeyValueHeads": 8,
+    "defaultWeightDtype": "bf16",
+    "defaultKvDtype": "fp16"
+  }
+]
+

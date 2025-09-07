@@ -1,0 +1,24 @@
+@import './tokens.css';
+@import "tailwindcss";
+
+@layer base {
+  html, body, #app-root {
+    height: 100%;
+  }
+  body {
+    background-color: var(--color-bg);
+    color: var(--color-text);
+  }
+}
+
+/* Provide semantic color utilities backed by CSS variables.
+   This ensures buttons like bg-primary are visible even if Tailwind
+   doesn't generate custom color classes in this environment. */
+@layer utilities {
+  .bg-bg { background-color: var(--color-bg); }
+  .bg-surface { background-color: var(--color-surface); }
+  .text-text { color: var(--color-text); }
+  .text-muted { color: var(--color-muted); }
+  .bg-primary { background-color: var(--color-primary); }
+  .text-primary { color: var(--color-primary); }
+}
