@@ -209,53 +209,181 @@ export function buildPerGpuFitStatus(state: AppState): Array<{
   });
 }
 
-export function computeDeploymentSuggestions(state: AppState, deploymentId: string): { maxModelLen: number; maxNumSeqs: number } {
-  const d = state.deployments.find(x => x.id === deploymentId);
-  if (!d) return { maxModelLen: 0, maxNumSeqs: 0 };
-  const modelsById: Record<string, Model | undefined> = Object.fromEntries(state.models.map(m => [m.id, m] as const));
-  const model = modelsById[d.modelId];
-  if (!model || d.assignedGpuIds.length === 0) return { maxModelLen: 0, maxNumSeqs: 0 };
-
-  // Precompute weights for all deployments per GPU for budget subtraction
-  const tp = Math.max(1, d.assignedGpuIds.length);
-  const util = utilizationByGpu(state);
-  const perTok = kvBytesPerTokenPerGpu(model.layers, model.hiddenSize, model.heads, model.numKeyValueHeads, d.kvDtype, tp, d.kvOverheadPct);
-  const weightsD = weightBytesPerGpu(model.paramsB, d.weightDtype, tp, d.replicationOverheadPct);
-
-  const SAFETY = 0.98; // leave headroom so fitChecks doesn't flag zero-free as over
-  let bestLen = Infinity;
-  let bestSeq = Infinity;
-  for (const gid of d.assignedGpuIds) {
-    const gpu = state.gpus.find(g => g.id === gid);
-    if (!gpu) continue;
-    const capacity = gpu.vramBytes;
-    const sumU = util.get(gid) || 0;
-    const reserveBytes = Math.max(0, 1 - sumU) * capacity;
-    const budgetBytes = Math.max(0, capacity - reserveBytes);
-    // Sum usage of OTHER deployments on this GPU (weights + KV), exclude current deployment d
-    let usedByOthers = 0;
-    for (const other of state.deployments) {
-      if (!other.assignedGpuIds.includes(gid) || other.id === d.id) continue;
-      const omodel = modelsById[other.modelId];
-      if (!omodel) continue;
-      const otp = Math.max(1, other.assignedGpuIds.length);
-      const oWeights = weightBytesPerGpu(omodel.paramsB, other.weightDtype, otp, other.replicationOverheadPct);
-      const oPerTok = kvBytesPerTokenPerGpu(omodel.layers, omodel.hiddenSize, omodel.heads, omodel.numKeyValueHeads, other.kvDtype, otp, other.kvOverheadPct);
-      const oTokens = other.maxModelLen * other.maxNumSeqs;
-      const oKv = kvTotalBytesPerGpu(oTokens, oPerTok);
-      usedByOthers += oWeights + oKv;
-    }
-    // Available for d's KV = budget - others' usage - d's weights
-    const kvBudget = Math.max(0, budgetBytes - usedByOthers - weightsD);
-    const safeKvBudget = kvBudget * SAFETY;
-    const len = suggestMaxModelLen(safeKvBudget, perTok, d.maxNumSeqs);
-    const seq = suggestMaxNumSeq(safeKvBudget, perTok, d.maxModelLen);
-    if (Number.isFinite(len)) bestLen = Math.min(bestLen, len);
-    if (Number.isFinite(seq)) bestSeq = Math.min(bestSeq, seq);
+// Helper function to validate deployment and model for suggestions
+function validateDeploymentForSuggestions(
+  deployment: Deployment | undefined,
+  model: Model | undefined
+): { isValid: boolean; deployment: Deployment; model: Model } | { isValid: false } {
+  if (!deployment || !model || deployment.assignedGpuIds.length === 0) {
+    return { isValid: false };
   }
-  if (!Number.isFinite(bestLen)) bestLen = 0;
-  if (!Number.isFinite(bestSeq)) bestSeq = 0;
-  return { maxModelLen: Math.max(0, Math.floor(bestLen)), maxNumSeqs: Math.max(0, Math.floor(bestSeq)) };
+  return { isValid: true, deployment, model };
+}
+
+// Helper function to calculate memory usage by other deployments on a specific GPU
+function calculateOtherDeploymentsUsage(
+  gpuId: string,
+  currentDeploymentId: string,
+  deployments: Deployment[],
+  modelsById: Record<string, Model | undefined>
+): number {
+  let usedByOthers = 0;
+  
+  for (const other of deployments) {
+    if (!other.assignedGpuIds.includes(gpuId) || other.id === currentDeploymentId) {
+      continue;
+    }
+    
+    const otherModel = modelsById[other.modelId];
+    if (!otherModel) continue;
+    
+    const otherTp = Math.max(1, other.assignedGpuIds.length);
+    const otherWeights = weightBytesPerGpu(
+      otherModel.paramsB,
+      other.weightDtype,
+      otherTp,
+      other.replicationOverheadPct
+    );
+    const otherPerTok = kvBytesPerTokenPerGpu(
+      otherModel.layers,
+      otherModel.hiddenSize,
+      otherModel.heads,
+      otherModel.numKeyValueHeads,
+      other.kvDtype,
+      otherTp,
+      other.kvOverheadPct
+    );
+    const otherTokens = other.maxModelLen * other.maxNumSeqs;
+    const otherKv = kvTotalBytesPerGpu(otherTokens, otherPerTok);
+    
+    usedByOthers += otherWeights + otherKv;
+  }
+  
+  return usedByOthers;
+}
+
+// Helper function to calculate available KV budget for a deployment on a specific GPU
+function calculateKvBudgetForGpu(
+  gpu: Gpu,
+  deployment: Deployment,
+  deploymentWeights: number,
+  utilizationMap: Map<string, number>,
+  deployments: Deployment[],
+  modelsById: Record<string, Model | undefined>,
+  safetyFactor: number = 0.98
+): number {
+  const capacity = gpu.vramBytes;
+  const sumUtilization = utilizationMap.get(gpu.id) || 0;
+  const reserveBytes = Math.max(0, 1 - sumUtilization) * capacity;
+  const budgetBytes = Math.max(0, capacity - reserveBytes);
+  
+  const usedByOthers = calculateOtherDeploymentsUsage(
+    gpu.id,
+    deployment.id,
+    deployments,
+    modelsById
+  );
+  
+  const kvBudget = Math.max(0, budgetBytes - usedByOthers - deploymentWeights);
+  return kvBudget * safetyFactor;
+}
+
+// Helper function to compute suggestions for a single GPU
+function computeSuggestionsForGpu(
+  gpu: Gpu,
+  deployment: Deployment,
+  model: Model,
+  deploymentWeights: number,
+  perTokenBytes: number,
+  utilizationMap: Map<string, number>,
+  deployments: Deployment[],
+  modelsById: Record<string, Model | undefined>
+): { maxModelLen: number; maxNumSeqs: number } {
+  const kvBudget = calculateKvBudgetForGpu(
+    gpu,
+    deployment,
+    deploymentWeights,
+    utilizationMap,
+    deployments,
+    modelsById
+  );
+  
+  const suggestedLen = suggestMaxModelLen(kvBudget, perTokenBytes, deployment.maxNumSeqs);
+  const suggestedSeqs = suggestMaxNumSeq(kvBudget, perTokenBytes, deployment.maxModelLen);
+  
+  return {
+    maxModelLen: Number.isFinite(suggestedLen) ? suggestedLen : 0,
+    maxNumSeqs: Number.isFinite(suggestedSeqs) ? suggestedSeqs : 0
+  };
+}
+
+export function computeDeploymentSuggestions(
+  state: AppState,
+  deploymentId: string
+): { maxModelLen: number; maxNumSeqs: number } {
+  const deployment = state.deployments.find(x => x.id === deploymentId);
+  const modelsById: Record<string, Model | undefined> = Object.fromEntries(
+    state.models.map(m => [m.id, m] as const)
+  );
+  const model = modelsById[deployment?.modelId ?? ''];
+  
+  const validation = validateDeploymentForSuggestions(deployment, model);
+  if (!validation.isValid) {
+    return { maxModelLen: 0, maxNumSeqs: 0 };
+  }
+  
+  const { deployment: validDeployment, model: validModel } = validation;
+  const tp = Math.max(1, validDeployment.assignedGpuIds.length);
+  const utilizationMap = utilizationByGpu(state);
+  
+  // Pre-calculate deployment-specific values
+  const deploymentWeights = weightBytesPerGpu(
+    validModel.paramsB,
+    validDeployment.weightDtype,
+    tp,
+    validDeployment.replicationOverheadPct
+  );
+  const perTokenBytes = kvBytesPerTokenPerGpu(
+    validModel.layers,
+    validModel.hiddenSize,
+    validModel.heads,
+    validModel.numKeyValueHeads,
+    validDeployment.kvDtype,
+    tp,
+    validDeployment.kvOverheadPct
+  );
+  
+  // Find the most constraining GPU (minimum suggestions across all assigned GPUs)
+  let bestLen = Infinity;
+  let bestSeqs = Infinity;
+  
+  for (const gpuId of validDeployment.assignedGpuIds) {
+    const gpu = state.gpus.find(g => g.id === gpuId);
+    if (!gpu) continue;
+    
+    const suggestions = computeSuggestionsForGpu(
+      gpu,
+      validDeployment,
+      validModel,
+      deploymentWeights,
+      perTokenBytes,
+      utilizationMap,
+      state.deployments,
+      modelsById
+    );
+    
+    if (suggestions.maxModelLen > 0) {
+      bestLen = Math.min(bestLen, suggestions.maxModelLen);
+    }
+    if (suggestions.maxNumSeqs > 0) {
+      bestSeqs = Math.min(bestSeqs, suggestions.maxNumSeqs);
+    }
+  }
+  
+  return {
+    maxModelLen: Math.max(0, Math.floor(Number.isFinite(bestLen) ? bestLen : 0)),
+    maxNumSeqs: Math.max(0, Math.floor(Number.isFinite(bestSeqs) ? bestSeqs : 0))
+  };
 }
 
 export function applySuggestedMaxModelLen(state: AppState, deploymentId: string): void {
