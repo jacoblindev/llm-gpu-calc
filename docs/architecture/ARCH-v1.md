@@ -10,7 +10,7 @@ Primary drivers: simple, fast, and predictable per-GPU vRAM estimation for vLLM 
 - data/: Read-only catalogs for GPUs and models. Imports shared/ only.
 - shared/: Types, constants, and units utilities. No external deps.
 
-Allowed imports: UI→App; App→Domain|Data|Shared; Domain→Shared; Data→Shared. No back‑edges.
+Allowed imports: UI→App|Shared; App→Domain|Data|Shared; Domain→Shared; Data→Shared. No back‑edges.
 
 ## Key Contracts
 

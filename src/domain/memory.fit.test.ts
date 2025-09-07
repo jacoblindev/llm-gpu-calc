@@ -1,4 +1,7 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, afterEach, vi } from 'vitest';
+afterEach(() => {
+  vi.unstubAllGlobals();
+});
 import { fitChecks } from '@domain/memory';
 
 function mkMap(entries: Array<[string, { used: number; free: number; parts: Array<{deploymentId: string; weights: number; kv: number}> }]> ) {
@@ -37,4 +40,3 @@ describe('fitChecks', () => {
     expect(res[0].reason).toMatch(/Minimal KV/);
   });
 });
-

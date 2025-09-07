@@ -119,22 +119,25 @@
     - Traceability: PRD UI Styles; ARCH Shared utils.
     - Est: 1–2h
 
-- [ ] 5.0 Results & Recommendations
-  - [ ] 5.1 Fit/over-capacity status per GPU with reasons
+- [x] 5.0 Results & Recommendations
+  - [x] 5.1 Fit/over-capacity status per GPU with reasons
     - Acceptance: GPU cards show OK/Over with reasons (weights over budget, minimal KV unmet, etc.); state is testable.
     - Gates: Boundaries; Tests (unit or component-level where feasible).
     - Traceability: PRD Acceptance Criteria (Warnings/Errors).
     - Est: 1–2h
-  - [ ] 5.2 Suggestions per deployment (`--max-model-len` / `--max-num-seqs`)
+  - [x] 5.2 Suggestions per deployment (`--max-model-len` / `--max-num-seqs`)
     - Acceptance: Per-deployment suggestion chips display computed values; “Apply” updates inputs; formatting matches unit toggle.
     - Gates: Boundaries.
     - Traceability: PRD Recommendations.
     - Est: 1–2h
 
-- [ ] X.0 Align & prune tests
-  - [ ] X.1 Retire tests mismatching updated requirements (same PR)
-  - [ ] X.2 Add/adjust tests for new public behavior only
-  - [ ] X.3 Keep test runtime within agreed budget
+- [x] X.0 Align & prune tests
+  - [x] X.1 Retire tests mismatching updated requirements (same PR)
+    - None found to retire; existing domain/data tests align with current behavior.
+  - [x] X.2 Add/adjust tests for new public behavior only
+    - Added `src/app/controller.test.ts` covering utilization/reserve, suggestions, bars/fit, validation, GPU selection, unit persistence, and labels.
+  - [x] X.3 Keep test runtime within agreed budget
+    - Vitest suite runs quickly locally (<1s on Node 20); no slow tests.
 
 ## Notes
 
