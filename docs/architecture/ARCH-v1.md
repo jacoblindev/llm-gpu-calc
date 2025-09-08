@@ -84,6 +84,11 @@ State lives in App. Domain is stateless. Data is static JSON read at startup.
 - App version: SemVer `MAJOR.MINOR.PATCH`.
 - Source of truth: `package.json#version`; bump with `npm version {patch|minor|major}`.
 - Tags: Create Git tag `vX.Y.Z` for each release; use tags for traceability. Pages continues to deploy on `main`.
+- Branching: Trunk‑based on `main` with short‑lived feature branches merged via PR. A `develop` branch is optional; if it exists, merge `main` back into `develop` after releases to keep versions aligned.
+- Manual UI flow (supported):
+  - Bump `package.json#version` via a PR in the GitHub UI → merge to `main` (CI validates).
+  - Draft a Release in the GitHub UI and create tag `vX.Y.Z` targeting the merge commit on `main`.
+  - Pages deploy runs automatically on `main`.
 - Stamping (optional): Expose `VITE_APP_VERSION` and `VITE_APP_COMMIT` via Vite/env and display in a small footer/About. No backend.
 - Catalog changes: Data additions/edits are PATCH; schema additions MINOR; breaking schema changes MAJOR.
 - See ADR-0006 for details.

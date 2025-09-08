@@ -168,25 +168,9 @@
     - Gates: N/A.
     - Est: 0.5h
 
-- [ ] 7.0 Versioning & Releases
-  - [ ] 7.1 SemVer source of truth (`package.json`) and tags
-    - Acceptance: `package.json#version` is the authoritative version; README includes a short release flow (`npm version patch|minor|major && git push --follow-tags`); at least one annotated tag `vX.Y.Z` exists for a release.
-    - Gates: Boundaries unaffected; no new runtime deps; docs updated in the same PR.
-    - Traceability: ADR-0006 Versioning and Releases; ARCH-v1 “Versioning (v1)”.
-    - Est: 0.5h
-  - [ ] 7.2 Optional: Build stamping via env (`VITE_APP_VERSION`, `VITE_APP_COMMIT`)
-    - Acceptance: `deploy-pages.yml` sets `VITE_APP_VERSION` (defaults to `npm_package_version`) and `VITE_APP_COMMIT` (`github.sha`); `import.meta.env.VITE_APP_*` values are accessible at runtime.
-    - Gates: Boundaries; no runtime deps; CI diff is minimal.
-    - Traceability: ADR-0006 (Stamping), ARCH-v1 “Versioning (v1)”.
-    - Est: 0.5h
-  - [ ] 7.3 Optional: UI footer/About shows version and short SHA
-    - Acceptance: A small footer or About dialog displays app version (e.g., `1.0.0`) and short commit (e.g., `abcdef1`); feature is non-intrusive and disabled if envs are missing.
-    - Gates: Tests (light UI smoke), Boundaries; no new runtime deps.
-    - Traceability: ADR-0006 (Stamping/UI visibility).
-    - Est: 0.5–1h
-
 ## Notes
 
 - Traceability: See PRD `docs/prd/llm-gpu-calc/v1/prd.md` and ARCH `docs/architecture/ARCH-v1.md`.
+- Versioning & Releases: Managed manually via GitHub UI; see `README.md` (Versioning & Releases) and `docs/adr/ADR-0006-versioning-and-releases.md` for details.
 - Gates: Each sub-task observes Tests, Boundaries, and Dependency rules per `/rules/process-task-list.md`.
 - Estimates: Each sub-task targets 1–4h to complete.

@@ -17,6 +17,7 @@ This project is a simple SPA (Vue + Vite) deployed to GitHub Pages with no backe
 - Git tags: Tag releases as `vX.Y.Z` (created by `npm version` or manually). Tags provide traceability; GitHub Releases are optional.
 - Deployments: Keep Pages deployments on every push to `main` (current workflow). Tags are for traceability, not gating deploys in v1.
 - Pre‑releases: If needed, use `-rc.N` (e.g., `1.2.0-rc.1`). Pages continues to deploy `main`; no separate channels.
+- Branching: Trunk‑based on `main`. Use short‑lived feature branches via PRs into `main`. A long‑lived `develop` branch is not required; if present, synchronize it by merging `main` back after a release to avoid version drift.
 - Stamping (optional, simple): Expose build info in the UI using Vite envs:
   - `VITE_APP_VERSION = npm_package_version`
   - `VITE_APP_COMMIT = $GITHUB_SHA` (first 7 chars shown)
@@ -40,6 +41,21 @@ This project is a simple SPA (Vue + Vite) deployed to GitHub Pages with no backe
   npm version patch
   git push --follow-tags
   ```
+
+- Manual flow via GitHub UI (no local CLI required):
+
+  1) Bump version in `package.json` via PR to `main`:
+     - Navigate to `package.json` → Edit (pencil) → update the `version`.
+     - Propose changes to a new branch and open a PR targeting `main`.
+     - Let CI pass (typecheck/tests) and merge the PR into `main`.
+  2) Create an annotated tag and (optional) Release:
+     - Go to GitHub → Releases → “Draft a new release”.
+     - Choose a tag → “Create new tag” `vX.Y.Z`; target the merge commit on `main`.
+     - Publish. (This creates the tag; Release notes are optional in v1.)
+  3) Deployment:
+     - Pages deployment runs automatically on push to `main` and will already have built the merged commit.
+  4) If using a `develop` branch (optional):
+     - Open a PR from `main` → `develop` and merge to keep branches in sync.
 
 - Optional stamping in CI (deploy workflow):
 
