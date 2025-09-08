@@ -79,6 +79,15 @@ State lives in App. Domain is stateless. Data is static JSON read at startup.
   - Pages: Source = GitHub Actions; Environment = `github-pages`.
   - Branch protection (recommended): require CI checks on `main`.
 
+### Versioning (v1)
+
+- App version: SemVer `MAJOR.MINOR.PATCH`.
+- Source of truth: `package.json#version`; bump with `npm version {patch|minor|major}`.
+- Tags: Create Git tag `vX.Y.Z` for each release; use tags for traceability. Pages continues to deploy on `main`.
+- Stamping (optional): Expose `VITE_APP_VERSION` and `VITE_APP_COMMIT` via Vite/env and display in a small footer/About. No backend.
+- Catalog changes: Data additions/edits are PATCH; schema additions MINOR; breaking schema changes MAJOR.
+- See ADR-0006 for details.
+
 ## Tech Choices (see ADR‑0001, ADR‑0003)
 
 - Vue 3 + Vite + TypeScript + Pinia for a simple SPA.
