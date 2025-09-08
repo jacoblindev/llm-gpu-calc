@@ -46,3 +46,32 @@ Vite base path for Pages:
 Deployment URL:
 
 - For project pages: `https://jacoblindev.github.io/llm-gpu-calc/`
+
+## Versioning & Releases (v1)
+
+- Policy: SemVer app version in `package.json`; tags `vX.Y.Z`; Pages deploys on every push to `main`.
+- Branching: Trunk‑based on `main` with short‑lived feature branches via PR. `develop` is optional; if used, merge `main` → `develop` after releases.
+
+GitHub UI flow (no local CLI required):
+
+1) Bump the version
+   - Open `package.json` in the web UI → Edit `version` → propose changes to a new branch → open PR to `main`.
+   - Wait for CI to pass, then merge into `main`.
+
+2) Tag the release
+   - Go to Releases → “Draft a new release”.
+   - Choose a tag → “Create new tag” (e.g., `v1.0.1`) targeting the merge commit on `main` → Publish.
+
+3) Deploy
+   - Pages deployment runs automatically on `main`; no extra steps.
+
+4) Optional: keep `develop` in sync
+   - Open a PR `main` → `develop` and merge.
+
+CLI alternative (equivalent):
+
+```sh
+# from a clean main
+npm version patch   # or minor|major
+git push --follow-tags
+```

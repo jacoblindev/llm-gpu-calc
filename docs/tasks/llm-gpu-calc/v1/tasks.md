@@ -171,5 +171,6 @@
 ## Notes
 
 - Traceability: See PRD `docs/prd/llm-gpu-calc/v1/prd.md` and ARCH `docs/architecture/ARCH-v1.md`.
+- Versioning & Releases: Managed manually via GitHub UI; see `README.md` (Versioning & Releases) and `docs/adr/ADR-0006-versioning-and-releases.md` for details.
 - Gates: Each sub-task observes Tests, Boundaries, and Dependency rules per `/rules/process-task-list.md`.
 - Estimates: Each sub-task targets 1–4h to complete.
