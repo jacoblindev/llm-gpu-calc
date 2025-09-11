@@ -29,7 +29,7 @@ Repo assessment (concise)
     - Traceability: PRD Dependency Policy; ADR‑0004; ADR‑0007.
     - Est: 0.5h
 
-- [ ] 1.0 Results Preview (bars) in guided flow
+- [x] 1.0 Results Preview (bars) in guided flow
   - [x] 1.1 Reuse `app/controller.buildPerGpuBars` in a compact Preview panel; share segment labeling with Results
     - Acceptance: Preview renders per‑GPU bars after selection; composition matches Results.
     - Gates: Boundaries; no duplicated domain logic in UI.
@@ -40,12 +40,12 @@ Repo assessment (concise)
     - Gates: Accessibility (WCAG AA); Tests (smoke for nav/labels).
     - Traceability: PRD Acceptance (Visualization, Accessibility).
     - Est: 1–2h
-  - [ ] 1.3 Performance: keep updates <16 ms; avoid layout thrash (transform/opacity only)
+  - [x] 1.3 Performance: keep updates <16 ms; avoid layout thrash (transform/opacity only)
     - Acceptance: Manual test shows smooth updates; no forced synchronous reflow hotspots.
     - Gates: Manual perf check.
     - Traceability: PRD Goals; ARCH‑v2 Non‑Functionals.
     - Est: 1h
-  - [ ] 1.4 Responsive readability on small screens; collapse non‑critical controls
+  - [x] 1.4 Responsive readability on small screens; collapse non‑critical controls
     - Acceptance: Bars remain legible at narrow widths; controls wrap or collapse without overlap.
     - Gates: Visual check.
     - Traceability: PRD UX Notes.
