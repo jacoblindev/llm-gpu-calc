@@ -30,12 +30,12 @@ Repo assessment (concise)
     - Est: 0.5h
 
 - [ ] 1.0 Results Preview (bars) in guided flow
-  - [ ] 1.1 Reuse `app/controller.buildPerGpuBars` in a compact Preview panel; share segment labeling with Results
+  - [x] 1.1 Reuse `app/controller.buildPerGpuBars` in a compact Preview panel; share segment labeling with Results
     - Acceptance: Preview renders per‑GPU bars after selection; composition matches Results.
     - Gates: Boundaries; no duplicated domain logic in UI.
     - Traceability: ARCH‑v2 App/controller; PRD Visualization.
     - Est: 1–2h
-  - [ ] 1.2 Labels only for segments ≥10% width; tooltip/ARIA for smaller segments; keyboard Left/Right across segments
+  - [x] 1.2 Labels only for segments ≥10% width; tooltip/ARIA for smaller segments; keyboard Left/Right across segments
     - Acceptance: Inline labels threshold works; tooltips show model/kind/size/%; keyboard nav traverses segments.
     - Gates: Accessibility (WCAG AA); Tests (smoke for nav/labels).
     - Traceability: PRD Acceptance (Visualization, Accessibility).

@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { createInitialState, type AppState } from '@app/state'
-import { shouldShowPreview, setGpuCount } from '@app/controller'
+import { shouldShowPreview, setGpuCount, buildPerGpuBars } from '@app/controller'
 
 function GiB(n: number): number { return n * 1024 ** 3 }
 
@@ -23,5 +23,20 @@ describe('app: preview visibility', () => {
     setGpuCount(state, 'rtx', 0)
     expect(state.gpus.length).toBe(0)
     expect(shouldShowPreview(state)).toBe(false)
+  })
+
+  it('bars reflect selected GPUs count', () => {
+    const state: AppState = createInitialState()
+    state.gpuCatalog = [
+      { id: 'a', name: 'A', vramBytes: GiB(48) },
+      { id: 'b', name: 'B', vramBytes: GiB(24) },
+    ]
+    // No GPUs → no bars
+    expect(buildPerGpuBars(state).length).toBe(0)
+    // Select A:2, B:1 → three GPU instances → three bars
+    setGpuCount(state, 'a', 2)
+    setGpuCount(state, 'b', 1)
+    const bars = buildPerGpuBars(state)
+    expect(bars.length).toBe(3)
   })
 })
