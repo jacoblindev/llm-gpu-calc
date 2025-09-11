@@ -44,11 +44,33 @@
         </div>
         <div>
           <label class="block text-sm text-muted">max_model_len</label>
-          <input class="mt-1 w-full px-2 py-1 bg-bg border border-muted/30 rounded" type="number" min="0" step="128" :value="d.maxModelLen" @input="onMaxModelLen(d, $event)" />
+          <div class="mt-1 flex items-stretch gap-1">
+            <button class="px-2 py-1 rounded bg-surface border border-muted/30" @click="decLen(d)">-</button>
+            <input
+              class="w-full px-2 py-1 bg-bg border border-muted/30 rounded"
+              type="number" min="0" step="128"
+              :value="d.maxModelLen"
+              @input="onMaxModelLen(d, $event)"
+              @blur="onMaxModelLenBlur(d, $event)"
+              @keydown="onLenKey(d, $event)"
+            />
+            <button class="px-2 py-1 rounded bg-surface border border-muted/30" @click="incLen(d)">+</button>
+          </div>
         </div>
         <div>
           <label class="block text-sm text-muted">max_num_seqs</label>
-          <input class="mt-1 w-full px-2 py-1 bg-bg border border-muted/30 rounded" type="number" min="1" step="1" :value="d.maxNumSeqs" @input="onMaxNumSeqs(d, $event)" />
+          <div class="mt-1 flex items-stretch gap-1">
+            <button class="px-2 py-1 rounded bg-surface border border-muted/30" @click="decSeq(d)">-</button>
+            <input
+              class="w-full px-2 py-1 bg-bg border border-muted/30 rounded"
+              type="number" min="1" step="1"
+              :value="d.maxNumSeqs"
+              @input="onMaxNumSeqs(d, $event)"
+              @blur="onMaxNumSeqsBlur(d, $event)"
+              @keydown="onSeqKey(d, $event)"
+            />
+            <button class="px-2 py-1 rounded bg-surface border border-muted/30" @click="incSeq(d)">+</button>
+          </div>
         </div>
       </div>
       <div class="mt-2 text-xs sm:text-sm flex flex-wrap items-center gap-2">
@@ -74,6 +96,7 @@
 import type { AppState } from '@app/state'
 import { validateDeployment, computeDeploymentSuggestions, computeDeploymentSuggestionsRaw } from '@app/controller'
 import type { DType, KvDType } from '@shared/types'
+import { normalizeMaxModelLenInput, normalizeMaxNumSeqsInput, stepMaxModelLen, stepMaxNumSeqs, adjustByKey } from '@shared/controls'
 
 const props = defineProps<{ state: AppState }>()
 
@@ -87,10 +110,28 @@ function onKvDtype(d: AppState['deployments'][number], e: Event) {
   d.kvDtype = (e.target as HTMLSelectElement).value as KvDType
 }
 function onMaxModelLen(d: AppState['deployments'][number], e: Event) {
-  d.maxModelLen = Math.max(0, Number((e.target as HTMLInputElement).value) || 0)
+  d.maxModelLen = normalizeMaxModelLenInput(Number((e.target as HTMLInputElement).value))
 }
 function onMaxNumSeqs(d: AppState['deployments'][number], e: Event) {
-  d.maxNumSeqs = Math.max(1, Math.floor(Number((e.target as HTMLInputElement).value) || 1))
+  d.maxNumSeqs = normalizeMaxNumSeqsInput(Number((e.target as HTMLInputElement).value))
+}
+function onMaxModelLenBlur(d: AppState['deployments'][number], e: Event) {
+  d.maxModelLen = normalizeMaxModelLenInput(d.maxModelLen)
+}
+function onMaxNumSeqsBlur(d: AppState['deployments'][number], e: Event) {
+  d.maxNumSeqs = normalizeMaxNumSeqsInput(d.maxNumSeqs)
+}
+function incLen(d: AppState['deployments'][number]) { d.maxModelLen = stepMaxModelLen(d.maxModelLen, +1) }
+function decLen(d: AppState['deployments'][number]) { d.maxModelLen = stepMaxModelLen(d.maxModelLen, -1) }
+function incSeq(d: AppState['deployments'][number]) { d.maxNumSeqs = stepMaxNumSeqs(d.maxNumSeqs, +1) }
+function decSeq(d: AppState['deployments'][number]) { d.maxNumSeqs = stepMaxNumSeqs(d.maxNumSeqs, -1) }
+function onLenKey(d: AppState['deployments'][number], e: KeyboardEvent) {
+  const v = adjustByKey(d.maxModelLen, e.key, 128, 0)
+  if (v !== d.maxModelLen) { d.maxModelLen = v; e.preventDefault() }
+}
+function onSeqKey(d: AppState['deployments'][number], e: KeyboardEvent) {
+  const v = adjustByKey(d.maxNumSeqs, e.key, 1, 1)
+  if (v !== d.maxNumSeqs) { d.maxNumSeqs = v; e.preventDefault() }
 }
 function onPct<T extends 'kvOverheadPct'|'replicationOverheadPct'>(d: AppState['deployments'][number], key: T, e: Event) {
   const v = Math.max(0, Number((e.target as HTMLInputElement).value) || 0) / 100

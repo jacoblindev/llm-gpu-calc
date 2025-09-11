@@ -57,7 +57,7 @@ Repo assessment (concise)
     - Gates: Boundaries; Tests (deterministic suggestion rendering).
     - Traceability: PRD Recommendations; ARCH‑v2 Key Contracts.
     - Est: 1h
-  - [ ] 2.2 Controls: `max_num_seqs` step 1 (min 1); `max_model_len` step 128; allow direct numeric entry
+  - [x] 2.2 Controls: `max_num_seqs` step 1 (min 1); `max_model_len` step 128; allow direct numeric entry
     - Acceptance: Steppers and inputs enforce min/step; keyboard ArrowUp/Down works.
     - Gates: Accessibility; Tests (input/step behavior).
     - Traceability: PRD Detailed Behavior (Adjustable suggestions).
