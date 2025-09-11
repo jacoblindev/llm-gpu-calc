@@ -63,7 +63,7 @@ function segmentStyle(capacity: number, s: { bytes: number; kind: 'weights'|'kv'
   const leftPct = (start / total) * 100
   const widthPct = (s.bytes / total) * 100
   return {
-    transform: `translateX(${leftPct}%) scaleX(${widthPct / 100}) translateZ(0)`,
+    transform: `translateX(${leftPct}%) scaleX(${widthPct / 100})`,
     backgroundColor: colorFor(s.kind),
     willChange: 'transform',
   }
