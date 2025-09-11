@@ -204,7 +204,7 @@ export function computeResultsStub(state: AppState): Array<{
 /**
  * Constructs per-GPU bar segment data (weights, KV, reserve, free) for visualization.
  */
-export function buildPerGpuBars(state: AppState): Array<{
+export type PerGpuBar = {
   gpuId: string;
   gpuName: string;
   capacityBytes: number;
@@ -214,13 +214,15 @@ export function buildPerGpuBars(state: AppState): Array<{
     deploymentId?: string;
     modelName?: string;
   }>;
-}> {
+};
+
+export function buildPerGpuBars(state: AppState): PerGpuBar[] {
   const results = computeResultsStub(state);
   return results.map((r) => {
     const reserveBytes = Math.max(0, r.impliedReserveFrac * r.capacityBytes);
     const used = Math.max(0, r.usedBytes);
     const freeBytes = Math.max(0, r.capacityBytes - reserveBytes - used);
-    const segments: Array<{ kind: 'weights' | 'kv' | 'reserve' | 'free'; bytes: number; deploymentId?: string; modelName?: string }> = [];
+    const segments: PerGpuBar['segments'] = [];
     for (const p of r.parts) {
       if (p.weights > 0) segments.push({ kind: 'weights', bytes: p.weights, deploymentId: p.deploymentId, modelName: p.modelName });
       if (p.kv > 0) segments.push({ kind: 'kv', bytes: p.kv, deploymentId: p.deploymentId, modelName: p.modelName });
@@ -229,6 +231,35 @@ export function buildPerGpuBars(state: AppState): Array<{
     if (freeBytes > 0) segments.push({ kind: 'free', bytes: freeBytes });
     return { gpuId: r.gpuId, gpuName: r.gpuName, capacityBytes: r.capacityBytes, segments };
   });
+}
+
+export type DeploymentOverride = { id: string; maxModelLen?: number; maxNumSeqs?: number };
+
+/** Returns a shallow-cloned state whose deployments include overrides for preview. */
+export function cloneStateWithOverrides(state: AppState, overrides: DeploymentOverride[]): AppState {
+  const byId = new Map(overrides.map(o => [o.id, o] as const));
+  return {
+    ...state,
+    // reuse arrays that are read-only in compute paths
+    gpus: state.gpus.slice(),
+    gpuCatalog: state.gpuCatalog.slice(),
+    models: state.models.slice(),
+    deployments: state.deployments.map(d => {
+      const o = byId.get(d.id);
+      if (!o) return { ...d };
+      return {
+        ...d,
+        maxModelLen: o.maxModelLen != null ? o.maxModelLen : d.maxModelLen,
+        maxNumSeqs: o.maxNumSeqs != null ? o.maxNumSeqs : d.maxNumSeqs,
+      };
+    }),
+  };
+}
+
+/** Builds per-GPU bars using temporary deployment overrides (for preview UI). */
+export function buildPerGpuBarsWithOverrides(state: AppState, overrides: DeploymentOverride[]): PerGpuBar[] {
+  const s = cloneStateWithOverrides(state, overrides);
+  return buildPerGpuBars(s);
 }
 
 /**
@@ -350,7 +381,8 @@ function computeSuggestionsForGpu(
   perTokenBytes: number,
   utilizationMap: Map<string, number>,
   deployments: Deployment[],
-  modelsById: Record<string, Model | undefined>
+  modelsById: Record<string, Model | undefined>,
+  safetyFactor: number = 0.98
 ): { maxModelLen: number; maxNumSeqs: number } {
   const kvBudget = calculateKvBudgetForGpu(
     gpu,
@@ -358,7 +390,8 @@ function computeSuggestionsForGpu(
     deploymentWeights,
     utilizationMap,
     deployments,
-    modelsById
+    modelsById,
+    safetyFactor
   );
   
   const suggestedLen = suggestMaxModelLen(kvBudget, perTokenBytes, deployment.maxNumSeqs);
@@ -428,7 +461,8 @@ export function computeDeploymentSuggestions(
       perTokenBytes,
       utilizationMap,
       state.deployments,
-      modelsById
+      modelsById,
+      0.98
     );
     
     if (suggestions.maxModelLen > 0) {
@@ -439,6 +473,66 @@ export function computeDeploymentSuggestions(
     }
   }
   
+  return {
+    maxModelLen: Math.max(0, Math.floor(Number.isFinite(bestLen) ? bestLen : 0)),
+    maxNumSeqs: Math.max(0, Math.floor(Number.isFinite(bestSeqs) ? bestSeqs : 0))
+  };
+}
+
+/** Computes suggestions without applying safety factor (raw capacity). */
+export function computeDeploymentSuggestionsRaw(
+  state: AppState,
+  deploymentId: string
+): { maxModelLen: number; maxNumSeqs: number } {
+  const deployment = state.deployments.find(x => x.id === deploymentId);
+  const modelsById: Record<string, Model | undefined> = Object.fromEntries(
+    state.models.map(m => [m.id, m] as const)
+  );
+  const model = modelsById[deployment?.modelId ?? ''];
+
+  const validation = validateDeploymentForSuggestions(deployment, model);
+  if (!validation.isValid) {
+    return { maxModelLen: 0, maxNumSeqs: 0 };
+  }
+
+  const { deployment: validDeployment, model: validModel } = validation;
+  const tp = Math.max(1, validDeployment.assignedGpuIds.length);
+  const utilizationMap = utilizationByGpu(state);
+
+  const deploymentWeights = weightBytesPerGpu(
+    validModel.paramsB,
+    validDeployment.weightDtype,
+    tp,
+    validDeployment.replicationOverheadPct
+  );
+  const perTokenBytes = kvBytesPerTokenPerGpu(
+    validModel.layers,
+    validModel.hiddenSize,
+    validModel.heads,
+    validModel.numKeyValueHeads,
+    validDeployment.kvDtype,
+    tp,
+    validDeployment.kvOverheadPct
+  );
+
+  let bestLen = Infinity;
+  let bestSeqs = Infinity;
+  for (const gpuId of validDeployment.assignedGpuIds) {
+    const gpu = state.gpus.find(g => g.id === gpuId);
+    if (!gpu) continue;
+    const s = computeSuggestionsForGpu(
+      gpu,
+      validDeployment,
+      deploymentWeights,
+      perTokenBytes,
+      utilizationMap,
+      state.deployments,
+      modelsById,
+      1.0
+    );
+    if (s.maxModelLen > 0) bestLen = Math.min(bestLen, s.maxModelLen);
+    if (s.maxNumSeqs > 0) bestSeqs = Math.min(bestSeqs, s.maxNumSeqs);
+  }
   return {
     maxModelLen: Math.max(0, Math.floor(Number.isFinite(bestLen) ? bestLen : 0)),
     maxNumSeqs: Math.max(0, Math.floor(Number.isFinite(bestSeqs) ? bestSeqs : 0))

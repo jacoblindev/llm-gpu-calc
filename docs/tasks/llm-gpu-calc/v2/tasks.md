@@ -51,23 +51,23 @@ Repo assessment (concise)
     - Traceability: PRD UX Notes.
     - Est: 1h
 
-- [ ] 2.0 Recommendations in context (adjustable + Apply)
-  - [ ] 2.1 Seed adjustable controls with `computeDeploymentSuggestions` for active deployment
+- [x] 2.0 Recommendations in context (adjustable + Apply)
+  - [x] 2.1 Seed adjustable controls with `computeDeploymentSuggestions` for active deployment
     - Acceptance: Suggested values visible; safety factor (0.98) applied; hover reveals raw value.
     - Gates: Boundaries; Tests (deterministic suggestion rendering).
     - Traceability: PRD Recommendations; ARCH‑v2 Key Contracts.
     - Est: 1h
-  - [ ] 2.2 Controls: `max_num_seqs` step 1 (min 1); `max_model_len` step 128; allow direct numeric entry
+  - [x] 2.2 Controls: `max_num_seqs` step 1 (min 1); `max_model_len` step 128; allow direct numeric entry
     - Acceptance: Steppers and inputs enforce min/step; keyboard ArrowUp/Down works.
     - Gates: Accessibility; Tests (input/step behavior).
     - Traceability: PRD Detailed Behavior (Adjustable suggestions).
     - Est: 1–2h
-  - [ ] 2.3 Live preview recalculates on adjustment (pre‑Apply) without mutating state; Apply commits via App (`applySuggested…` or setter)
+  - [x] 2.3 Live preview recalculates on adjustment (pre‑Apply) without mutating state; Apply commits via App (`applySuggested…` or setter)
     - Acceptance: Adjust → preview updates using temporary UI state only (main App state unchanged); Apply → chosen value persisted to App state and re-renders; Apply disabled when invalid.
     - Gates: Tests (adjust+apply paths); Boundaries.
     - Traceability: PRD Acceptance (Recommendations); ARCH‑v2 App/controller.
     - Est: 1–2h
-  - [ ] 2.4 Validation and constraints
+  - [x] 2.4 Validation and constraints
     - Acceptance: Prevent values that violate constraints or below minimums; show concise inline message.
     - Gates: Tests.
     - Traceability: PRD Validation & Warnings.

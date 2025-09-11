@@ -39,14 +39,14 @@
 
 <script setup lang="ts">
 import type { AppState } from '@app/state'
-import { buildPerGpuBars } from '@app/controller'
+import { buildPerGpuBars, type PerGpuBar } from '@app/controller'
 import { computed, reactive } from 'vue'
 import { formatBytes } from '@shared/units'
 import { buildSegmentAriaLabel, nextIndexForArrow, shouldShowInlineLabel, segmentPercent } from '@shared/preview'
 
-const props = defineProps<{ state: AppState }>()
+const props = defineProps<{ state?: AppState; bars?: PerGpuBar[] }>()
 
-const bars = computed(() => buildPerGpuBars(props.state))
+const bars = computed(() => props.bars ?? (props.state ? buildPerGpuBars(props.state) : []))
 
 function colorFor(kind: 'weights'|'kv'|'reserve'|'free') {
   switch (kind) {
@@ -89,7 +89,7 @@ function labelStyle(capacity: number, s: { bytes: number }) {
   } as const
 }
 
-function format(b: number) { return formatBytes(b, props.state.unit, 1) }
+function format(b: number) { return formatBytes(b, (props.state?.unit ?? 'GiB') as any, 1) }
 
 // Instant tooltip (faster than native title)
 const tip = reactive({ visible: false, text: '', x: 0, y: 0 })
