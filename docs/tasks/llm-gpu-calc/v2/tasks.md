@@ -74,12 +74,12 @@ Repo assessment (concise)
     - Est: 0.5–1h
 
 - [ ] 3.0 Visual language & tokens
-  - [ ] 3.1 Tune `src/styles/tokens.css` to muted Apple‑like palette; maintain AA contrast in dark/light
+  - [x] 3.1 Tune `src/styles/tokens.css` to muted Apple‑like palette; maintain AA contrast in dark/light
     - Acceptance: Color variables updated; contrast verified; no regressions in existing components.
     - Gates: N/A; Boundaries unaffected.
     - Traceability: PRD UX Notes (Visual Language).
     - Est: 1h
-  - [ ] 3.2 Spacing, borders, typography; system font stack; subtle transitions (150–200 ms) with `prefers-reduced-motion`
+  - [x] 3.2 Spacing, borders, typography; system font stack; subtle transitions (150–200 ms) with `prefers-reduced-motion`
     - Acceptance: Reduced border noise; increased whitespace; system font applied; transitions feel subtle.
     - Gates: N/A; No logic changes.
     - Traceability: PRD Visual Language; ARCH‑v2 Non‑Functionals.

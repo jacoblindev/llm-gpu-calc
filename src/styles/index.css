@@ -2,12 +2,31 @@
 @import "tailwindcss";
 
 @layer base {
+  :root {
+    /* subtle default border color to reduce noise */
+    --border-color: color-mix(in srgb, var(--color-muted) 30%, transparent);
+  }
   html, body, #app-root {
     height: 100%;
   }
   body {
     background-color: var(--color-bg);
     color: var(--color-text);
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji';
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  :where(button, input, select) {
+    transition: background-color 180ms ease, color 180ms ease, border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
+  }
+  :where(button, input, select):focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    :where(button, input, select, .seg) { transition: none !important; }
   }
 }
 
@@ -21,4 +40,8 @@
   .text-muted { color: var(--color-muted); }
   .bg-primary { background-color: var(--color-primary); }
   .text-primary { color: var(--color-primary); }
+  .text-success { color: var(--color-success); }
+  .text-warning { color: var(--color-warning); }
+  .text-danger { color: var(--color-danger); }
+  .border { border-color: var(--border-color); }
 }
