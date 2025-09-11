@@ -49,3 +49,15 @@ export function stepMaxNumSeqs(current: number, delta: number): number {
   return clampMin(current + delta * 1, 1)
 }
 
+export function validateMaxModelLen(value: number): string | null {
+  if (!Number.isFinite(value)) return 'Enter a number'
+  if (value < 0) return 'Must be ≥ 0'
+  if (value % 128 !== 0) return 'Step: 128'
+  return null
+}
+
+export function validateMaxNumSeqs(value: number): string | null {
+  if (!Number.isFinite(value)) return 'Enter a number'
+  if (value < 1) return 'Must be ≥ 1'
+  return null
+}

@@ -3,6 +3,7 @@ import {
   clampMin, snapToStep, adjustByDelta, adjustByKey,
   normalizeMaxModelLenInput, normalizeMaxNumSeqsInput,
   stepMaxModelLen, stepMaxNumSeqs,
+  validateMaxModelLen, validateMaxNumSeqs,
 } from '@shared/controls'
 
 describe('shared/controls: min/step helpers', () => {
@@ -31,5 +32,12 @@ describe('shared/controls: min/step helpers', () => {
     expect(stepMaxNumSeqs(3, +1)).toBe(4)
     expect(stepMaxNumSeqs(1, -1)).toBe(1)
   })
-})
 
+  it('validation messages for len and seqs', () => {
+    expect(validateMaxModelLen(-1)).toBeTruthy()
+    expect(validateMaxModelLen(127)).toBe('Step: 128')
+    expect(validateMaxModelLen(128)).toBeNull()
+    expect(validateMaxNumSeqs(0)).toBeTruthy()
+    expect(validateMaxNumSeqs(1)).toBeNull()
+  })
+})

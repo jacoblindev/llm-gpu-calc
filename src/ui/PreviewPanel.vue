@@ -10,10 +10,16 @@
         <div class="hidden sm:flex items-center gap-2">
           <span class="text-muted">len</span>
           <button class="px-2 py-1 rounded bg-surface border border-muted/30" @click="decLen()">-</button>
-          <input class="w-24 px-2 py-1 bg-bg border border-muted/30 rounded" type="number" min="0" step="128" v-model.number="len" @blur="onLenBlur" @keydown="onLenKey" />
+          <div class="flex flex-col">
+            <input class="w-24 px-2 py-1 bg-bg border border-muted/30 rounded" type="number" min="0" step="128" v-model.number="len" @blur="onLenBlur" @keydown="onLenKey" />
+            <span v-if="lenErr" class="text-[11px] text-danger">{{ lenErr }}</span>
+          </div>
           <span class="text-muted">seqs</span>
           <button class="px-2 py-1 rounded bg-surface border border-muted/30" @click="decSeq()">-</button>
-          <input class="w-16 px-2 py-1 bg-bg border border-muted/30 rounded" type="number" min="1" step="1" v-model.number="seqs" @blur="onSeqBlur" @keydown="onSeqKey" />
+          <div class="flex flex-col">
+            <input class="w-16 px-2 py-1 bg-bg border border-muted/30 rounded" type="number" min="1" step="1" v-model.number="seqs" @blur="onSeqBlur" @keydown="onSeqKey" />
+            <span v-if="seqErr" class="text-[11px] text-danger">{{ seqErr }}</span>
+          </div>
         </div>
         <button class="px-2 py-1 rounded bg-primary text-white disabled:opacity-50" :disabled="!canApply" @click="apply">Apply</button>
       </div>
@@ -30,7 +36,7 @@ import type { AppState } from '@app/state'
 import PerGpuBars from '@ui/PerGpuBars.vue'
 import { computed, reactive, watch, ref } from 'vue'
 import { buildPerGpuBarsWithOverrides, type DeploymentOverride } from '@app/controller'
-import { normalizeMaxModelLenInput, normalizeMaxNumSeqsInput, stepMaxModelLen, stepMaxNumSeqs, adjustByKey } from '@shared/controls'
+import { normalizeMaxModelLenInput, normalizeMaxNumSeqsInput, stepMaxModelLen, stepMaxNumSeqs, adjustByKey, validateMaxModelLen, validateMaxNumSeqs } from '@shared/controls'
 
 const props = defineProps<{ state: AppState }>()
 
@@ -52,13 +58,16 @@ watch(() => activeId.value, (id) => {
   temp.seqs = d?.maxNumSeqs ?? 1
 })
 
-const len = computed({ get: () => temp.len, set: (v: number) => temp.len = normalizeMaxModelLenInput(v) })
-const seqs = computed({ get: () => temp.seqs, set: (v: number) => temp.seqs = normalizeMaxNumSeqsInput(v) })
+const len = computed({ get: () => temp.len, set: (v: number) => temp.len = Math.floor(v || 0) })
+const seqs = computed({ get: () => temp.seqs, set: (v: number) => temp.seqs = Math.floor(v || 1) })
+
+const lenErr = computed(() => validateMaxModelLen(len.value))
+const seqErr = computed(() => validateMaxNumSeqs(seqs.value))
 
 const overrides = computed<DeploymentOverride[]>(() => activeId.value ? [{ id: activeId.value, maxModelLen: len.value, maxNumSeqs: seqs.value }] : [])
 const previewBars = computed(() => buildPerGpuBarsWithOverrides(props.state, overrides.value))
 
-const canApply = computed(() => !!activeId.value && Number.isFinite(len.value) && Number.isFinite(seqs.value) && seqs.value >= 1 && len.value >= 0)
+const canApply = computed(() => !!activeId.value && !lenErr.value && !seqErr.value)
 
 function onLenBlur() { len.value = normalizeMaxModelLenInput(len.value) }
 function onSeqBlur() { seqs.value = normalizeMaxNumSeqsInput(seqs.value) }
@@ -75,4 +84,6 @@ function apply() {
 }
 </script>
 
-<style scoped></style>
+<style scoped>
+.text-danger { color: var(--color-danger); }
+</style>

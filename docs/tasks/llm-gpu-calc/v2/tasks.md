@@ -67,7 +67,7 @@ Repo assessment (concise)
     - Gates: Tests (adjust+apply paths); Boundaries.
     - Traceability: PRD Acceptance (Recommendations); ARCH‑v2 App/controller.
     - Est: 1–2h
-  - [ ] 2.4 Validation and constraints
+  - [x] 2.4 Validation and constraints
     - Acceptance: Prevent values that violate constraints or below minimums; show concise inline message.
     - Gates: Tests.
     - Traceability: PRD Validation & Warnings.
