@@ -204,7 +204,7 @@ export function computeResultsStub(state: AppState): Array<{
 /**
  * Constructs per-GPU bar segment data (weights, KV, reserve, free) for visualization.
  */
-export function buildPerGpuBars(state: AppState): Array<{
+export type PerGpuBar = {
   gpuId: string;
   gpuName: string;
   capacityBytes: number;
@@ -214,13 +214,15 @@ export function buildPerGpuBars(state: AppState): Array<{
     deploymentId?: string;
     modelName?: string;
   }>;
-}> {
+};
+
+export function buildPerGpuBars(state: AppState): PerGpuBar[] {
   const results = computeResultsStub(state);
   return results.map((r) => {
     const reserveBytes = Math.max(0, r.impliedReserveFrac * r.capacityBytes);
     const used = Math.max(0, r.usedBytes);
     const freeBytes = Math.max(0, r.capacityBytes - reserveBytes - used);
-    const segments: Array<{ kind: 'weights' | 'kv' | 'reserve' | 'free'; bytes: number; deploymentId?: string; modelName?: string }> = [];
+    const segments: PerGpuBar['segments'] = [];
     for (const p of r.parts) {
       if (p.weights > 0) segments.push({ kind: 'weights', bytes: p.weights, deploymentId: p.deploymentId, modelName: p.modelName });
       if (p.kv > 0) segments.push({ kind: 'kv', bytes: p.kv, deploymentId: p.deploymentId, modelName: p.modelName });
@@ -229,6 +231,35 @@ export function buildPerGpuBars(state: AppState): Array<{
     if (freeBytes > 0) segments.push({ kind: 'free', bytes: freeBytes });
     return { gpuId: r.gpuId, gpuName: r.gpuName, capacityBytes: r.capacityBytes, segments };
   });
+}
+
+export type DeploymentOverride = { id: string; maxModelLen?: number; maxNumSeqs?: number };
+
+/** Returns a shallow-cloned state whose deployments include overrides for preview. */
+export function cloneStateWithOverrides(state: AppState, overrides: DeploymentOverride[]): AppState {
+  const byId = new Map(overrides.map(o => [o.id, o] as const));
+  return {
+    ...state,
+    // reuse arrays that are read-only in compute paths
+    gpus: state.gpus.slice(),
+    gpuCatalog: state.gpuCatalog.slice(),
+    models: state.models.slice(),
+    deployments: state.deployments.map(d => {
+      const o = byId.get(d.id);
+      if (!o) return { ...d };
+      return {
+        ...d,
+        maxModelLen: o.maxModelLen != null ? o.maxModelLen : d.maxModelLen,
+        maxNumSeqs: o.maxNumSeqs != null ? o.maxNumSeqs : d.maxNumSeqs,
+      };
+    }),
+  };
+}
+
+/** Builds per-GPU bars using temporary deployment overrides (for preview UI). */
+export function buildPerGpuBarsWithOverrides(state: AppState, overrides: DeploymentOverride[]): PerGpuBar[] {
+  const s = cloneStateWithOverrides(state, overrides);
+  return buildPerGpuBars(s);
 }
 
 /**
