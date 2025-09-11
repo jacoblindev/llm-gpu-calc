@@ -52,7 +52,7 @@ Repo assessment (concise)
     - Est: 1h
 
 - [ ] 2.0 Recommendations in context (adjustable + Apply)
-  - [ ] 2.1 Seed adjustable controls with `computeDeploymentSuggestions` for active deployment
+  - [x] 2.1 Seed adjustable controls with `computeDeploymentSuggestions` for active deployment
     - Acceptance: Suggested values visible; safety factor (0.98) applied; hover reveals raw value.
     - Gates: Boundaries; Tests (deterministic suggestion rendering).
     - Traceability: PRD Recommendations; ARCH‑v2 Key Contracts.

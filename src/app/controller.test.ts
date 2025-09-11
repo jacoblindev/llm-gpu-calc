@@ -17,6 +17,7 @@ import {
   gpuCapacityLabel,
   applySuggestedMaxModelLen,
   applySuggestedMaxNumSeqs,
+  computeDeploymentSuggestionsRaw,
 } from '@app/controller';
 import type { AppState } from '@app/state';
 import { createInitialState } from '@app/state';
@@ -170,6 +171,25 @@ describe('controller: suggestions', () => {
     applySuggestedMaxNumSeqs(state, dSelf.id);
     const afterSeq = state.deployments.find(d => d.id === dSelf.id)!;
     expect(afterSeq.maxNumSeqs).toBe(s2.maxNumSeqs);
+  });
+
+  it('suggestions with safety are <= raw suggestions', () => {
+    const state = baseState();
+    const model = makeModel();
+    state.models = [model];
+    const g1 = makeGpu('g1', 'G1', 80);
+    const g2 = makeGpu('g2', 'G2', 48);
+    state.gpus = [g1, g2];
+    const d: Deployment = {
+      id: 'd', modelId: model.id, assignedGpuIds: ['g1', 'g2'], tp: 2,
+      weightDtype: 'bf16', kvDtype: 'fp16', kvOverheadPct: 0.1, replicationOverheadPct: 0.02,
+      maxModelLen: 4096, maxNumSeqs: 2, utilizationShare: 0.5,
+    };
+    state.deployments = [d];
+    const safe = computeDeploymentSuggestions(state, 'd');
+    const raw = (computeDeploymentSuggestionsRaw as any)(state, 'd');
+    expect(safe.maxModelLen).toBeLessThanOrEqual(raw.maxModelLen);
+    expect(safe.maxNumSeqs).toBeLessThanOrEqual(raw.maxNumSeqs);
   });
 });
 

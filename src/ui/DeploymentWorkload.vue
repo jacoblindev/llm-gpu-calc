@@ -51,6 +51,17 @@
           <input class="mt-1 w-full px-2 py-1 bg-bg border border-muted/30 rounded" type="number" min="1" step="1" :value="d.maxNumSeqs" @input="onMaxNumSeqs(d, $event)" />
         </div>
       </div>
+      <div class="mt-2 text-xs sm:text-sm flex flex-wrap items-center gap-2">
+        <span class="text-muted">Suggestion:</span>
+        <span
+          class="px-2 py-0.5 rounded bg-surface border border-muted/30"
+          :title="rawTitleLen(d.id)"
+        >max_model_len = {{ suggest(d.id).maxModelLen }}</span>
+        <span
+          class="px-2 py-0.5 rounded bg-surface border border-muted/30"
+          :title="rawTitleSeq(d.id)"
+        >max_num_seqs = {{ suggest(d.id).maxNumSeqs }}</span>
+      </div>
       <div class="mt-3">
         <div v-if="errors(d).length" class="text-danger text-sm">{{ errors(d).join('; ') }}</div>
         <div v-else-if="warnings(d).length" class="text-warning text-sm">{{ warnings(d).join('; ') }}</div>
@@ -61,7 +72,7 @@
 
 <script setup lang="ts">
 import type { AppState } from '@app/state'
-import { validateDeployment } from '@app/controller'
+import { validateDeployment, computeDeploymentSuggestions, computeDeploymentSuggestionsRaw } from '@app/controller'
 import type { DType, KvDType } from '@shared/types'
 
 const props = defineProps<{ state: AppState }>()
@@ -95,6 +106,15 @@ function onGpuToggle(d: AppState['deployments'][number], id: string, e: Event) {
 }
 function errors(d: AppState['deployments'][number]) { return validateDeployment(d, props.state.gpus).errors }
 function warnings(d: AppState['deployments'][number]) { return validateDeployment(d, props.state.gpus).warnings }
+function suggest(id: string) { return computeDeploymentSuggestions(props.state, id) }
+function rawTitleLen(id: string) {
+  const raw = computeDeploymentSuggestionsRaw(props.state, id)
+  return `Raw (no safety): max_model_len = ${raw.maxModelLen} // safety 0.98 applied in suggestion`
+}
+function rawTitleSeq(id: string) {
+  const raw = computeDeploymentSuggestionsRaw(props.state, id)
+  return `Raw (no safety): max_num_seqs = ${raw.maxNumSeqs} // safety 0.98 applied in suggestion`
+}
 </script>
 
 <style scoped>
