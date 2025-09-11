@@ -78,6 +78,11 @@ export function gpuCapacityLabel(gpu: Gpu): string {
   return `${gb} GB (${gib} GiB)`;
 }
 
+/** Returns true when any GPU is selected; drives Preview visibility in UI. */
+export function shouldShowPreview(state: AppState): boolean {
+  return state.gpus.length > 0;
+}
+
 /** Creates `count` instances of a GPU type with numbered ids/names. */
 function makeGpuInstances(type: Gpu, count: number): Gpu[] {
   const out: Gpu[] = [];

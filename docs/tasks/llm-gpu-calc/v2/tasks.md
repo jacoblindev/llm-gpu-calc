@@ -12,18 +12,18 @@ Repo assessment (concise)
 
 ---
 
-- [ ] 0.0 Establish architecture scaffolding
-  - [ ] 0.1 Create layout & component stubs for preview panel and top bar per ARCH‑v2 (UI→App boundaries)
+- [x] 0.0 Establish architecture scaffolding
+  - [x] 0.1 Create layout & component stubs for preview panel and top bar per ARCH‑v2 (UI→App boundaries)
     - Acceptance: Components compile; exported via `src/ui/index.ts` if needed; app builds and typechecks.
     - Gates: Boundaries per ARCH‑v2; no runtime deps.
     - Traceability: PRD Module Plan; ARCH‑v2 Modules & Key Contracts.
     - Est: 1–2h
-  - [ ] 0.2 Wire preview visibility to GPU selection; do not render bars until at least one GPU is selected (empty deployment allowed)
+  - [x] 0.2 Wire preview visibility to GPU selection; do not render bars until at least one GPU is selected (empty deployment allowed)
     - Acceptance: Selecting first GPU shows preview; removing last GPU hides preview; state remains intact.
     - Gates: Tests (simple smoke); Boundaries.
     - Traceability: PRD UX Notes (First‑run); ARCH‑v2 Data Flow.
     - Est: 1h
-  - [ ] 0.3 Confirm dep policy (no new runtime deps in v2); ADR required for any exception
+  - [x] 0.3 Confirm dep policy (no new runtime deps in v2); ADR required for any exception
     - Acceptance: Tasks/readme reflect policy; ADR‑0007 references no‑new‑deps; any exception requires ADR.
     - Gates: Dependency.
     - Traceability: PRD Dependency Policy; ADR‑0004; ADR‑0007.
