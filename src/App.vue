@@ -1,34 +1,36 @@
 <template>
   <main class="min-h-dvh bg-bg text-text p-6">
-    <div class="flex items-center justify-between">
-      <h1 class="text-2xl font-semibold">LLM GPU vRAM Calculator</h1>
-      <button
-        class="px-3 py-2 rounded-md bg-surface border border-muted/30"
-        @click="dark = !dark"
-      >
-        Toggle {{ dark ? 'Light' : 'Dark' }}
-      </button>
-    </div>
+    <TopBar :dark="dark" @toggle-theme="dark = !dark" />
     <section class="mt-4 space-y-4">
       <Stepper :steps="steps" :current="currentStep" />
-      <div v-if="currentStep === 0" class="space-y-4">
-        <GpuSelector :state="state" />
-      </div>
-      <div v-else-if="currentStep === 1">
-        <DeploymentModels :state="state" @add="onAdd" @remove="onRemove" />
-      </div>
-      <div v-else-if="currentStep === 2">
-        <DeploymentWorkload :state="state" />
-      </div>
-      <div v-else class="space-y-4">
-        <GlobalControls :state="state" />
-        <ResultsStub :state="state" />
-        <Legend />
-        <PerGpuBars :state="state" />
-      </div>
-      <div class="flex items-center justify-between pt-2">
-        <button class="px-3 py-1.5 rounded bg-surface border border-muted/30" :disabled="currentStep === 0" @click="prev">Back</button>
-        <button class="px-3 py-1.5 rounded bg-primary text-white disabled:opacity-50" :disabled="!canNext" @click="next">{{ currentStep < steps.length - 1 ? 'Next' : 'Done' }}</button>
+      <div class="grid gap-4 lg:grid-cols-[2fr_1fr] items-start">
+        <!-- Main column -->
+        <div class="space-y-4">
+          <div v-if="currentStep === 0" class="space-y-4">
+            <GpuSelector :state="state" />
+          </div>
+          <div v-else-if="currentStep === 1">
+            <DeploymentModels :state="state" @add="onAdd" @remove="onRemove" />
+          </div>
+          <div v-else-if="currentStep === 2">
+            <DeploymentWorkload :state="state" />
+          </div>
+          <div v-else class="space-y-4">
+            <GlobalControls :state="state" />
+            <ResultsStub :state="state" />
+            <Legend />
+            <PerGpuBars :state="state" />
+          </div>
+          <div class="flex items-center justify-between pt-2">
+            <button class="px-3 py-1.5 rounded bg-surface border border-muted/30" :disabled="currentStep === 0" @click="prev">Back</button>
+            <button class="px-3 py-1.5 rounded bg-primary text-white disabled:opacity-50" :disabled="!canNext" @click="next">{{ currentStep < steps.length - 1 ? 'Next' : 'Done' }}</button>
+          </div>
+        </div>
+
+        <!-- Preview column (sticky layout; visibility wired in 0.2) -->
+        <div class="lg:sticky lg:top-4" v-if="shouldShowPreview(state)">
+          <PreviewPanel :state="state" />
+        </div>
       </div>
     </section>
   </main>
@@ -44,6 +46,9 @@ import PerGpuBars from '@ui/PerGpuBars.vue'
 import Legend from '@ui/Legend.vue'
 import Stepper from '@ui/Stepper.vue'
 import GpuSelector from '@ui/GpuSelector.vue'
+import TopBar from '@ui/TopBar.vue'
+import PreviewPanel from '@ui/PreviewPanel.vue'
+import { shouldShowPreview } from '@app/controller'
 import { createInitialState } from '@app/state'
 import { addDeployment, removeDeployment, init, loadUnitPreference } from '@app/controller'
 
