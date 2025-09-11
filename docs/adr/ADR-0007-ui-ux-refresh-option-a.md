@@ -31,6 +31,7 @@ Option A balances clarity for first‑time users with minimal changes to v1, red
 ## Implementation Notes
 
 - Reuse `app/controller.buildPerGpuBars` for both preview and results; do not duplicate logic in UI.
+- Provide a minimal Top Bar with title plus theme and unit toggles (persisted via localStorage).
 - Persist theme and unit preference in localStorage.
 - Use CSS transforms and opacity for subtle transitions; avoid layout thrash in sticky containers.
 - Maintain boundaries per `ARCH-v2.md`: UI→App; App→Domain|Data|Shared; Domain→Shared; Data→Shared.

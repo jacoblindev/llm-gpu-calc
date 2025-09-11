@@ -23,8 +23,8 @@ v1 delivers a functional calculator with a guided stepper and custom SVG bars. v
 
 ## Goals
 
-- Elevate the per‑GPU vRAM visualization to the primary canvas, always visible while adjusting inputs.
-- Streamline the flow: provide a split layout with instant results; keep a lightweight stepper for first‑time users.
+- Elevate the per‑GPU vRAM visualization to the primary canvas, visible while adjusting inputs once GPUs are selected.
+- Streamline the flow: adopt a guided stepper with a sticky results preview (Option A); consider a Canvas (split) mode as a later toggle.
 - Integrate in‑context recommendations for `--max-model-len` and `--max-num-seqs` with one‑click Apply and clear rationale.
 - Improve readability and focus via Apple‑style minimalism: ample whitespace, subtle depth, crisp typography, gentle motion.
 - Ensure responsive design, strong accessibility (keyboard/ARIA), and fast updates (<16ms frame budget for UI updates).
@@ -38,7 +38,7 @@ v1 delivers a functional calculator with a guided stepper and custom SVG bars. v
 
 ## User Stories
 
-- As an ML engineer, I see the GPU bars immediately and adjust GPUs, models, TP, and workload while the bars update in place.
+- As an ML engineer, I select GPUs and immediately see bars update as I adjust models, TP, and workload.
 - As a devops user, I open a deployment’s panel and apply suggested `--max-model-len` or `--max-num-seqs` with one click.
 - As an accessibility user, I can navigate bar segments by keyboard and read text equivalents for each segment.
 - As a newcomer, I can follow a guided mode (stepper) the first time, then switch to the split layout for quicker iteration.
@@ -133,7 +133,7 @@ UI modules (new/refined):
   - Files: 1–2 SFCs (~200–250 lines total).
 
 - ui/Panels/DeploymentsPanel.vue
-  - Responsibility: Compact editor for deployments (model, TP, dtypes, U, GPU assignment); in split layout.
+  - Responsibility: Compact editor for deployments (model, TP, dtypes, U, GPU assignment) within the guided flow; compatible with future split layout.
   - Public API: Props: `{ state }` and callbacks to App.
   - Internal: Validation messages; disabled Apply for invalid states.
   - Files: 1 SFC (~200–300 lines).
@@ -206,7 +206,7 @@ Tokens & styles:
   - Seed the control with the suggested value; allow +/- nudging (step 1 for `max_num_seqs`, step 128 for `max_model_len`), and direct typing.
   - Disable Apply when the adjusted value would violate constraints or drop below minimums.
   - On adjustment, preview recalculates bars in real time (before Apply) for immediate feedback.
-- First‑run defaults: Preselect 1×L40S, add one deployment empty (no model) to encourage selection; hide advanced fields behind disclosure.
+- First‑run defaults: Do not preselect a GPU. After the user selects one or more GPUs, show bars with an empty deployment and a calm prompt to choose a model; hide advanced fields behind disclosure.
 - Persisted prefs: Theme and unit in localStorage; default unit GiB.
 
 ---
