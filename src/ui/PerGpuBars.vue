@@ -5,26 +5,28 @@
         <div class="font-medium">{{ b.gpuName }}</div>
         <div class="text-sm text-muted">Capacity: {{ format(b.capacityBytes) }}</div>
       </div>
-      <div class="w-full h-5 rounded bg-bg overflow-hidden border border-muted/30 relative">
+      <div class="w-full h-6 md:h-5 rounded bg-bg overflow-hidden border border-muted/30 relative">
         <div
           v-for="(s, idx) in b.segments"
           :key="idx"
-          class="h-full absolute flex items-center"
+          class="h-full w-full absolute flex items-center seg"
           :style="segmentStyle(b.capacityBytes, s, idx, b.segments)"
-          :aria-label="segmentTitle(s)"
+          :aria-label="segmentTitle(b.capacityBytes, s)"
           role="img"
           data-segment
           tabindex="0"
-          @focus="onFocus(s, $event)"
+          @focus="onFocus(b.capacityBytes, s, $event)"
           @blur="onLeave"
-          @mouseenter="onEnter(s, $event)"
+          @mouseenter="onEnter(b.capacityBytes, s, $event)"
           @mousemove="onMove($event)"
           @mouseleave="onLeave"
           @keydown="onKeyNav"
         >
           <span
-            v-if="widthPct(b.capacityBytes, s.bytes) >= 10"
-            class="ml-1 px-1 py-[1px] rounded text-[10px] font-medium text-white shadow"
+            v-if="shouldShowInlineLabel(b.capacityBytes, s.bytes)"
+            aria-hidden="true"
+            class="ml-1 px-1 py-[1px] rounded text-[10px] sm:text-[11px] font-medium text-white shadow whitespace-nowrap"
+            :style="labelStyle(b.capacityBytes, s)"
           >{{ segmentLabel(b.capacityBytes, s) }}</span>
         </div>
       </div>
@@ -40,6 +42,7 @@ import type { AppState } from '@app/state'
 import { buildPerGpuBars } from '@app/controller'
 import { computed, reactive } from 'vue'
 import { formatBytes } from '@shared/units'
+import { buildSegmentAriaLabel, nextIndexForArrow, shouldShowInlineLabel, segmentPercent } from '@shared/preview'
 
 const props = defineProps<{ state: AppState }>()
 
@@ -60,33 +63,39 @@ function segmentStyle(capacity: number, s: { bytes: number; kind: 'weights'|'kv'
   const leftPct = (start / total) * 100
   const widthPct = (s.bytes / total) * 100
   return {
-    left: `${leftPct}%`,
-    width: `${widthPct}%`,
+    transform: `translateX(${leftPct}%) scaleX(${widthPct / 100})`,
     backgroundColor: colorFor(s.kind),
+    willChange: 'transform',
   }
 }
 
-function segmentTitle(s: { kind: 'weights'|'kv'|'reserve'|'free'; bytes: number; modelName?: string }) {
-  const label = s.kind === 'weights' || s.kind === 'kv' ? `${s.modelName ?? ''} ${s.kind}`.trim() : s.kind
-  return `${label}: ${format(s.bytes)}`
+function segmentTitle(capacity: number, s: { kind: 'weights'|'kv'|'reserve'|'free'; bytes: number; modelName?: string }) {
+  return buildSegmentAriaLabel(capacity, s.bytes, s.kind, s.modelName, (b) => format(b))
 }
 
 function segmentLabel(capacity: number, s: { kind: 'weights'|'kv'|'reserve'|'free'; bytes: number }) {
-  const pct = ((s.bytes / (capacity || 1)) * 100).toFixed(0)
+  const pct = Math.round((s.bytes / (capacity || 1)) * 100)
   return `${format(s.bytes)} (${pct}%)`
 }
 
-function widthPct(capacity: number, bytes: number) {
-  return (bytes / (capacity || 1)) * 100
+function labelStyle(capacity: number, s: { bytes: number }) {
+  const pct = segmentPercent(capacity, s.bytes)
+  const scale = pct > 0 ? 100 / pct : 1
+  return {
+    transform: `scaleX(${scale})`,
+    transformOrigin: 'left center',
+    willChange: 'transform',
+    pointerEvents: 'none',
+  } as const
 }
 
 function format(b: number) { return formatBytes(b, props.state.unit, 1) }
 
 // Instant tooltip (faster than native title)
 const tip = reactive({ visible: false, text: '', x: 0, y: 0 })
-function onEnter(s: { kind: 'weights'|'kv'|'reserve'|'free'; bytes: number; modelName?: string }, e: MouseEvent) {
+function onEnter(capacity: number, s: { kind: 'weights'|'kv'|'reserve'|'free'; bytes: number; modelName?: string }, e: MouseEvent) {
   tip.visible = true
-  tip.text = segmentTitle(s)
+  tip.text = segmentTitle(capacity, s)
   onMove(e)
 }
 function onMove(e: MouseEvent) {
@@ -96,9 +105,9 @@ function onMove(e: MouseEvent) {
 function onLeave() { tip.visible = false }
 
 // Keyboard focus support
-function onFocus(s: { kind: 'weights'|'kv'|'reserve'|'free'; bytes: number; modelName?: string }, e: FocusEvent) {
+function onFocus(capacity: number, s: { kind: 'weights'|'kv'|'reserve'|'free'; bytes: number; modelName?: string }, e: FocusEvent) {
   tip.visible = true
-  tip.text = segmentTitle(s)
+  tip.text = segmentTitle(capacity, s)
   const el = e.target as HTMLElement
   const rect = el.getBoundingClientRect()
   tip.x = rect.left + rect.width / 2
@@ -113,8 +122,8 @@ function onKeyNav(e: KeyboardEvent) {
   if (!parent) return
   const segments = Array.from(parent.querySelectorAll('[data-segment]')) as HTMLElement[]
   const idx = segments.indexOf(current!)
-  const delta = e.key === 'ArrowLeft' ? -1 : 1
-  const next = segments[idx + delta]
+  const nextIdx = nextIndexForArrow(segments.length, idx, e.key)
+  const next = segments[nextIdx]
   if (next) {
     next.focus()
     e.preventDefault()
@@ -123,4 +132,8 @@ function onKeyNav(e: KeyboardEvent) {
 </script>
 
 <style scoped>
+.seg {
+  transform-origin: left center;
+  transition: transform 150ms ease-in-out, opacity 150ms ease-in-out;
+}
 </style>

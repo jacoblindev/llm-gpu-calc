@@ -5,7 +5,7 @@
       <div v-for="t in state.gpuCatalog" :key="t.id" class="border border-muted/30 rounded p-3">
         <div class="font-medium">{{ t.name }}</div>
         <div class="text-sm text-muted">{{ capacity(t) }}</div>
-        <div class="mt-2 flex items-center gap-2">
+        <div class="mt-2 flex items-center gap-2 flex-wrap">
           <button class="px-2 py-1 rounded bg-surface border border-muted/30" @click="dec(t.id)">-</button>
           <input class="w-16 px-2 py-1 bg-bg border border-muted/30 rounded" type="number" min="0" step="1" :value="count(t.id)" @input="onCount(t.id, $event)" />
           <button class="px-2 py-1 rounded bg-surface border border-muted/30" @click="inc(t.id)">+</button>
@@ -40,4 +40,3 @@ const totalSelected = computed(() => props.state.gpus.length)
 </script>
 
 <style scoped></style>
-
