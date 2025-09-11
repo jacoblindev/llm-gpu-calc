@@ -36,6 +36,54 @@ Option A balances clarity for first‑time users with minimal changes to v1, red
 - Use CSS transforms and opacity for subtle transitions; avoid layout thrash in sticky containers.
 - Maintain boundaries per `ARCH-v2.md`: UI→App; App→Domain|Data|Shared; Domain→Shared; Data→Shared.
 - For adjustable suggestions, either bind directly to `state.deployments[i].maxNumSeqs/maxModelLen` prior to Apply, or provide a thin App setter to keep UI lean; ensure min/step constraints (seqs ≥1, len step 128 by default) and disable Apply when invalid.
+- Adjustable suggestions should use temporary UI state to support live preview without mutating App state; commit to App state only on Apply.
+
+## Palette Tokens (v2)
+
+Define a muted, Apple‑like palette with AA contrast in light/dark. UI uses these CSS variables (see `src/styles/tokens.css`).
+
+Light mode
+
+- `--color-bg`:        #FFFFFF
+- `--color-surface`:   #F5F5F7   (Apple gray)
+- `--color-text`:      #1D1D1F   (primary text)
+- `--color-muted`:     #6E6E73   (secondary text)
+- `--color-primary`:   #0071E3   (accent blue)
+- `--color-success`:   #34C759
+- `--color-warning`:   #FF9F0A
+- `--color-danger`:    #FF3B30
+
+Domain (light)
+
+- `--color-weights`:   #5E5CE6   (indigo)
+- `--color-kv`:        #BF5AF2   (purple)
+- `--color-reserve`:   #A1A1A6   (secondary gray)
+- `--color-unallocated`: #D2D2D7 (tertiary gray)
+- `--color-free`:      #30D158   (green)
+
+Dark mode
+
+- `--color-bg`:        #000000
+- `--color-surface`:   #1C1C1E
+- `--color-text`:      #F5F5F7
+- `--color-muted`:     #A1A1A6
+- `--color-primary`:   #0A84FF
+- `--color-success`:   #30D158
+- `--color-warning`:   #FFD60A
+- `--color-danger`:    #FF453A
+
+Domain (dark)
+
+- `--color-weights`:   #7D7AFF   (indigo)
+- `--color-kv`:        #C678F7   (purple)
+- `--color-reserve`:   #636366   (secondary gray)
+- `--color-unallocated`: #3A3A3C (tertiary gray)
+- `--color-free`:      #30D158   (green)
+
+Notes
+
+- Bars render labels with white text on colored segments; chosen hues maintain sufficient contrast in both themes.
+- Reserve/unallocated use neutral grays to avoid confusing semantic colors.
 
 ## Testing
 

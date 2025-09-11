@@ -44,7 +44,7 @@ State continues to live in App; Domain remains stateless and pure; Data is stati
 
 - Performance: UI updates target <16 ms per interaction for typical scenarios (<10 GPUs, <5 deployments). Avoid layout thrash in the sticky panel; prefer transform/opacity transitions.
 - Accessibility: Keyboard nav across bar segments (Left/Right), focus order that avoids traps, ARIA labels summarizing segment kind, model, and size; WCAG AA color contrast.
-- Controls: Numeric steppers for suggestions must be keyboard accessible (ArrowUp/Down), announce value changes to screen readers, and respect min/step semantics.
+- Controls: Numeric steppers for suggestions must be keyboard accessible (ArrowUp/Down), announce value changes to screen readers, and respect min/step semantics. Adjustable suggestions live in temporary UI state; App state is only mutated when the user clicks Apply.
 - Testability: Existing domain tests remain valid; light UI smoke tests for preview rendering and keyboard nav.
 - Dependencies: No new runtime deps; tooltip/positioning remain custom and minimal; any future runtime dep requires an ADR.
 

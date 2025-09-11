@@ -150,7 +150,7 @@ UI modules (new/refined):
 
 Tokens & styles:
 
-- src/styles/tokens.css (tune): adjust palette to muted Apple‑like hues; ensure AA contrast; keep semantic variables.
+- src/styles/tokens.css (tune): adjust palette to muted Apple‑like hues per ADR‑0007 Palette Tokens; ensure AA contrast; keep semantic variables.
 - src/styles/index.css: maintain utilities; prefer fewer borders, more spacing.
 
 ### Flow Variants (choose one)
@@ -205,7 +205,7 @@ Tokens & styles:
 - Adjustable suggestions:
   - Seed the control with the suggested value; allow +/- nudging (step 1 for `max_num_seqs`, step 128 for `max_model_len`), and direct typing.
   - Disable Apply when the adjusted value would violate constraints or drop below minimums.
-  - On adjustment, preview recalculates bars in real time (before Apply) for immediate feedback.
+  - On adjustment, preview recalculates bars in real time (before Apply) using temporary UI state; main App state updates only on Apply.
 - First‑run defaults: Do not preselect a GPU. After the user selects one or more GPUs, show bars with an empty deployment and a calm prompt to choose a model; hide advanced fields behind disclosure.
 - Persisted prefs: Theme and unit in localStorage; default unit GiB.
 

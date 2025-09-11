@@ -63,7 +63,7 @@ Repo assessment (concise)
     - Traceability: PRD Detailed Behavior (Adjustable suggestions).
     - Est: 1–2h
   - [ ] 2.3 Live preview recalculates on adjustment (pre‑Apply) without mutating state; Apply commits via App (`applySuggested…` or setter)
-    - Acceptance: Adjust → preview updates; Apply → state updates and re-renders; Apply disabled when invalid.
+    - Acceptance: Adjust → preview updates using temporary UI state only (main App state unchanged); Apply → chosen value persisted to App state and re-renders; Apply disabled when invalid.
     - Gates: Tests (adjust+apply paths); Boundaries.
     - Traceability: PRD Acceptance (Recommendations); ARCH‑v2 App/controller.
     - Est: 1–2h
