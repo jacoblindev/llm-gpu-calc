@@ -1,20 +1,20 @@
 :root {
-  /* Colors */
-  --color-bg: #ffffff;
-  --color-surface: #f7f7f8;
-  --color-text: #0f172a; /* slate-900 */
-  --color-muted: #64748b; /* slate-500 */
-  --color-primary: #2563eb; /* blue-600 */
-  --color-success: #16a34a; /* green-600 */
-  --color-warning: #ca8a04; /* amber-600 */
-  --color-danger: #dc2626; /* red-600 */
+  /* Light mode — Apple-like muted palette */
+  --color-bg: #FFFFFF;
+  --color-surface: #F5F5F7;
+  --color-text: #1D1D1F;
+  --color-muted: #6E6E73;
+  --color-primary: #0071E3;
+  --color-success: #34C759;
+  --color-warning: #FF9F0A;
+  --color-danger: #FF3B30;
 
-  /* Domain colors */
-  --color-weights: #7c3aed; /* violet-600 */
-  --color-kv: #059669; /* emerald-600 */
-  --color-reserve: #f59e0b; /* amber-500 */
-  --color-unallocated: #94a3b8; /* slate-400 */
-  --color-free: #22d3ee; /* cyan-400 */
+  /* Domain colors (light) */
+  --color-weights: #5E5CE6;
+  --color-kv: #BF5AF2;
+  --color-reserve: #A1A1A6;
+  --color-unallocated: #D2D2D7;
+  --color-free: #30D158;
 
   /* Radii */
   --radius-sm: 4px;
@@ -23,19 +23,20 @@
 }
 
 .dark {
-  --color-bg: #0b1220; /* near slate-950 */
-  --color-surface: #111827; /* gray-900 */
-  --color-text: #e5e7eb; /* gray-200 */
-  --color-muted: #94a3b8; /* slate-400 */
-  --color-primary: #3b82f6; /* blue-500 */
-  --color-success: #22c55e; /* green-500 */
-  --color-warning: #f59e0b; /* amber-500 */
-  --color-danger: #ef4444; /* red-500 */
+  /* Dark mode */
+  --color-bg: #000000;
+  --color-surface: #1C1C1E;
+  --color-text: #F5F5F7;
+  --color-muted: #A1A1A6;
+  --color-primary: #0A84FF;
+  --color-success: #30D158;
+  --color-warning: #FFD60A;
+  --color-danger: #FF453A;
 
-  /* Domain colors (dark variants) */
-  --color-weights: #8b5cf6; /* violet-500 */
-  --color-kv: #10b981; /* emerald-500 */
-  --color-reserve: #fbbf24; /* amber-400 */
-  --color-unallocated: #64748b; /* slate-500 */
-  --color-free: #67e8f9; /* cyan-300 */
+  /* Domain colors (dark) */
+  --color-weights: #7D7AFF;
+  --color-kv: #C678F7;
+  --color-reserve: #636366;
+  --color-unallocated: #3A3A3C;
+  --color-free: #30D158;
 }

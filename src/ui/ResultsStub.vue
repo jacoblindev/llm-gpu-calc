@@ -1,10 +1,10 @@
 <template>
   <div class="space-y-4">
-    <div class="bg-surface border border-muted/30 rounded-md p-4">
+    <div class="bg-surface border rounded-md p-4">
       <h2 class="text-lg font-semibold">Selected GPUs</h2>
       <div v-if="state.gpus.length === 0" class="text-muted mt-2">No GPUs selected.</div>
       <ul v-else class="mt-2 grid md:grid-cols-2 lg:grid-cols-3 gap-2">
-        <li v-for="r in results" :key="r.gpuId" class="border border-muted/30 rounded p-2">
+        <li v-for="r in results" :key="r.gpuId" class="border rounded p-3">
           <div class="flex items-center justify-between">
             <span>{{ r.gpuName }}</span>
             <span class="text-sm text-muted">{{ format(r.capacityBytes) }}</span>
@@ -27,10 +27,10 @@
       </ul>
     </div>
 
-    <div class="bg-surface border border-muted/30 rounded-md p-4">
+    <div class="bg-surface border rounded-md p-4">
       <h2 class="text-lg font-semibold">Deployments</h2>
       <div v-if="state.deployments.length === 0" class="text-muted mt-2">No deployments configured.</div>
-      <div v-for="d in state.deployments" :key="d.id" class="mt-3 border border-muted/30 rounded p-3">
+      <div v-for="d in state.deployments" :key="d.id" class="mt-3 border rounded p-3">
         <div class="flex items-center justify-between">
           <div class="font-medium">{{ modelName(d.modelId) || 'Select model' }}</div>
           <div class="text-sm text-muted">Deployment: {{ d.id }}</div>
@@ -49,11 +49,11 @@
         </div>
         <div class="mt-2 flex flex-wrap gap-2 text-sm">
           <span class="text-muted">Suggestions:</span>
-          <button class="px-2 py-1 rounded bg-surface border border-muted/30"
+          <button class="px-2 py-1 rounded bg-surface border"
             @click="applyLen(d.id)">
             max_model_len = {{ suggest(d.id).maxModelLen }}
           </button>
-          <button class="px-2 py-1 rounded bg-surface border border-muted/30"
+          <button class="px-2 py-1 rounded bg-surface border"
             @click="applySeq(d.id)">
             max_num_seqs = {{ suggest(d.id).maxNumSeqs }}
           </button>

@@ -5,7 +5,7 @@
       <button class="px-3 py-1.5 rounded bg-primary text-white" @click="$emit('add')">Add Deployment</button>
     </div>
     <div v-if="state.deployments.length === 0" class="text-muted">No deployments yet. Click “Add Deployment”.</div>
-    <div v-for="d in state.deployments" :key="d.id" class="border border-muted/30 rounded-md p-3 bg-surface">
+    <div v-for="d in state.deployments" :key="d.id" class="border rounded-md p-3 bg-surface">
       <div class="flex items-start justify-between">
         <div class="font-medium">{{ modelName(d.modelId) || 'Select model' }}</div>
         <button class="text-sm text-danger" @click="$emit('remove', d.id)">Remove</button>
@@ -14,13 +14,13 @@
       <div class="grid md:grid-cols-3 gap-3 mt-3">
         <div>
           <label class="block text-sm text-muted">Model</label>
-          <select class="mt-1 w-full px-2 py-1 bg-bg border border-muted/30 rounded" :value="d.modelId" @change="onModelChange(d, $event)">
+          <select class="mt-1 w-full px-2 py-1 bg-bg border rounded" :value="d.modelId" @change="onModelChange(d, $event)">
             <option v-for="m in state.models" :key="m.id" :value="m.id">{{ m.name }}</option>
           </select>
         </div>
         <div>
           <label class="block text-sm text-muted">Assign GPUs</label>
-          <div class="mt-1 max-h-36 overflow-auto border border-muted/30 rounded p-2 space-y-1">
+          <div class="mt-1 max-h-36 overflow-auto border rounded p-2 space-y-1">
             <label v-for="g in state.gpus" :key="g.id" class="flex items-center gap-2">
               <input type="checkbox" :value="g.id" :checked="d.assignedGpuIds.includes(g.id)" @change="onGpuToggle(d, g.id, $event)" />
               <span>{{ g.name }} — {{ gpuLabel(g) }}</span>
@@ -29,11 +29,11 @@
         </div>
         <div>
           <label class="block text-sm text-muted">TP</label>
-          <input class="mt-1 w-full px-2 py-1 bg-bg border border-muted/30 rounded" type="number" min="1" step="1" :value="d.tp" @input="onTp(d, $event)" />
+          <input class="mt-1 w-full px-2 py-1 bg-bg border rounded" type="number" min="1" step="1" :value="d.tp" @input="onTp(d, $event)" />
         </div>
         <div>
           <label class="block text-sm text-muted">Weight dtype</label>
-          <select class="mt-1 w-full px-2 py-1 bg-bg border border-muted/30 rounded" :value="d.weightDtype" @change="onWeightDtype(d, $event)">
+          <select class="mt-1 w-full px-2 py-1 bg-bg border rounded" :value="d.weightDtype" @change="onWeightDtype(d, $event)">
             <option value="bf16">bf16</option>
             <option value="fp16">fp16</option>
             <option value="fp32">fp32</option>
@@ -43,7 +43,7 @@
         </div>
         <div>
           <label class="block text-sm text-muted">KV dtype</label>
-          <select class="mt-1 w-full px-2 py-1 bg-bg border border-muted/30 rounded" :value="d.kvDtype" @change="onKvDtype(d, $event)">
+          <select class="mt-1 w-full px-2 py-1 bg-bg border rounded" :value="d.kvDtype" @change="onKvDtype(d, $event)">
             <option value="bf16">bf16</option>
             <option value="fp16">fp16</option>
             <option value="fp8">fp8</option>
@@ -52,19 +52,19 @@
         </div>
         <div>
           <label class="block text-sm text-muted">KV overhead %</label>
-          <input class="mt-1 w-full px-2 py-1 bg-bg border border-muted/30 rounded" type="number" min="0" step="1" :value="Math.round(d.kvOverheadPct*100)" @input="onPct(d, 'kvOverheadPct', $event)" />
+          <input class="mt-1 w-full px-2 py-1 bg-bg border rounded" type="number" min="0" step="1" :value="Math.round(d.kvOverheadPct*100)" @input="onPct(d, 'kvOverheadPct', $event)" />
         </div>
         <div>
           <label class="block text-sm text-muted">Replication overhead %</label>
-          <input class="mt-1 w-full px-2 py-1 bg-bg border border-muted/30 rounded" type="number" min="0" step="1" :value="Math.round(d.replicationOverheadPct*100)" @input="onPct(d, 'replicationOverheadPct', $event)" />
+          <input class="mt-1 w-full px-2 py-1 bg-bg border rounded" type="number" min="0" step="1" :value="Math.round(d.replicationOverheadPct*100)" @input="onPct(d, 'replicationOverheadPct', $event)" />
         </div>
         <div>
           <label class="block text-sm text-muted">max_model_len</label>
-          <input class="mt-1 w-full px-2 py-1 bg-bg border border-muted/30 rounded" type="number" min="0" step="128" :value="d.maxModelLen" @input="onMaxModelLen(d, $event)" />
+          <input class="mt-1 w-full px-2 py-1 bg-bg border rounded" type="number" min="0" step="128" :value="d.maxModelLen" @input="onMaxModelLen(d, $event)" />
         </div>
         <div>
           <label class="block text-sm text-muted">max_num_seqs</label>
-          <input class="mt-1 w-full px-2 py-1 bg-bg border border-muted/30 rounded" type="number" min="1" step="1" :value="d.maxNumSeqs" @input="onMaxNumSeqs(d, $event)" />
+          <input class="mt-1 w-full px-2 py-1 bg-bg border rounded" type="number" min="1" step="1" :value="d.maxNumSeqs" @input="onMaxNumSeqs(d, $event)" />
         </div>
       </div>
 

@@ -1,23 +1,23 @@
 <template>
-  <aside class="bg-surface border border-muted/30 rounded-md p-4">
+  <aside class="bg-surface border rounded-md p-4">
     <h2 class="text-lg font-semibold">Results Preview</h2>
     <div v-if="state.deployments.length > 0" class="mt-2 flex flex-wrap items-center gap-2 text-sm">
       <label class="text-muted">Active deployment:</label>
-      <select v-model="activeId" class="px-2 py-1 bg-bg border border-muted/30 rounded">
+      <select v-model="activeId" class="px-2 py-1 bg-bg border rounded">
         <option v-for="d in state.deployments" :key="d.id" :value="d.id">{{ modelName(d.modelId) || d.id }}</option>
       </select>
-      <div class="ml-auto flex items-stretch gap-1">
-        <div class="hidden sm:flex items-center gap-2">
+      <div class="ml-auto flex items-stretch gap-1 flex-wrap sm:flex-nowrap">
+        <div class="flex items-center gap-2">
           <span class="text-muted">len</span>
-          <button class="px-2 py-1 rounded bg-surface border border-muted/30" @click="decLen()">-</button>
+          <button class="px-2 py-1 rounded bg-surface border" @click="decLen()">-</button>
           <div class="flex flex-col">
-            <input class="w-24 px-2 py-1 bg-bg border border-muted/30 rounded" type="number" min="0" step="128" v-model.number="len" @blur="onLenBlur" @keydown="onLenKey" />
+            <input class="w-20 sm:w-24 px-2 py-1 bg-bg border rounded" type="number" min="0" step="128" v-model.number="len" @blur="onLenBlur" @keydown="onLenKey" />
             <span v-if="lenErr" class="text-[11px] text-danger">{{ lenErr }}</span>
           </div>
           <span class="text-muted">seqs</span>
-          <button class="px-2 py-1 rounded bg-surface border border-muted/30" @click="decSeq()">-</button>
+          <button class="px-2 py-1 rounded bg-surface border" @click="decSeq()">-</button>
           <div class="flex flex-col">
-            <input class="w-16 px-2 py-1 bg-bg border border-muted/30 rounded" type="number" min="1" step="1" v-model.number="seqs" @blur="onSeqBlur" @keydown="onSeqKey" />
+            <input class="w-14 sm:w-16 px-2 py-1 bg-bg border rounded" type="number" min="1" step="1" v-model.number="seqs" @blur="onSeqBlur" @keydown="onSeqKey" />
             <span v-if="seqErr" class="text-[11px] text-danger">{{ seqErr }}</span>
           </div>
         </div>

@@ -73,17 +73,32 @@ Repo assessment (concise)
     - Traceability: PRD Validation & Warnings.
     - Est: 0.5–1h
 
-- [ ] 3.0 Visual language & tokens
-  - [ ] 3.1 Tune `src/styles/tokens.css` to muted Apple‑like palette; maintain AA contrast in dark/light
+- [x] 3.0 Visual language & tokens
+  - [x] 3.1 Tune `src/styles/tokens.css` to muted Apple‑like palette; maintain AA contrast in dark/light
     - Acceptance: Color variables updated; contrast verified; no regressions in existing components.
     - Gates: N/A; Boundaries unaffected.
     - Traceability: PRD UX Notes (Visual Language).
     - Est: 1h
-  - [ ] 3.2 Spacing, borders, typography; system font stack; subtle transitions (150–200 ms) with `prefers-reduced-motion`
+  - [x] 3.2 Spacing, borders, typography; system font stack; subtle transitions (150–200 ms) with `prefers-reduced-motion`
     - Acceptance: Reduced border noise; increased whitespace; system font applied; transitions feel subtle.
     - Gates: N/A; No logic changes.
     - Traceability: PRD Visual Language; ARCH‑v2 Non‑Functionals.
     - Est: 1–2h
+  - [x] 3.3 Top Bar polish (sticky, tokens, responsive)
+    - Acceptance: TopBar uses tokens (bg/surface/text), is sticky with subtle blur/backdrop and 150–200 ms transitions; theme toggle preserved; layout condenses cleanly on small screens; no layout shift.
+    - Gates: N/A (visual), Boundaries unchanged, no new runtime deps.
+    - Traceability: PRD Visual Language; ARCH‑v2 Non‑Functionals; ADR‑0007 (minimal chrome).
+    - Est: 1h
+  - [x] 3.4 Footer info strip (version/links)
+    - Acceptance: Footer added with muted styling; shows app version (from `package.json`), GitHub link, ADR index link; responsive; no overlap with content.
+    - Gates: N/A; Boundaries unchanged; no new runtime deps.
+    - Traceability: PRD Visual Language; Build & Release notes.
+    - Est: 1h
+  - [x] 3.5 Spacing/border audit
+    - Acceptance: Replace hard-coded border colors with `.border` utility where feasible; unify paddings on cards/panels; consistent vertical rhythm across Stepper/selectors/preview.
+    - Gates: N/A; Visual check only.
+    - Traceability: PRD Visual Language.
+    - Est: 0.5–1h
 
 - [ ] 4.0 Accessibility & keyboard nav
   - [ ] 4.1 ARIA: segments have role/labels “`model` `component`: `size` (`pct`)”

@@ -1,11 +1,11 @@
 <template>
   <div class="space-y-3">
-    <div v-for="b in bars" :key="b.gpuId" class="border border-muted/30 rounded p-3 bg-surface">
+    <div v-for="b in bars" :key="b.gpuId" class="border rounded p-4 bg-surface">
       <div class="flex items-center justify-between mb-2">
         <div class="font-medium">{{ b.gpuName }}</div>
         <div class="text-sm text-muted">Capacity: {{ format(b.capacityBytes) }}</div>
       </div>
-      <div class="w-full h-6 md:h-5 rounded bg-bg overflow-hidden border border-muted/30 relative">
+      <div class="w-full h-6 md:h-5 rounded bg-bg overflow-hidden border relative">
         <div
           v-for="(s, idx) in b.segments"
           :key="idx"
@@ -32,7 +32,7 @@
       </div>
     </div>
   </div>
-  <div v-if="tip.visible" class="fixed z-50 pointer-events-none px-2 py-1 text-xs rounded bg-surface text-text border border-muted/30 shadow" :style="{ left: tip.x + 'px', top: tip.y + 'px' }">
+  <div v-if="tip.visible" class="fixed z-50 pointer-events-none px-2 py-1 text-xs rounded bg-surface text-text border shadow" :style="{ left: tip.x + 'px', top: tip.y + 'px' }">
     {{ tip.text }}
   </div>
 </template>
