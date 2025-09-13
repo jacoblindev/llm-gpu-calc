@@ -100,18 +100,18 @@ Repo assessment (concise)
     - Traceability: PRD Visual Language.
     - Est: 0.5–1h
 
-- [ ] 4.0 Accessibility & keyboard nav
-  - [ ] 4.1 ARIA: segments have role/labels “`model` `component`: `size` (`pct`)”
+- [x] 4.0 Accessibility & keyboard nav
+  - [x] 4.1 ARIA: segments have role/labels “`model` `component`: `size` (`pct`)”
     - Acceptance: Screen readers read labels for each segment; preview has accessible name.
     - Gates: Accessibility (manual check).
     - Traceability: PRD Accessibility; ARCH‑v2 Non‑Functionals.
     - Est: 1h
-  - [ ] 4.2 Focus order avoids traps; Tab cycles bars/controls; Arrow keys move within bar segments; outline visible
+  - [x] 4.2 Focus order avoids traps; Tab cycles bars/controls; Arrow keys move within bar segments; outline visible
     - Acceptance: Keyboard walkthrough passes; no dead‑ends; visual focus state present.
     - Gates: Accessibility; Tests (smoke nav).
     - Traceability: PRD Accessibility.
     - Est: 1–2h
-  - [ ] 4.3 Announce suggestion value changes; enforce min/step semantics
+  - [x] 4.3 Announce suggestion value changes; enforce min/step semantics
     - Acceptance: Value changes announced; invalid entries corrected or blocked with hint.
     - Gates: Accessibility.
     - Traceability: PRD Recommendations (Adjustable); ARCH‑v2 Controls.

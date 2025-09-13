@@ -136,4 +136,8 @@ function onKeyNav(e: KeyboardEvent) {
   transform-origin: left center;
   transition: transform 150ms ease-in-out, opacity 150ms ease-in-out;
 }
+.seg:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 1px;
+}
 </style>
