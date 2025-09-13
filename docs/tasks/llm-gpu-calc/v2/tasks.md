@@ -84,6 +84,21 @@ Repo assessment (concise)
     - Gates: N/A; No logic changes.
     - Traceability: PRD Visual Language; ARCH‑v2 Non‑Functionals.
     - Est: 1–2h
+  - [x] 3.3 Top Bar polish (sticky, tokens, responsive)
+    - Acceptance: TopBar uses tokens (bg/surface/text), is sticky with subtle blur/backdrop and 150–200 ms transitions; theme toggle preserved; layout condenses cleanly on small screens; no layout shift.
+    - Gates: N/A (visual), Boundaries unchanged, no new runtime deps.
+    - Traceability: PRD Visual Language; ARCH‑v2 Non‑Functionals; ADR‑0007 (minimal chrome).
+    - Est: 1h
+  - [ ] 3.4 Footer info strip (version/links)
+    - Acceptance: Footer added with muted styling; shows app version (from `package.json`), GitHub link, ADR index link; responsive; no overlap with content.
+    - Gates: N/A; Boundaries unchanged; no new runtime deps.
+    - Traceability: PRD Visual Language; Build & Release notes.
+    - Est: 1h
+  - [ ] 3.5 Spacing/border audit
+    - Acceptance: Replace hard-coded border colors with `.border` utility where feasible; unify paddings on cards/panels; consistent vertical rhythm across Stepper/selectors/preview.
+    - Gates: N/A; Visual check only.
+    - Traceability: PRD Visual Language.
+    - Est: 0.5–1h
 
 - [ ] 4.0 Accessibility & keyboard nav
   - [ ] 4.1 ARIA: segments have role/labels “`model` `component`: `size` (`pct`)”
