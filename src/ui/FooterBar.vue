@@ -13,9 +13,10 @@
 <script setup lang="ts">
 // Vite supports importing JSON; TypeScript resolves via resolveJsonModule
 // Only read the version field to avoid bundling extra metadata.
+interface PackageJson { version: string }
 import pkg from '../../package.json'
 
-const version = (pkg as any).version as string
+const version = (pkg as PackageJson).version
 const repoUrl = 'https://github.com/jacoblindev/llm-gpu-calc'
 </script>
 
