@@ -79,13 +79,18 @@ const canApply = computed(() => !!activeId.value && !lenErr.value && !seqErr.val
 
 // Announce value changes for screen readers
 const announce = ref('')
+function withAnnounceSuppressed(fn: () => void) {
+  if (!suppressAnnounce.value) fn()
+}
 watch(() => len.value, (v, ov) => {
-  if (suppressAnnounce.value) return
-  if (v !== ov) announce.value = `Length ${v} tokens`
+  withAnnounceSuppressed(() => {
+    if (v !== ov) announce.value = `Length ${v} tokens`
+  })
 })
 watch(() => seqs.value, (v, ov) => {
-  if (suppressAnnounce.value) return
-  if (v !== ov) announce.value = `Sequences ${v}`
+  withAnnounceSuppressed(() => {
+    if (v !== ov) announce.value = `Sequences ${v}`
+  })
 })
 
 function onLenBlur() { len.value = normalizeMaxModelLenInput(len.value) }
