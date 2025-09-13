@@ -89,7 +89,7 @@ Repo assessment (concise)
     - Gates: N/A (visual), Boundaries unchanged, no new runtime deps.
     - Traceability: PRD Visual Language; ARCH‑v2 Non‑Functionals; ADR‑0007 (minimal chrome).
     - Est: 1h
-  - [ ] 3.4 Footer info strip (version/links)
+  - [x] 3.4 Footer info strip (version/links)
     - Acceptance: Footer added with muted styling; shows app version (from `package.json`), GitHub link, ADR index link; responsive; no overlap with content.
     - Gates: N/A; Boundaries unchanged; no new runtime deps.
     - Traceability: PRD Visual Language; Build & Release notes.

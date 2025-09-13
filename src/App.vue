@@ -33,6 +33,7 @@
         </div>
       </div>
     </section>
+    <FooterBar />
   </main>
 </template>
 
@@ -49,6 +50,7 @@ import GpuSelector from '@ui/GpuSelector.vue'
 import TopBar from '@ui/TopBar.vue'
 import PreviewPanel from '@ui/PreviewPanel.vue'
 import { shouldShowPreview } from '@app/controller'
+import FooterBar from '@ui/FooterBar.vue'
 import { createInitialState } from '@app/state'
 import { addDeployment, removeDeployment, init, loadUnitPreference } from '@app/controller'
 
