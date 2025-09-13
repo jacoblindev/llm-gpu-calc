@@ -22,7 +22,7 @@
             <PerGpuBars :state="state" />
           </div>
           <div class="flex items-center justify-between pt-2">
-            <button class="px-3 py-1.5 rounded bg-surface border border-muted/30" :disabled="currentStep === 0" @click="prev">Back</button>
+            <button class="px-3 py-1.5 rounded bg-surface border" :disabled="currentStep === 0" @click="prev">Back</button>
             <button class="px-3 py-1.5 rounded bg-primary text-white disabled:opacity-50" :disabled="!canNext" @click="next">{{ currentStep < steps.length - 1 ? 'Next' : 'Done' }}</button>
           </div>
         </div>

@@ -1,13 +1,13 @@
 <template>
-  <div class="bg-surface border border-muted/30 rounded-md p-4 space-y-3">
+  <div class="bg-surface border rounded-md p-4 space-y-3">
     <h2 class="text-lg font-semibold">Configure Workload</h2>
     <div v-if="state.deployments.length === 0" class="text-muted">No deployments defined. Go back and add a model.</div>
-    <div v-for="d in state.deployments" :key="d.id" class="border border-muted/30 rounded p-3">
+    <div v-for="d in state.deployments" :key="d.id" class="border rounded p-3">
       <div class="font-medium mb-2">{{ modelName(d.modelId) || 'Select model' }}</div>
       <div class="grid md:grid-cols-3 gap-3">
         <div class="md:col-span-1">
           <label class="block text-sm text-muted">Assign GPUs</label>
-          <div class="mt-1 max-h-40 overflow-auto border border-muted/30 rounded p-2 space-y-1">
+          <div class="mt-1 max-h-40 overflow-auto border rounded p-2 space-y-1">
             <label v-for="g in state.gpus" :key="g.id" class="flex items-center gap-2">
               <input type="checkbox" :value="g.id" :checked="d.assignedGpuIds.includes(g.id)" @change="onGpuToggle(d, g.id, $event)" />
               <span>{{ g.name }}</span>
@@ -17,7 +17,7 @@
         </div>
         <div>
           <label class="block text-sm text-muted">Weight dtype</label>
-          <select class="mt-1 w-full px-2 py-1 bg-bg border border-muted/30 rounded" :value="d.weightDtype" @change="onWeightDtype(d, $event)">
+          <select class="mt-1 w-full px-2 py-1 bg-bg border rounded" :value="d.weightDtype" @change="onWeightDtype(d, $event)">
             <option value="bf16">bf16</option>
             <option value="fp16">fp16</option>
             <option value="fp32">fp32</option>
@@ -27,7 +27,7 @@
         </div>
         <div>
           <label class="block text-sm text-muted">KV dtype</label>
-          <select class="mt-1 w-full px-2 py-1 bg-bg border border-muted/30 rounded" :value="d.kvDtype" @change="onKvDtype(d, $event)">
+          <select class="mt-1 w-full px-2 py-1 bg-bg border rounded" :value="d.kvDtype" @change="onKvDtype(d, $event)">
             <option value="bf16">bf16</option>
             <option value="fp16">fp16</option>
             <option value="fp8">fp8</option>
@@ -36,51 +36,51 @@
         </div>
         <div>
           <label class="block text-sm text-muted">KV overhead %</label>
-          <input class="mt-1 w-full px-2 py-1 bg-bg border border-muted/30 rounded" type="number" min="0" step="1" :value="Math.round(d.kvOverheadPct*100)" @input="onPct(d, 'kvOverheadPct', $event)" />
+          <input class="mt-1 w-full px-2 py-1 bg-bg border rounded" type="number" min="0" step="1" :value="Math.round(d.kvOverheadPct*100)" @input="onPct(d, 'kvOverheadPct', $event)" />
         </div>
         <div>
           <label class="block text-sm text-muted">Replication overhead %</label>
-          <input class="mt-1 w-full px-2 py-1 bg-bg border border-muted/30 rounded" type="number" min="0" step="1" :value="Math.round(d.replicationOverheadPct*100)" @input="onPct(d, 'replicationOverheadPct', $event)" />
+          <input class="mt-1 w-full px-2 py-1 bg-bg border rounded" type="number" min="0" step="1" :value="Math.round(d.replicationOverheadPct*100)" @input="onPct(d, 'replicationOverheadPct', $event)" />
         </div>
         <div>
           <label class="block text-sm text-muted">max_model_len</label>
           <div class="mt-1 flex items-stretch gap-1">
-            <button class="px-2 py-1 rounded bg-surface border border-muted/30" @click="decLen(d)">-</button>
+            <button class="px-2 py-1 rounded bg-surface border" @click="decLen(d)">-</button>
             <input
-              class="w-full px-2 py-1 bg-bg border border-muted/30 rounded"
+              class="w-full px-2 py-1 bg-bg border rounded"
               type="number" min="0" step="128"
               :value="d.maxModelLen"
               @input="onMaxModelLen(d, $event)"
               @blur="onMaxModelLenBlur(d, $event)"
               @keydown="onLenKey(d, $event)"
             />
-            <button class="px-2 py-1 rounded bg-surface border border-muted/30" @click="incLen(d)">+</button>
+            <button class="px-2 py-1 rounded bg-surface border" @click="incLen(d)">+</button>
           </div>
         </div>
         <div>
           <label class="block text-sm text-muted">max_num_seqs</label>
           <div class="mt-1 flex items-stretch gap-1">
-            <button class="px-2 py-1 rounded bg-surface border border-muted/30" @click="decSeq(d)">-</button>
+            <button class="px-2 py-1 rounded bg-surface border" @click="decSeq(d)">-</button>
             <input
-              class="w-full px-2 py-1 bg-bg border border-muted/30 rounded"
+              class="w-full px-2 py-1 bg-bg border rounded"
               type="number" min="1" step="1"
               :value="d.maxNumSeqs"
               @input="onMaxNumSeqs(d, $event)"
               @blur="onMaxNumSeqsBlur(d, $event)"
               @keydown="onSeqKey(d, $event)"
             />
-            <button class="px-2 py-1 rounded bg-surface border border-muted/30" @click="incSeq(d)">+</button>
+            <button class="px-2 py-1 rounded bg-surface border" @click="incSeq(d)">+</button>
           </div>
         </div>
       </div>
       <div class="mt-2 text-xs sm:text-sm flex flex-wrap items-center gap-2">
         <span class="text-muted">Suggestion:</span>
         <span
-          class="px-2 py-0.5 rounded bg-surface border border-muted/30"
+          class="px-2 py-0.5 rounded bg-surface border"
           :title="rawTitleLen(d.id)"
         >max_model_len = {{ suggest(d.id).maxModelLen }}</span>
         <span
-          class="px-2 py-0.5 rounded bg-surface border border-muted/30"
+          class="px-2 py-0.5 rounded bg-surface border"
           :title="rawTitleSeq(d.id)"
         >max_num_seqs = {{ suggest(d.id).maxNumSeqs }}</span>
       </div>

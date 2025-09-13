@@ -94,7 +94,7 @@ Repo assessment (concise)
     - Gates: N/A; Boundaries unchanged; no new runtime deps.
     - Traceability: PRD Visual Language; Build & Release notes.
     - Est: 1h
-  - [ ] 3.5 Spacing/border audit
+  - [x] 3.5 Spacing/border audit
     - Acceptance: Replace hard-coded border colors with `.border` utility where feasible; unify paddings on cards/panels; consistent vertical rhythm across Stepper/selectors/preview.
     - Gates: N/A; Visual check only.
     - Traceability: PRD Visual Language.
