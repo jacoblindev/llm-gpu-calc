@@ -1,6 +1,6 @@
 <template>
-  <aside class="bg-surface border rounded-md p-4">
-    <h2 class="text-lg font-semibold">Results Preview</h2>
+  <aside class="bg-surface border rounded-md p-4" role="region" aria-labelledby="preview-title">
+    <h2 id="preview-title" class="text-lg font-semibold">Results Preview</h2>
     <div v-if="state.deployments.length > 0" class="mt-2 flex flex-wrap items-center gap-2 text-sm">
       <label class="text-muted">Active deployment:</label>
       <select v-model="activeId" class="px-2 py-1 bg-bg border rounded">
@@ -11,14 +11,18 @@
           <span class="text-muted">len</span>
           <button class="px-2 py-1 rounded bg-surface border" @click="decLen()">-</button>
           <div class="flex flex-col">
-            <input class="w-20 sm:w-24 px-2 py-1 bg-bg border rounded" type="number" min="0" step="128" v-model.number="len" @blur="onLenBlur" @keydown="onLenKey" />
-            <span v-if="lenErr" class="text-[11px] text-danger">{{ lenErr }}</span>
+            <input class="w-20 sm:w-24 px-2 py-1 bg-bg border rounded" type="number" min="0" step="128"
+              v-model.number="len" @blur="onLenBlur" @keydown="onLenKey"
+              :aria-invalid="!!lenErr" :aria-describedby="lenErr ? 'len-hint' : undefined" />
+            <span v-if="lenErr" id="len-hint" class="text-[11px] text-danger">{{ lenErr }}</span>
           </div>
           <span class="text-muted">seqs</span>
           <button class="px-2 py-1 rounded bg-surface border" @click="decSeq()">-</button>
           <div class="flex flex-col">
-            <input class="w-14 sm:w-16 px-2 py-1 bg-bg border rounded" type="number" min="1" step="1" v-model.number="seqs" @blur="onSeqBlur" @keydown="onSeqKey" />
-            <span v-if="seqErr" class="text-[11px] text-danger">{{ seqErr }}</span>
+            <input class="w-14 sm:w-16 px-2 py-1 bg-bg border rounded" type="number" min="1" step="1"
+              v-model.number="seqs" @blur="onSeqBlur" @keydown="onSeqKey"
+              :aria-invalid="!!seqErr" :aria-describedby="seqErr ? 'seq-hint' : undefined" />
+            <span v-if="seqErr" id="seq-hint" class="text-[11px] text-danger">{{ seqErr }}</span>
           </div>
         </div>
         <button class="px-2 py-1 rounded bg-primary text-white disabled:opacity-50" :disabled="!canApply" @click="apply">Apply</button>
@@ -28,13 +32,14 @@
       <!-- Bars recompute from temporary overrides without mutating App state -->
       <PerGpuBars :bars="previewBars" />
     </div>
+    <div class="sr-only" role="status" aria-live="polite">{{ announce }}</div>
   </aside>
 </template>
 
 <script setup lang="ts">
 import type { AppState } from '@app/state'
 import PerGpuBars from '@ui/PerGpuBars.vue'
-import { computed, reactive, watch, ref } from 'vue'
+import { computed, reactive, watch, ref, nextTick } from 'vue'
 import { buildPerGpuBarsWithOverrides, type DeploymentOverride } from '@app/controller'
 import { normalizeMaxModelLenInput, normalizeMaxNumSeqsInput, stepMaxModelLen, stepMaxNumSeqs, adjustByKey, validateMaxModelLen, validateMaxNumSeqs } from '@shared/controls'
 
@@ -52,10 +57,13 @@ watch(() => props.state.deployments.length, (n) => {
 const temp = reactive({ len: 0, seqs: 1 })
 
 // Seed from current state when active changes
+const suppressAnnounce = ref(false)
 watch(() => activeId.value, (id) => {
+  suppressAnnounce.value = true
   const d = props.state.deployments.find(x => x.id === id!)
   temp.len = d?.maxModelLen ?? 0
   temp.seqs = d?.maxNumSeqs ?? 1
+  nextTick(() => { suppressAnnounce.value = false })
 })
 
 const len = computed({ get: () => temp.len, set: (v: number) => temp.len = Math.floor(v || 0) })
@@ -68,6 +76,22 @@ const overrides = computed<DeploymentOverride[]>(() => activeId.value ? [{ id: a
 const previewBars = computed(() => buildPerGpuBarsWithOverrides(props.state, overrides.value))
 
 const canApply = computed(() => !!activeId.value && !lenErr.value && !seqErr.value)
+
+// Announce value changes for screen readers
+const announce = ref('')
+function withAnnounceSuppressed(fn: () => void) {
+  if (!suppressAnnounce.value) fn()
+}
+watch(() => len.value, (v, ov) => {
+  withAnnounceSuppressed(() => {
+    if (v !== ov) announce.value = `Length ${v} tokens`
+  })
+})
+watch(() => seqs.value, (v, ov) => {
+  withAnnounceSuppressed(() => {
+    if (v !== ov) announce.value = `Sequences ${v}`
+  })
+})
 
 function onLenBlur() { len.value = normalizeMaxModelLenInput(len.value) }
 function onSeqBlur() { seqs.value = normalizeMaxNumSeqsInput(seqs.value) }
