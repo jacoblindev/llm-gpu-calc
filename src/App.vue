@@ -1,7 +1,7 @@
 <template>
-  <main class="min-h-dvh bg-bg text-text p-6">
-    <TopBar :dark="dark" @toggle-theme="dark = !dark" />
-    <section class="mt-4 space-y-4">
+  <main class="min-h-dvh bg-bg text-text flex flex-col">
+    <TopBar :dark="dark" :state="state" @toggle-theme="dark = !dark" />
+    <section class="mt-4 mb-6 space-y-4 px-6">
       <Stepper :steps="steps" :current="currentStep" />
       <div class="grid gap-4 lg:grid-cols-[2fr_1fr] items-start">
         <!-- Main column -->
@@ -16,7 +16,6 @@
             <DeploymentWorkload :state="state" />
           </div>
           <div v-else class="space-y-4">
-            <GlobalControls :state="state" />
             <ResultsStub :state="state" />
             <Legend />
             <PerGpuBars :state="state" />
@@ -28,7 +27,7 @@
         </div>
 
         <!-- Preview column (sticky layout; visibility wired in 0.2) -->
-        <div class="lg:sticky lg:top-4" v-if="shouldShowPreview(state)">
+        <div class="lg:sticky lg:top-20" v-if="shouldShowPreview(state)">
           <PreviewPanel :state="state" />
         </div>
       </div>
@@ -39,7 +38,6 @@
 
 <script setup lang="ts">
 import { onMounted, watch, ref, reactive, computed } from 'vue'
-import GlobalControls from '@ui/GlobalControls.vue'
 import DeploymentModels from '@ui/DeploymentModels.vue'
 import DeploymentWorkload from '@ui/DeploymentWorkload.vue'
 import ResultsStub from '@ui/ResultsStub.vue'

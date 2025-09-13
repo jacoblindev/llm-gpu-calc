@@ -6,10 +6,10 @@
         <span class="sm:hidden">vRAM Calc</span>
       </h1>
       <div class="actions">
-        <button
-          class="btn"
-          @click="$emit('toggle-theme')"
-        >
+        <button class="btn" @click="toggleUnit" :aria-label="`Toggle units (current ${state.unit})`" title="Toggle units">
+          Units: {{ state.unit }}
+        </button>
+        <button class="btn" @click="$emit('toggle-theme')">
           Toggle {{ dark ? 'Light' : 'Dark' }}
         </button>
       </div>
@@ -19,8 +19,16 @@
 </template>
 
 <script setup lang="ts">
-defineProps<{ dark: boolean }>()
+import type { AppState } from '@app/state'
+import { setUnit } from '@app/controller'
+
+const props = defineProps<{ dark: boolean; state: AppState }>()
 defineEmits<{ (e: 'toggle-theme'): void }>()
+
+function toggleUnit() {
+  const next = props.state.unit === 'GiB' ? 'GB' : 'GiB'
+  setUnit(props.state, next)
+}
 </script>
 
 <style scoped>
@@ -36,7 +44,7 @@ defineEmits<{ (e: 'toggle-theme'): void }>()
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0.75rem 0; /* 12px vertical rhythm */
+  padding: 0.75rem 1.5rem; /* 12px vert, 24px horiz */
 }
 .title {
   font-size: 1.25rem;
@@ -54,4 +62,5 @@ defineEmits<{ (e: 'toggle-theme'): void }>()
 }
 .btn:active { transform: translateY(1px); }
 .btn:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 2px; }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
 </style>

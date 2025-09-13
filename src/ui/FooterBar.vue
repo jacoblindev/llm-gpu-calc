@@ -24,7 +24,7 @@ const adrUrl = 'https://github.com/jacoblindev/llm-gpu-calc/tree/main/docs/adr'
 
 <style scoped>
 .footer {
-  margin-top: 1.5rem;
+  margin-top: auto; /* push to bottom when content is short (inside flex column) */
   border-top: 1px solid var(--border-color);
   background: color-mix(in srgb, var(--color-surface) 80%, transparent);
 }
@@ -32,11 +32,10 @@ const adrUrl = 'https://github.com/jacoblindev/llm-gpu-calc/tree/main/docs/adr'
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0.75rem 0; /* 12px */
+  padding: 0.75rem 1.5rem; /* 12px vert, 24px horiz */
 }
 .muted { color: var(--color-muted); font-size: 0.875rem; }
 .links { display: flex; align-items: center; gap: 0.5rem; }
 .links a { color: var(--color-text); text-decoration: none; opacity: 0.8; transition: opacity 150ms ease; }
 .links a:hover { opacity: 1; text-decoration: underline; }
 </style>
-
