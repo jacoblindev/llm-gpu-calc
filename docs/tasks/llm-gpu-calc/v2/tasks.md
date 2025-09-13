@@ -73,7 +73,7 @@ Repo assessment (concise)
     - Traceability: PRD Validation & Warnings.
     - Est: 0.5–1h
 
-- [ ] 3.0 Visual language & tokens
+- [x] 3.0 Visual language & tokens
   - [x] 3.1 Tune `src/styles/tokens.css` to muted Apple‑like palette; maintain AA contrast in dark/light
     - Acceptance: Color variables updated; contrast verified; no regressions in existing components.
     - Gates: N/A; Boundaries unaffected.

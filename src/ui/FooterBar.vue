@@ -4,8 +4,6 @@
       <div class="muted">v{{ version }}</div>
       <nav class="links">
         <a :href="repoUrl" target="_blank" rel="noopener noreferrer">GitHub</a>
-        <span aria-hidden="true">·</span>
-        <a :href="adrUrl" target="_blank" rel="noopener noreferrer">ADRs</a>
       </nav>
     </div>
   </footer>
@@ -19,7 +17,6 @@ import pkg from '../../package.json'
 
 const version = (pkg as any).version as string
 const repoUrl = 'https://github.com/jacoblindev/llm-gpu-calc'
-const adrUrl = 'https://github.com/jacoblindev/llm-gpu-calc/tree/main/docs/adr'
 </script>
 
 <style scoped>

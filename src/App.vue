@@ -22,7 +22,13 @@
           </div>
           <div class="flex items-center justify-between pt-2">
             <button class="px-3 py-1.5 rounded bg-surface border" :disabled="currentStep === 0" @click="prev">Back</button>
-            <button class="px-3 py-1.5 rounded bg-primary text-white disabled:opacity-50" :disabled="!canNext" @click="next">{{ currentStep < steps.length - 1 ? 'Next' : 'Done' }}</button>
+            <button
+              :class="isLastStep
+                ? 'px-3 py-1.5 rounded bg-surface border text-muted cursor-default'
+                : 'px-3 py-1.5 rounded bg-primary text-white disabled:opacity-50'"
+              :disabled="isLastStep || !canNext"
+              @click="next"
+            >{{ isLastStep ? 'Done' : 'Next' }}</button>
           </div>
         </div>
 
@@ -74,6 +80,7 @@ const canNext = computed(() => {
   if (currentStep.value === 2) return state.deployments.every(d => d.assignedGpuIds.length > 0)
   return true
 })
+const isLastStep = computed(() => currentStep.value >= steps.length - 1)
 function next() { if (canNext.value && currentStep.value < steps.length - 1) currentStep.value++ }
 function prev() { if (currentStep.value > 0) currentStep.value-- }
 </script>
