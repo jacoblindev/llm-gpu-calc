@@ -28,6 +28,17 @@
         <button class="px-2 py-1 rounded bg-primary text-white disabled:opacity-50" :disabled="!canApply" @click="apply">Apply</button>
       </div>
     </div>
+    <!-- Notices: concise and non-intrusive; link to full Results -->
+    <div v-if="hasNotices" class="mt-2">
+      <div :class="['notice', hasError ? 'error' : 'warning']">
+        <div class="msg">
+          <span v-if="hasError">{{ errorSummary }}</span>
+          <span v-else>{{ warnSummary }}</span>
+        </div>
+        <button type="button" class="link" @click="$emit('goto-results')">See details</button>
+      </div>
+    </div>
+
     <div class="mt-2">
       <!-- Bars recompute from temporary overrides without mutating App state -->
       <PerGpuBars :bars="previewBars" />
@@ -40,7 +51,7 @@
 import type { AppState } from '@app/state'
 import PerGpuBars from '@ui/PerGpuBars.vue'
 import { computed, reactive, watch, ref, nextTick } from 'vue'
-import { buildPerGpuBarsWithOverrides, type DeploymentOverride } from '@app/controller'
+import { buildPerGpuBarsWithOverrides, type DeploymentOverride, buildPerGpuFitStatus } from '@app/controller'
 import { normalizeMaxModelLenInput, normalizeMaxNumSeqsInput, stepMaxModelLen, stepMaxNumSeqs, adjustByKey, validateMaxModelLen, validateMaxNumSeqs } from '@shared/controls'
 
 const props = defineProps<{ state: AppState }>()
@@ -106,8 +117,27 @@ function apply() {
   d.maxModelLen = len.value
   d.maxNumSeqs = seqs.value
 }
+
+// Fit/warning summaries for preview
+const fit = computed(() => buildPerGpuFitStatus(props.state))
+const warnCount = computed(() => fit.value.filter(s => (s.reason || '').includes('High utilization')).length)
+const minimalKvCount = computed(() => fit.value.filter(s => (s.reason || '').includes('Minimal KV not met')).length)
+const overCount = computed(() => fit.value.filter(s => (s.reason || '').includes('Over capacity') || !s.ok).length)
+const hasError = computed(() => overCount.value > 0 || minimalKvCount.value > 0)
+const hasWarn = computed(() => warnCount.value > 0)
+const hasNotices = computed(() => hasError.value || hasWarn.value)
+const errorSummary = computed(() => {
+  if (overCount.value > 0) return `Over capacity or no headroom on ${overCount.value} GPU(s)`
+  if (minimalKvCount.value > 0) return `Minimal KV not met on ${minimalKvCount.value} GPU(s)`
+  return ''
+})
+const warnSummary = computed(() => warnCount.value > 0 ? `High utilization >95% on ${warnCount.value} GPU(s)` : '')
 </script>
 
 <style scoped>
 .text-danger { color: var(--color-danger); }
+.notice { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; padding: 0.5rem 0.75rem; border: 1px solid var(--border-color); border-left-width: 4px; border-radius: 0.5rem; background: color-mix(in srgb, var(--color-surface) 90%, transparent); }
+.notice.error { border-left-color: var(--color-danger); }
+.notice.warning { border-left-color: var(--color-warning); }
+.link { color: var(--color-primary); text-decoration: underline; }
 </style>

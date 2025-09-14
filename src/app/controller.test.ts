@@ -255,6 +255,43 @@ describe('controller: bars and fit status', () => {
     expect(status[0].reason).toMatch(/Over capacity or no headroom/);
     expect(status[0].free).toBe(0);
   });
+
+  it('fit status includes a high utilization warning (>95%) when nearly saturated', () => {
+    const state = baseState();
+    // Single 24 GiB GPU
+    state.gpus = [makeGpu('g1', 'G1', 24)];
+    // Tune model/params to put weights near budget and add ~1.2 GiB KV
+    const model = makeModel({ paramsB: 11 }); // ~21 GiB weights on fp16-ish
+    state.models = [model];
+    const dep: Deployment = {
+      id: 'd', modelId: model.id, assignedGpuIds: ['g1'], tp: 1,
+      weightDtype: 'bf16', kvDtype: 'fp16', kvOverheadPct: 0.1, replicationOverheadPct: 0.02,
+      maxModelLen: 4096, maxNumSeqs: 2, // ~8192 tokens → ~1.2 GiB KV
+      utilizationShare: 0.96,
+    };
+    state.deployments = [dep];
+    const status = buildPerGpuFitStatus(state);
+    const s1 = status.find(s => s.gpuId === 'g1')!;
+    expect(s1.ok).toBe(true);
+    expect(s1.reason || '').toMatch(/High utilization > 95%/);
+  });
+
+  it('fit status flags minimal KV not met as error when workload tokens = 0', () => {
+    const state = baseState();
+    state.gpus = [makeGpu('g1', 'G1', 24)];
+    const model = makeModel({ paramsB: 1 });
+    state.models = [model];
+    const dep: Deployment = {
+      id: 'd', modelId: model.id, assignedGpuIds: ['g1'], tp: 1,
+      weightDtype: 'bf16', kvDtype: 'fp16', kvOverheadPct: 0.1, replicationOverheadPct: 0.02,
+      maxModelLen: 0, maxNumSeqs: 1, utilizationShare: 0.5,
+    };
+    state.deployments = [dep];
+    const status = buildPerGpuFitStatus(state);
+    const s = status[0];
+    expect(s.ok).toBe(false);
+    expect(s.reason || '').toMatch(/Minimal KV not met/);
+  });
 });
 
 describe('controller: validation and selection', () => {

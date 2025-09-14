@@ -13,6 +13,7 @@
             <span class="text-muted">ΣU:</span> <span class="font-medium">{{ r.util.toFixed(2) }}</span>
             <span class="ml-3 text-muted">Implied reserve:</span> <span class="font-medium">{{ (r.reserve * 100).toFixed(0) }}%</span>
             <span v-if="r.util > 1" class="ml-2 text-danger">over 100%</span>
+            <span v-else-if="r.util > 0.95" class="ml-2 text-warning">high &gt;95%</span>
           </div>
           <div class="mt-1 text-sm">
             <span class="text-muted">Approx used (weights+KV):</span>
@@ -21,7 +22,7 @@
           <div v-if="fit[r.gpuId]" class="mt-1 text-sm">
             <span class="text-muted">Status:</span>
             <span :class="fit[r.gpuId].ok ? 'text-success' : 'text-danger'">{{ fit[r.gpuId].ok ? 'OK' : 'Over' }}</span>
-            <span v-if="fit[r.gpuId].reason" class="ml-2 text-muted">{{ fit[r.gpuId].reason }}</span>
+            <span v-if="fit[r.gpuId].reason" :class="['ml-2', reasonStyle(fit[r.gpuId])]">{{ fit[r.gpuId].reason }}</span>
           </div>
         </li>
       </ul>
@@ -100,6 +101,10 @@ function uShare(d: AppState['deployments'][number]) { return d.utilizationShare 
 function suggest(id: string) { return computeDeploymentSuggestions(props.state, id) }
 function applyLen(id: string) { applySuggestedMaxModelLen(props.state, id) }
 function applySeq(id: string) { applySuggestedMaxNumSeqs(props.state, id) }
+function reasonStyle(s: { ok: boolean; reason?: string }) {
+  if (s.reason && s.reason.includes('High utilization')) return 'text-warning'
+  return s.ok ? 'text-muted' : 'text-danger'
+}
 </script>
 
 <style scoped>
