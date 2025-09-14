@@ -123,7 +123,7 @@ Repo assessment (concise)
     - Gates: Tests (assertion); Boundaries.
     - Traceability: PRD Validation & Warnings; ADR‑0005.
     - Est: 1–2h
-  - [ ] 5.2 Non‑intrusive notice styling; link to details in Results view
+  - [x] 5.2 Non‑intrusive notice styling; link to details in Results view
     - Acceptance: Notices are concise; link navigates to full Results; no modals.
     - Gates: N/A.
     - Traceability: PRD Visualization.

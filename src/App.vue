@@ -16,6 +16,7 @@
             <DeploymentWorkload :state="state" />
           </div>
           <div v-else class="space-y-4">
+            <h2 id="results-anchor" class="sr-only" tabindex="-1">Results</h2>
             <ResultsStub :state="state" />
             <Legend />
             <PerGpuBars :state="state" />
@@ -34,7 +35,7 @@
 
         <!-- Preview column (sticky layout; visibility wired in 0.2) -->
         <div class="lg:sticky lg:top-20" v-if="shouldShowPreview(state)">
-          <PreviewPanel :state="state" />
+          <PreviewPanel :state="state" @goto-results="gotoResults" />
         </div>
       </div>
     </section>
@@ -43,7 +44,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, watch, ref, reactive, computed } from 'vue'
+import { onMounted, watch, ref, reactive, computed, nextTick } from 'vue'
 import DeploymentModels from '@ui/DeploymentModels.vue'
 import DeploymentWorkload from '@ui/DeploymentWorkload.vue'
 import ResultsStub from '@ui/ResultsStub.vue'
@@ -83,4 +84,11 @@ const canNext = computed(() => {
 const isLastStep = computed(() => currentStep.value >= steps.length - 1)
 function next() { if (canNext.value && currentStep.value < steps.length - 1) currentStep.value++ }
 function prev() { if (currentStep.value > 0) currentStep.value-- }
+function gotoResults() {
+  currentStep.value = steps.length - 1
+  nextTick(() => {
+    const el = document.getElementById('results-anchor')
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  })
+}
 </script>
