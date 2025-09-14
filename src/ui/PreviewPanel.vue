@@ -1,0 +1,143 @@
+<template>
+  <aside class="bg-surface border rounded-md p-4" role="region" aria-labelledby="preview-title">
+    <h2 id="preview-title" class="text-lg font-semibold">Results Preview</h2>
+    <div v-if="state.deployments.length > 0" class="mt-2 flex flex-wrap items-center gap-2 text-sm">
+      <label class="text-muted">Active deployment:</label>
+      <select v-model="activeId" class="px-2 py-1 bg-bg border rounded">
+        <option v-for="d in state.deployments" :key="d.id" :value="d.id">{{ modelName(d.modelId) || d.id }}</option>
+      </select>
+      <div class="ml-auto flex items-stretch gap-1 flex-wrap sm:flex-nowrap">
+        <div class="flex items-center gap-2">
+          <span class="text-muted">len</span>
+          <button class="px-2 py-1 rounded bg-surface border" @click="decLen()">-</button>
+          <div class="flex flex-col">
+            <input class="w-20 sm:w-24 px-2 py-1 bg-bg border rounded" type="number" min="0" step="128"
+              v-model.number="len" @blur="onLenBlur" @keydown="onLenKey"
+              :aria-invalid="!!lenErr" :aria-describedby="lenErr ? 'len-hint' : undefined" />
+            <span v-if="lenErr" id="len-hint" class="text-[11px] text-danger">{{ lenErr }}</span>
+          </div>
+          <span class="text-muted">seqs</span>
+          <button class="px-2 py-1 rounded bg-surface border" @click="decSeq()">-</button>
+          <div class="flex flex-col">
+            <input class="w-14 sm:w-16 px-2 py-1 bg-bg border rounded" type="number" min="1" step="1"
+              v-model.number="seqs" @blur="onSeqBlur" @keydown="onSeqKey"
+              :aria-invalid="!!seqErr" :aria-describedby="seqErr ? 'seq-hint' : undefined" />
+            <span v-if="seqErr" id="seq-hint" class="text-[11px] text-danger">{{ seqErr }}</span>
+          </div>
+        </div>
+        <button class="px-2 py-1 rounded bg-primary text-white disabled:opacity-50" :disabled="!canApply" @click="apply">Apply</button>
+      </div>
+    </div>
+    <!-- Notices: concise and non-intrusive; link to full Results -->
+    <div v-if="hasNotices" class="mt-2">
+      <div :class="['notice', hasError ? 'error' : 'warning']">
+        <div class="msg">
+          <span v-if="hasError">{{ errorSummary }}</span>
+          <span v-else>{{ warnSummary }}</span>
+        </div>
+        <button type="button" class="link" @click="$emit('goto-results')">See details</button>
+      </div>
+    </div>
+
+    <div class="mt-2">
+      <!-- Bars recompute from temporary overrides without mutating App state -->
+      <PerGpuBars :bars="previewBars" />
+    </div>
+    <div class="sr-only" role="status" aria-live="polite">{{ announce }}</div>
+  </aside>
+</template>
+
+<script setup lang="ts">
+import type { AppState } from '@app/state'
+import PerGpuBars from '@ui/PerGpuBars.vue'
+import { computed, reactive, watch, ref, nextTick } from 'vue'
+import { buildPerGpuBarsWithOverrides, type DeploymentOverride, buildPerGpuFitStatus } from '@app/controller'
+import { normalizeMaxModelLenInput, normalizeMaxNumSeqsInput, stepMaxModelLen, stepMaxNumSeqs, adjustByKey, validateMaxModelLen, validateMaxNumSeqs } from '@shared/controls'
+
+const props = defineProps<{ state: AppState }>()
+
+function modelName(id: string) { return props.state.models.find(m => m.id === id)?.name }
+
+// Active deployment selection
+const activeId = ref<string | null>(props.state.deployments[0]?.id ?? null)
+watch(() => props.state.deployments.length, (n) => {
+  if (n > 0 && !activeId.value) activeId.value = props.state.deployments[0]?.id ?? null
+})
+
+// Temporary UI state for adjustable preview
+const temp = reactive({ len: 0, seqs: 1 })
+
+// Seed from current state when active changes
+const suppressAnnounce = ref(false)
+watch(() => activeId.value, (id) => {
+  suppressAnnounce.value = true
+  const d = props.state.deployments.find(x => x.id === id!)
+  temp.len = d?.maxModelLen ?? 0
+  temp.seqs = d?.maxNumSeqs ?? 1
+  nextTick(() => { suppressAnnounce.value = false })
+})
+
+const len = computed({ get: () => temp.len, set: (v: number) => temp.len = Math.floor(v || 0) })
+const seqs = computed({ get: () => temp.seqs, set: (v: number) => temp.seqs = Math.floor(v || 1) })
+
+const lenErr = computed(() => validateMaxModelLen(len.value))
+const seqErr = computed(() => validateMaxNumSeqs(seqs.value))
+
+const overrides = computed<DeploymentOverride[]>(() => activeId.value ? [{ id: activeId.value, maxModelLen: len.value, maxNumSeqs: seqs.value }] : [])
+const previewBars = computed(() => buildPerGpuBarsWithOverrides(props.state, overrides.value))
+
+const canApply = computed(() => !!activeId.value && !lenErr.value && !seqErr.value)
+
+// Announce value changes for screen readers
+const announce = ref('')
+function withAnnounceSuppressed(fn: () => void) {
+  if (!suppressAnnounce.value) fn()
+}
+watch(() => len.value, (v, ov) => {
+  withAnnounceSuppressed(() => {
+    if (v !== ov) announce.value = `Length ${v} tokens`
+  })
+})
+watch(() => seqs.value, (v, ov) => {
+  withAnnounceSuppressed(() => {
+    if (v !== ov) announce.value = `Sequences ${v}`
+  })
+})
+
+function onLenBlur() { len.value = normalizeMaxModelLenInput(len.value) }
+function onSeqBlur() { seqs.value = normalizeMaxNumSeqsInput(seqs.value) }
+function decLen() { len.value = stepMaxModelLen(len.value, -1) }
+function decSeq() { seqs.value = stepMaxNumSeqs(seqs.value, -1) }
+function onLenKey(e: KeyboardEvent) { const v = adjustByKey(len.value, e.key, 128, 0); if (v !== len.value) { len.value = v; e.preventDefault() } }
+function onSeqKey(e: KeyboardEvent) { const v = adjustByKey(seqs.value, e.key, 1, 1); if (v !== seqs.value) { seqs.value = v; e.preventDefault() } }
+function apply() {
+  if (!activeId.value) return
+  const d = props.state.deployments.find(x => x.id === activeId.value)
+  if (!d) return
+  d.maxModelLen = len.value
+  d.maxNumSeqs = seqs.value
+}
+
+// Fit/warning summaries for preview
+const fit = computed(() => buildPerGpuFitStatus(props.state))
+const warnCount = computed(() => fit.value.filter(s => (s.reason || '').includes('High utilization')).length)
+const minimalKvCount = computed(() => fit.value.filter(s => (s.reason || '').includes('Minimal KV not met')).length)
+const overCount = computed(() => fit.value.filter(s => (s.reason || '').includes('Over capacity') || !s.ok).length)
+const hasError = computed(() => overCount.value > 0 || minimalKvCount.value > 0)
+const hasWarn = computed(() => warnCount.value > 0)
+const hasNotices = computed(() => hasError.value || hasWarn.value)
+const errorSummary = computed(() => {
+  if (overCount.value > 0) return `Over capacity or no headroom on ${overCount.value} GPU(s)`
+  if (minimalKvCount.value > 0) return `Minimal KV not met on ${minimalKvCount.value} GPU(s)`
+  return ''
+})
+const warnSummary = computed(() => warnCount.value > 0 ? `High utilization >95% on ${warnCount.value} GPU(s)` : '')
+</script>
+
+<style scoped>
+.text-danger { color: var(--color-danger); }
+.notice { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; padding: 0.5rem 0.75rem; border: 1px solid var(--border-color); border-left-width: 4px; border-radius: 0.5rem; background: color-mix(in srgb, var(--color-surface) 90%, transparent); }
+.notice.error { border-left-color: var(--color-danger); }
+.notice.warning { border-left-color: var(--color-warning); }
+.link { color: var(--color-primary); text-decoration: underline; }
+</style>

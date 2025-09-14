@@ -14,6 +14,7 @@ A calculator to visualize GPU vRAM usages with LLM deployment via vLLM.
 
 - Runtime deps require an ADR and approval (see `docs/adr/ADR-0004-dependency-policy.md`).
 - Initial stack approved in ADR-0001 (Vue/Pinia/Vite) and ADR-0003 (Tailwind CSS).
+- v2: No new runtime dependencies. Any exception requires an ADR referencing ADR-0007 and ADR-0004.
 
 ## Development
 

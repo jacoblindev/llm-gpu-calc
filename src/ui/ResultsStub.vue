@@ -1,10 +1,10 @@
 <template>
   <div class="space-y-4">
-    <div class="bg-surface border border-muted/30 rounded-md p-4">
+    <div class="bg-surface border rounded-md p-4">
       <h2 class="text-lg font-semibold">Selected GPUs</h2>
       <div v-if="state.gpus.length === 0" class="text-muted mt-2">No GPUs selected.</div>
       <ul v-else class="mt-2 grid md:grid-cols-2 lg:grid-cols-3 gap-2">
-        <li v-for="r in results" :key="r.gpuId" class="border border-muted/30 rounded p-2">
+        <li v-for="r in results" :key="r.gpuId" class="border rounded p-3">
           <div class="flex items-center justify-between">
             <span>{{ r.gpuName }}</span>
             <span class="text-sm text-muted">{{ format(r.capacityBytes) }}</span>
@@ -13,6 +13,7 @@
             <span class="text-muted">ΣU:</span> <span class="font-medium">{{ r.util.toFixed(2) }}</span>
             <span class="ml-3 text-muted">Implied reserve:</span> <span class="font-medium">{{ (r.reserve * 100).toFixed(0) }}%</span>
             <span v-if="r.util > 1" class="ml-2 text-danger">over 100%</span>
+            <span v-else-if="r.util > 0.95" class="ml-2 text-warning">high &gt;95%</span>
           </div>
           <div class="mt-1 text-sm">
             <span class="text-muted">Approx used (weights+KV):</span>
@@ -21,16 +22,16 @@
           <div v-if="fit[r.gpuId]" class="mt-1 text-sm">
             <span class="text-muted">Status:</span>
             <span :class="fit[r.gpuId].ok ? 'text-success' : 'text-danger'">{{ fit[r.gpuId].ok ? 'OK' : 'Over' }}</span>
-            <span v-if="fit[r.gpuId].reason" class="ml-2 text-muted">{{ fit[r.gpuId].reason }}</span>
+            <span v-if="fit[r.gpuId].reason" :class="['ml-2', reasonStyle(fit[r.gpuId])]">{{ fit[r.gpuId].reason }}</span>
           </div>
         </li>
       </ul>
     </div>
 
-    <div class="bg-surface border border-muted/30 rounded-md p-4">
+    <div class="bg-surface border rounded-md p-4">
       <h2 class="text-lg font-semibold">Deployments</h2>
       <div v-if="state.deployments.length === 0" class="text-muted mt-2">No deployments configured.</div>
-      <div v-for="d in state.deployments" :key="d.id" class="mt-3 border border-muted/30 rounded p-3">
+      <div v-for="d in state.deployments" :key="d.id" class="mt-3 border rounded p-3">
         <div class="flex items-center justify-between">
           <div class="font-medium">{{ modelName(d.modelId) || 'Select model' }}</div>
           <div class="text-sm text-muted">Deployment: {{ d.id }}</div>
@@ -49,11 +50,11 @@
         </div>
         <div class="mt-2 flex flex-wrap gap-2 text-sm">
           <span class="text-muted">Suggestions:</span>
-          <button class="px-2 py-1 rounded bg-surface border border-muted/30"
+          <button class="px-2 py-1 rounded bg-surface border"
             @click="applyLen(d.id)">
             max_model_len = {{ suggest(d.id).maxModelLen }}
           </button>
-          <button class="px-2 py-1 rounded bg-surface border border-muted/30"
+          <button class="px-2 py-1 rounded bg-surface border"
             @click="applySeq(d.id)">
             max_num_seqs = {{ suggest(d.id).maxNumSeqs }}
           </button>
@@ -100,6 +101,10 @@ function uShare(d: AppState['deployments'][number]) { return d.utilizationShare 
 function suggest(id: string) { return computeDeploymentSuggestions(props.state, id) }
 function applyLen(id: string) { applySuggestedMaxModelLen(props.state, id) }
 function applySeq(id: string) { applySuggestedMaxNumSeqs(props.state, id) }
+function reasonStyle(s: { ok: boolean; reason?: string }) {
+  if (s.reason && s.reason.includes('High utilization')) return 'text-warning'
+  return s.ok ? 'text-muted' : 'text-danger'
+}
 </script>
 
 <style scoped>
