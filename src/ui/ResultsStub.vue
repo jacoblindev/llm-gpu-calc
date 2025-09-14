@@ -13,6 +13,7 @@
             <span class="text-muted">ΣU:</span> <span class="font-medium">{{ r.util.toFixed(2) }}</span>
             <span class="ml-3 text-muted">Implied reserve:</span> <span class="font-medium">{{ (r.reserve * 100).toFixed(0) }}%</span>
             <span v-if="r.util > 1" class="ml-2 text-danger">over 100%</span>
+            <span v-else-if="r.util > 0.95" class="ml-2 text-warning">high &gt;95%</span>
           </div>
           <div class="mt-1 text-sm">
             <span class="text-muted">Approx used (weights+KV):</span>
