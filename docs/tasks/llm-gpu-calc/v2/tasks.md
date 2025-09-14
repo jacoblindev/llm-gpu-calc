@@ -129,18 +129,18 @@ Repo assessment (concise)
     - Traceability: PRD Visualization.
     - Est: 0.5h
 
-- [ ] X.0 Align & prune tests
-  - [ ] X.1 Remove/update tests that no longer match the UI flow (same PR)
+- [x] X.0 Align & prune tests
+  - [x] X.1 Remove/update tests that no longer match the UI flow (same PR)
     - Acceptance: No spurious failures from UI changes; tests updated or removed.
     - Gates: Tests.
     - Traceability: Rules — Align & prune tests.
     - Est: 0.5–1h
-  - [ ] X.2 Add/adjust tests for new public behavior only (preview rendering, keyboard nav, adjustable Apply)
+  - [x] X.2 Add/adjust tests for new public behavior only (preview rendering, keyboard nav, adjustable Apply)
     - Acceptance: Smoke tests cover preview rendering, keyboard nav, adjustable Apply; domain tests unaffected.
     - Gates: Tests; Boundaries.
     - Traceability: PRD Test Strategy; ARCH‑v2.
     - Est: 1–2h
-  - [ ] X.3 Keep runtime reasonable; rely on unit/smoke tests; avoid brittle snapshots
+  - [x] X.3 Keep runtime reasonable; rely on unit/smoke tests; avoid brittle snapshots
     - Acceptance: `npm test` + typecheck complete quickly locally.
     - Gates: Test runtime.
     - Traceability: Rules — Generate Tasks (runtime budget).
