@@ -117,7 +117,7 @@ Repo assessment (concise)
     - Traceability: PRD Recommendations (Adjustable); ARCH‑v2 Controls.
     - Est: 1h
 
-- [ ] 5.0 Fit/warnings in preview
+- [x] 5.0 Fit/warnings in preview
   - [x] 5.1 Show ΣU and implied reserve per GPU; reflect warnings when ΣU>0.95 and errors when over capacity/min KV not viable
     - Acceptance: Deterministic state renders expected warnings/errors.
     - Gates: Tests (assertion); Boundaries.
