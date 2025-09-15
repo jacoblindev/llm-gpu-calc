@@ -13,6 +13,7 @@ Slug: llm-gpu-calc
 5) Sorting/filtering defaults? — Sort by Status severity (Over > Warn > OK), then Used% desc; no filters active by default.
 6) Accessibility? — Full keyboard navigation and ARIA labels; tile-level focusable interactions; WCAG AA color contrast.
 7) Dependencies? — No new runtime deps; custom CSS/SVG only; ADR required before adding any new runtime library.
+8) Visual style? — Futuristic sci‑fi, but minimal and high‑contrast (“Synthwave Minimal”).
 
 ---
 
@@ -65,6 +66,14 @@ v2 introduced a refined UI with a guided stepper and a sticky preview. For v3 we
   - Footer shows: “Used XX% • Reserve YY% • Free ZZ%”. Values reconcile with cell counts within rounding error.
   - Tooltip/focus reveals exact bytes and percentages for Used (with weights/kv split), Reserve, and Free.
 
+- Layout & Navigation — Canvas + Dual Drawers
+  - Default view is Viz‑first: the waffle grid fills the main canvas on both desktop and mobile.
+  - Control Dock (left overlay drawer): Tabbed editor for GPUs, Deployments/Models, and Workload; opens over the canvas without reflow. Keyboard: `E` toggles; ESC closes; focus is trapped while open; opening returns focus to the invoker on close.
+  - Insights Drawer (right overlay): Lists per‑GPU status (OK/Warn/Over with reason) and Suggestions (Apply: `applySuggestedMaxModelLen/NumSeqs`). Keyboard: `F` toggles; ESC closes; “Only warnings” chip toggles Status filter.
+  - Tile Inspector (modal): Opens on tile click/Enter; shows per‑GPU details incl. weights vs KV and per‑deployment breakdown; focus is trapped; ESC or close button exits.
+  - Command Strip: Top area with title, KPI ribbon, and compact chips (Sort, Filter, Density, Search). Clicking KPI “Warnings” opens Insights and applies Status=Warn/Over.
+  - No layout shift: drawers and modal overlay the Viz; opening/closing cannot push content; page scroll remains stable.
+
 - Viz Controls (Sort & Filter)
   - Sort options: Status severity, Used% desc, Free% asc, ΣU desc, Capacity desc, Name asc.
   - Filters: Status (OK/Warn/Over), Utilization (ΣU) range, Used% range, Free% range, Vendor/Type multi-select, By deployment, Text search by name/id.
@@ -83,9 +92,12 @@ v2 introduced a refined UI with a guided stepper and a sticky preview. For v3 we
 - Mobile Behavior
   - Editor cards collapse into accordions; only one open by default to reduce scroll.
   - Viz is single-column; tile content fits without horizontal scrolling. Provide a sticky “Back to Editor” button when scrolled into Viz.
+  - Bottom Sheet Editor: Control Dock appears as a bottom sheet (draggable from 20% to 80% height); tiles remain visible underneath on open.
+  - Insights Drawer becomes a full‑height sheet from the right; Inspector is a full‑screen modal.
 
 - Persistence
   - Unit/theme prefs saved (existing behavior). Sort/filter density state persisted to URL query and/or localStorage; “Reset filters” clears state.
+  - App state is managed by a Pinia store; UI reads via `useAppStore()` and does not prop‑drill the entire state tree. Store actions wrap existing controller functions; getters expose derived data.
 
 - Edge Cases
   - Zero GPUs: show calm placeholder in Viz; KPIs reflect zeros.
@@ -97,6 +109,46 @@ v2 introduced a refined UI with a guided stepper and a sticky preview. For v3 we
 - Visual hierarchy: calm KPI strip; evenly sized cards; Viz section dominates below.
 - Legend uses existing domain colors for Weights, KV, Reserve, Free; placed in Viz controls.
 - Status badges: OK (neutral), Warning (high utilization >95% or minimal KV not met), Over (over capacity / not OK).
+
+### Visual Design — Synthwave Minimal (styling spec)
+
+- Palette tokens (theme alias: `theme-synth`)
+  - Base: `--color-bg` #0B0F17; `--color-surface` #111827; `--border-color` #1F2937.
+  - Text: `--color-text` #E5E7EB; `--color-muted` #94A3B8.
+  - Accent: `--color-primary` #22D3EE (hover: #67E8F9).
+  - Status: `--color-success` #10B981; `--color-warning` #F59E0B; `--color-danger` #F43F5E.
+  - Viz/domain: `--color-weights` #8B5CF6; `--color-kv` #22D3EE; `--color-reserve` #334155; `--color-free` #16A34A.
+- Typography
+  - UI: Inter/SF system stack; numbers/labels may use JetBrains Mono for a tech accent.
+  - Headings: slight tracking (+2%); all‑caps only for tiny labels; avoid heavy weight.
+- Surfaces & shapes
+  - Corners: `--radius-md` ~10px; subtle 1px inner stroke (`--panel-inner-stroke`: rgba(255,255,255,0.06)).
+  - Borders: 1px using `--border-color`; minimal shadows.
+- Motion
+  - Micro interactions 140–180ms ease‑out; press translateY(1px); focus adds faint glow ring.
+  - Respect `prefers-reduced-motion`: disable transform/glow animations.
+- Background accents (optional, low opacity)
+  - Radial gradient (cyan/purple) anchored top‑right at ~10–15% opacity.
+  - Dot‑grid (24px spacing, 1px dots rgba(255,255,255,0.04)) beneath panels.
+- Controls
+  - Buttons: flat with border and tiny outer glow on hover; active chip styles for sort/filter.
+  - Focus: high‑contrast ring + faint cyan glow (`--ring-glow`).
+- Waffle tiles
+  - 1px cell gaps; Used splits weights (violet) vs kv (cyan); Reserve deep slate; Free near‑bg.
+  - Tile hover: slight lift + cyan‑tinted border; tooltip uses monospace numerics.
+- Accessibility
+  - Maintain AA contrast in both light/dark; never rely on color alone for status (always include text/badges).
+- Implementation notes
+  - Add a `theme-synth` class on `<html>` that overrides CSS variables in `src/styles/tokens.css` (and `theme-synth.dark` variant).
+  - New tokens: `--ring-glow`, `--grid-dot`, `--panel-inner-stroke`, and reuse `--radius-md`.
+  - Add a TopBar theme menu entry to toggle `theme-synth`; persist user choice in localStorage.
+
+### Keyboard Shortcuts (discoverable via `?`)
+
+- `E`: Toggle Control Dock (Editor)
+- `F`: Toggle Insights Drawer
+- Arrow keys: Move tile focus; `Enter`: open Inspector; `Esc`: close overlay/drawer
+- `/`: Focus search; `G/M/W`: Jump to GPUs/Models/Workload tabs when Control Dock is open
 
 ## Risks & Assumptions
 
@@ -117,7 +169,8 @@ v2 introduced a refined UI with a guided stepper and a sticky preview. For v3 we
 ## Reference Architecture (lean)
 
 - Keep layer-first: UI → App → Domain/Data/Shared; no back-edges. State remains in App; Domain pure.
-- UI reads derived data via App/controller:
+- State management: Use Pinia for the App store. UI components consume the store via `useAppStore()` rather than prop-drilling the whole state.
+- UI reads derived data via App/controller and store getters:
   - `computeResultsStub(state)` for KPIs and coarse metrics.
   - `buildPerGpuBars(state)` to source Used/Reserve/Free and weights/kv totals (aggregate by kind for waffles).
   - `buildPerGpuFitStatus(state)` for status badges and reasons.
@@ -167,6 +220,15 @@ Target layout additions (UI only):
   - Internal Notes: Bytes→cells mapping via largest remainder; focusable tiles; tooltip content; density switch.
 
 Estimated file sizes: each 150–300 LOC; `PerGpuWaffle` ~250–350 LOC including a11y helpers.
+
+App state (Pinia):
+
+- app/store.ts (new)
+  - Responsibility: Central app store using Pinia; owns state previously passed via `reactive(createInitialState())`.
+  - State: `gpuCatalog`, `gpus`, `gpuCounts`, `models`, `deployments`, `utilization`, `reserveBytes`, `unit`.
+  - Actions: `init()`, `loadUnitPreference()`, `setUnit(unit)`, `setGpuCount(typeId, n)`, `incrementGpu(typeId, delta)`, `addDeployment()`, `removeDeployment(id)`, `applySuggestedMaxModelLen(id)`, `applySuggestedMaxNumSeqs(id)` — these wrap functions in `app/controller.ts` and update store state.
+  - Getters: `resultsStub`, `perGpuBars`, `fitStatus`, `kpis` (aggregate KPIs), and view prefs (sort/filter/density) persisted to localStorage/URL.
+  - Notes: Getters delegate to existing controller functions; Domain remains pure.
 
 ## Suggested Size & Complexity Limits
 
