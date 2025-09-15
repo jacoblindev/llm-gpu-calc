@@ -24,8 +24,8 @@ Repo assessment (concise)
     - Gates: Tests (smoke), Boundaries.
     - Traceability: ARCH‑v3 Implementation Notes.
     - Est: 1h
-  - [ ] 0.3 Confirm dependency policy (no new runtime deps); ADR required for exceptions
-    - Acceptance: Tasks/docs reflect policy; ADRs referenced.
+  - [x] 0.3 Confirm dependency policy (no new runtime deps); ADR required for exceptions
+    - Acceptance: Tasks/docs reflect policy; ADRs referenced. Confirmed: No new runtime deps in v3; any virtualization/positioning lib requires ADR per ADR‑0004.
     - Gates: Dependency policy.
     - Traceability: PRD Dependency Policy; ADR‑0004; ADR‑0008/0009.
     - Est: 0.5h
