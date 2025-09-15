@@ -49,7 +49,7 @@ Allowed imports remain: UI→App; App→Domain|Data|Shared; Domain→Shared; Dat
 ## Non‑Functionals
 
 - Performance: Typical flows (<10 GPUs, <5 deployments) update within 16ms. For ≥32 GPUs at 20×20, degrade to 10×10 automatically to sustain 60fps hover and ≥30fps mass update.
-- Accessibility: Overlay drawers and modal trap focus; ESC closes; aria‑labels summarize tile status (name, capacity, Used/Reserve/Free, status). Keyboard grid nav across tiles.
+- Accessibility: Overlay drawers and modal trap focus; ESC closes; aria‑labels summarize tile status (name, capacity, Used/Reserve/Free, status). Keyboard grid nav across tiles supports Arrow keys, Home/End (first/last), and PageUp/PageDown (jump one visible row).
 - Stability: Drawers/modals are overlays to avoid layout shifts; no geometry changes on theme toggle (token‑only changes).
 
 ## Risks & Mitigations
@@ -67,3 +67,4 @@ Allowed imports remain: UI→App; App→Domain|Data|Shared; Domain→Shared; Dat
   - `ui/viz/PerGpuWaffle.vue`, `ui/viz/VizControls.vue`
   - `ui/inspector/TileInspector.vue`
 - Keep existing `GpuSelector`, `DeploymentModels`, `DeploymentWorkload`, `Legend` by wrapping them in the dock/drawer.
+- Store plugin: synchronize `viewPrefs` (sort, filter, density) with URL/localStorage for deep-links and restore. Components read/write only via the Pinia store.

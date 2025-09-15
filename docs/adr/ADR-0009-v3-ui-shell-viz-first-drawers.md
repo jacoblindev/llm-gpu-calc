@@ -27,12 +27,14 @@ v2 adopted a guided stepper with a sticky preview (ADR‑0007). For v3, we want 
 - New shell composition and components (Dock, Drawer, Inspector). Existing editors are wrapped/reused.
 - Sort/filter moves into a sticky control row within Viz; KPI ribbon deep‑links to Viz (e.g., Warnings chip opens Insights and sets filter).
 - Mobile uses bottom sheet for Control Dock and full‑height sheet for Insights; Inspector becomes a full‑screen modal.
+- View preferences (sort, filter, density) become part of the Pinia store; a small store plugin keeps them in sync with URL/localStorage for shareable views.
 
 ## Implementation Notes
 
-- State management: consolidate app state into a Pinia store; UI consumes via `useAppStore()`; store actions wrap controller logic.
+- State management: consolidate app state into a Pinia store; UI consumes via `useAppStore()`; store actions wrap controller logic. Include `viewPrefs` in the store for sort/filter/density.
 - Reuse existing `GpuSelector`, `DeploymentModels`, `DeploymentWorkload`, `Legend` inside the Dock/Drawer.
 - Use existing controller derivations: `computeResultsStub`, `buildPerGpuBars`, `buildPerGpuFitStatus`, and suggestion apply functions.
+- Keyboard: grid navigation supports Arrow keys plus Home/End (first/last) and PageUp/PageDown (jump by visible row).
 - Persist sort/filter/density to URL/localStorage; theme via `theme-synth` class and localStorage.
 
 ## Testing

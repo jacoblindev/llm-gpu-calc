@@ -66,6 +66,7 @@ v2 introduced a refined UI with a guided stepper and a sticky preview. For v3 we
     - Cell fill order: left→right, top→bottom. Sum of Used+Reserve+Free cells equals N×N exactly (use largest remainder rounding).
   - Footer shows: “Used XX% • Reserve YY% • Free ZZ%”. Values reconcile with cell counts within rounding error.
   - Tooltip/focus reveals exact bytes and percentages for Used (with weights/kv split), Reserve, and Free.
+  - Per‑deployment detail is available in TileInspector: the Inspector MUST show a per‑deployment vRAM breakdown (weights and KV bytes) for the selected GPU to fully mitigate the loss of detail in the main waffle view.
 
 - Layout & Navigation — Canvas + Dual Drawers
   - Default view is Viz‑first: the waffle grid fills the main canvas on both desktop and mobile.
@@ -96,8 +97,9 @@ v2 introduced a refined UI with a guided stepper and a sticky preview. For v3 we
   - Insights Drawer becomes a full‑height sheet from the right; Inspector is a full‑screen modal.
 
 - Persistence
-  - Unit/theme prefs saved (existing behavior). Sort/filter density state persisted to URL query and/or localStorage; “Reset filters” clears state.
+  - Unit/theme prefs saved (existing behavior). Sort/filter/density state is synchronized to URL query and/or localStorage for deep-linking and restore.
   - App state is managed by a Pinia store; UI reads via `useAppStore()` and does not prop‑drill the entire state tree. Store actions wrap existing controller functions; getters expose derived data.
+  - View‑specific state (sort, filter, density) also lives in the Pinia store (`viewPrefs`) and is synchronized with URL/localStorage via a lightweight subscriber/plugin. Components only interact with the store; they do not touch URL/localStorage directly.
 
 - Edge Cases
   - Zero GPUs: show calm placeholder in Viz; KPIs reflect zeros.
@@ -148,6 +150,8 @@ v2 introduced a refined UI with a guided stepper and a sticky preview. For v3 we
 - `E`: Toggle Control Dock (Editor)
 - `F`: Toggle Insights Drawer
 - Arrow keys: Move tile focus; `Enter`: open Inspector; `Esc`: close overlay/drawer
+- `Home` / `End`: Jump to first / last tile
+- `PageUp` / `PageDown`: Jump by one full visible row of tiles
 - `/`: Focus search; `G/M/W`: Jump to GPUs/Models/Workload tabs when Control Dock is open
 
 ## Risks & Assumptions
@@ -229,7 +233,7 @@ App state (Pinia):
 
 - Layer-first organization; UI imports App only. No Domain logic in UI.
 - Keep props explicit, avoid one-letter identifiers, and ensure consistent naming.
-- Centralize sort/filter state within `VizSection`; persist via query/localStorage.
+- Centralize sort/filter/density state in the Pinia store (`viewPrefs`); `VizCanvas` consumes and updates the store. Persistence to URL/localStorage occurs via a store subscriber/plugin.
 
 ## Test Strategy
 
