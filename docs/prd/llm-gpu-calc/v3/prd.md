@@ -6,9 +6,9 @@ Slug: llm-gpu-calc
 
 ## Clarifying Questions (with agreed defaults)
 
-1) Primary layout? — Command Center dashboard (cards + visualization), no stepper.
+1) Primary layout? — Viz‑first canvas with overlay drawers (Control Dock + Insights), no stepper.
 2) Default visualization? — Waffle (discrete grid) only in v3; bars/doughnuts out-of-scope.
-3) Audience/devices? — Desktop-first; mobile supported with stacked accordions and single-column tiles.
+3) Audience/devices? — Desktop-first; mobile canvas-first with bottom‑sheet editors and single-column tiles.
 4) Density? — Default 10×10 (Comfortable); optional 20×20 (Compact) toggle in the Viz controls.
 5) Sorting/filtering defaults? — Sort by Status severity (Over > Warn > OK), then Used% desc; no filters active by default.
 6) Accessibility? — Full keyboard navigation and ARIA labels; tile-level focusable interactions; WCAG AA color contrast.
@@ -19,11 +19,11 @@ Slug: llm-gpu-calc
 
 ## Context
 
-v2 introduced a refined UI with a guided stepper and a sticky preview. For v3 we pivot to a Command Center dashboard: always-visible editor cards (GPUs, Deployments/Models, Workload) and a visualization section using Waffle small multiples (one tile per GPU). Waffle grids provide a compact, glanceable “how full” view, while preserving clarity and performance.
+v2 introduced a refined UI with a guided stepper and a sticky preview. For v3 we pivot to a Viz‑first canvas: on‑demand overlay drawers host the editors (GPUs, Deployments/Models, Workload) while the visualization section using Waffle small multiples (one tile per GPU) remains primary. Waffle grids provide a compact, glanceable “how full” view, while preserving clarity and performance.
 
 ## Goals
 
-- Replace stepper with a single-surface dashboard for faster iteration and at-a-glance state.
+- Replace stepper with a single-surface, Viz‑first canvas for faster iteration and at-a-glance state.
 - Use Waffle visualization (discrete grid) as the sole visual for v3, showing Used, Reserve, and Free; Used splits into Weights vs KV (aggregate).
 - Provide robust sort and filter controls to triage constrained GPUs quickly.
 - Maintain strong accessibility, performance (<16ms per typical interaction), and responsive behavior.
@@ -41,7 +41,7 @@ v2 introduced a refined UI with a guided stepper and a sticky preview. For v3 we
 - As an ML engineer, I select GPUs and immediately see per-GPU waffles update as I adjust models, TP, and workload.
 - As a devops user, I sort by Status to surface Over/Warning GPUs, then filter by vendor to focus triage.
 - As a keyboard-first user, I can navigate tiles, read accessible labels for Used/Reserve/Free, and open details without a mouse.
-- As a mobile user, I expand the “GPUs/Deployments/Workload” accordions, then scroll a list of waffle tiles to inspect status.
+- As a mobile user, I open the bottom‑sheet editor (GPUs/Deployments/Workload), then scroll a list of waffle tiles to inspect status.
 
 ## Acceptance Criteria
 
@@ -49,11 +49,12 @@ v2 introduced a refined UI with a guided stepper and a sticky preview. For v3 we
   - Top bar shows title and theme/unit toggles; visualization density and sort live in the Viz controls (not the top bar).
   - KPI strip shows: GPUs selected, Total capacity, Total used, Total implied reserve, Warnings count. Clicking “Warnings” applies Status=Warn/Over filter and scrolls to Viz.
 
-- Cards Grid (Editor)
-  - GPU Card: wraps current GPU selector; shows total selected.
-  - Models/Deployments Card: wraps deployment creation/removal, model selection, and utilization share (U).
-  - Workload Card: wraps assignment, TP auto-clamp (TP ≤ assigned GPUs), dtypes, overheads, max_model_len, and max_num_seqs.
-  - Suggestions (optional for v3): may show constrained deployments with “Apply” using existing controller functions; can be deferred to v3.x.
+- Control Dock (Editor)
+  - Tabbed editor overlays the canvas with three tabs: GPUs, Deployments/Models, Workload.
+  - GPUs tab: wraps current GPU selector; shows total selected.
+  - Deployments/Models tab: wraps deployment creation/removal, model selection, and utilization share (U).
+  - Workload tab: wraps assignment, TP auto-clamp (TP ≤ assigned GPUs), dtypes, overheads, max_model_len, and max_num_seqs.
+  - Suggestions are shown in the Insights drawer (see below) with Apply actions; the Control Dock focuses on editing inputs.
 
 - Visualization: Waffle Tiles
   - One tile per GPU in a responsive grid (auto-fill; min tile width ~260px desktop, ~220px mobile).
@@ -90,7 +91,6 @@ v2 introduced a refined UI with a guided stepper and a sticky preview. For v3 we
   - Rendering uses CSS grid for cells; the interactive unit is the tile (not each cell) to keep DOM size manageable.
 
 - Mobile Behavior
-  - Editor cards collapse into accordions; only one open by default to reduce scroll.
   - Viz is single-column; tile content fits without horizontal scrolling. Provide a sticky “Back to Editor” button when scrolled into Viz.
   - Bottom Sheet Editor: Control Dock appears as a bottom sheet (draggable from 20% to 80% height); tiles remain visible underneath on open.
   - Insights Drawer becomes a full‑height sheet from the right; Inspector is a full‑screen modal.
@@ -180,39 +180,30 @@ v2 introduced a refined UI with a guided stepper and a sticky preview. For v3 we
 
 Target layout additions (UI only):
 
-- ui/dashboard/DashboardShell.vue
-  - Responsibility: Page shell; composes TopBar, KPI strip, card grid, viz section, footer.
-  - Public API: Props `{ state }` (or accesses App state via props from `App.vue`).
-  - Internal: Sticky sections; responsive containers.
+- ui/shell/DashboardShell.vue
+  - Responsibility: Page shell; composes CommandStrip, VizCanvas, ControlDock, InsightsDrawer, TileInspector, FooterBar.
+  - Public API: Props `{ state }` (or consumes Pinia store).
+  - Internal: Sticky sections; overlay management (no layout shift).
 
-- ui/dashboard/KpiStrip.vue
-  - Responsibility: Compute and display high-level KPIs from `computeResultsStub`.
-  - Public API: Props `{ state }`.
-  - Internal: Emits deep-link events to set filters (Warnings) in Viz.
+- ui/shell/CommandStrip.vue
+  - Responsibility: Title, KPI ribbon, quick chips (Sort, Filter, Density, Search) and KPI deep-links.
+  - Public API: Emits filter/sort changes for VizCanvas and toggles drawers.
 
-- ui/dashboard/CardGrid.vue
-  - Responsibility: Responsive grid container for editor cards.
-  - Public API: Slots for cards.
+- ui/viz/VizCanvas.vue (or VizSection.vue)
+  - Responsibility: Sort/filter controls row, legend, and waffle grid composition.
+  - Public API: Props `{ state }`; emits open/inspect events; persists view prefs.
 
-- ui/dashboard/GpuCard.vue
-  - Responsibility: Wrap existing `GpuSelector` inside a card chrome.
-  - Public API: Props `{ state }`.
+- ui/dock/ControlDock.vue
+  - Responsibility: Left overlay drawer with tabs (GPUs | Deployments/Models | Workload) wrapping existing editors.
+  - Public API: Props `{ state }`; keyboard a11y (focus trap, ESC, return focus).
 
-- ui/dashboard/ModelsCard.vue
-  - Responsibility: Wrap `DeploymentModels` with trimmed controls appropriate for cards.
-  - Public API: Props `{ state }`.
+- ui/dock/InsightsDrawer.vue
+  - Responsibility: Right overlay with Fit list + Suggestions (Apply actions using controller helpers).
+  - Public API: Props `{ state }`; exposes “Only warnings” toggle.
 
-- ui/dashboard/WorkloadCard.vue
-  - Responsibility: Wrap `DeploymentWorkload`; ensure compact layout.
-  - Public API: Props `{ state }`.
-
-- ui/dashboard/SuggestionsCard.vue (optional for v3)
-  - Responsibility: Show constrained deployments and offer Apply actions using `applySuggestedMaxModelLen/NumSeqs`.
-  - Public API: Props `{ state }`.
-
-- ui/dashboard/VizSection.vue
-  - Responsibility: Sort/filter controls, legend, and waffle grid composition.
-  - Public API: Props `{ state }`.
+- ui/inspector/TileInspector.vue
+  - Responsibility: Modal with per‑GPU detail view (weights vs KV, per‑deployment breakdown) and actions.
+  - Public API: Props for selected GPU.
 
 - ui/viz/PerGpuWaffle.vue
   - Responsibility: Render waffle tiles based on aggregated data from `buildPerGpuBars` and fit status.
