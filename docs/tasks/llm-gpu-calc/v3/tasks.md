@@ -36,7 +36,7 @@ Repo assessment (concise)
     - Gates: Boundaries; Tests (basic store unit tests if feasible).
     - Traceability: PRD Reference Architecture; ARCH‑v3 Key Contracts.
     - Est: 2h
-  - [ ] 1.2 Getters for derived data (resultsStub, perGpuBars, fitStatus, kpis)
+  - [x] 1.2 Getters for derived data (resultsStub, perGpuBars, fitStatus, kpis)
     - Acceptance: Getters delegate to controller; deterministic given state; no UI logic in store.
     - Gates: Tests (smoke), Boundaries.
     - Traceability: PRD Module Plan; ARCH‑v3 Key Contracts.
