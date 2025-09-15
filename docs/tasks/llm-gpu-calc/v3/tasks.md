@@ -31,7 +31,7 @@ Repo assessment (concise)
     - Est: 0.5h
 
 - [ ] 1.0 Pinia store + viewPrefs
-  - [ ] 1.1 Consolidate app state into `useAppStore()`; wrap controller fns as actions
+  - [x] 1.1 Consolidate app state into `useAppStore()`; wrap controller fns as actions
     - Acceptance: Store owns GPUs, models, deployments, prefs; actions: init, setUnit, loadUnitPreference, setGpuCount, incrementGpu, add/remove deployment, applySuggested…
     - Gates: Boundaries; Tests (basic store unit tests if feasible).
     - Traceability: PRD Reference Architecture; ARCH‑v3 Key Contracts.
