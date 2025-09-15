@@ -16,12 +16,22 @@ import {
   applySuggestedMaxNumSeqs as applySuggestedMaxNumSeqsController,
 } from './controller'
 import type { UnitPreference } from '@shared/types'
+import {
+  defaultViewPrefs,
+  parseFromURL,
+  loadFromLocalStorage,
+  persistToLocalStorage,
+  applyToURL,
+} from './viewPrefs'
 
 export type Density = '10x10' | '20x20'
 
 export interface ViewPrefs {
   density: Density
-  // Future: sort/filter/search configuration lives here
+  sort: string
+  statusFilter: string
+  vendorFilter: string
+  search: string
 }
 
 type StoreState = AppState & { viewPrefs: ViewPrefs }
@@ -29,7 +39,7 @@ type StoreState = AppState & { viewPrefs: ViewPrefs }
 export const useAppStore = defineStore('app', {
   state: (): StoreState => ({
     ...createInitialState(),
-    viewPrefs: { density: '10x10' },
+    viewPrefs: { ...defaultViewPrefs },
   }),
 
   getters: {
@@ -98,6 +108,57 @@ export const useAppStore = defineStore('app', {
     setDensity(density: Density) {
       this.viewPrefs.density = density
     },
+    setSort(sort: string) {
+      this.viewPrefs.sort = sort
+    },
+    setStatusFilter(status: string) {
+      this.viewPrefs.statusFilter = status
+    },
+    setVendorFilter(vendor: string) {
+      this.viewPrefs.vendorFilter = vendor
+    },
+    setSearch(q: string) {
+      this.viewPrefs.search = q
+    },
+
+    /**
+     * Starts syncing viewPrefs with URL query params and localStorage.
+     * - On start, read URL first, then localStorage for any missing values.
+     * - On changes, persist to both and update the URL with replaceState.
+     */
+    startViewPrefsSync() {
+      // initialize from URL, then fill gaps from localStorage
+      try {
+        const fromUrl = parseFromURL(window.location.search)
+        this.viewPrefs = {
+          ...defaultViewPrefs,
+          ...loadFromLocalStorage(),
+          ...fromUrl,
+        }
+        // write back normalized params
+        const query = applyToURL(window.location.search, this.viewPrefs)
+        const newUrl = `${window.location.pathname}${query ? `?${query}` : ''}${window.location.hash}`
+        window.history.replaceState(null, '', newUrl)
+      } catch {}
+
+      // subscribe to store changes and persist only when viewPrefs actually changed
+      let last = ''
+      const snapshot = (vp: ViewPrefs) => JSON.stringify(vp)
+      last = snapshot(this.viewPrefs)
+
+      this.$subscribe(() => {
+        const next = snapshot(this.viewPrefs)
+        if (next === last) return
+        last = next
+        // persist to LS
+        persistToLocalStorage(this.viewPrefs)
+        // update URL
+        try {
+          const query = applyToURL(window.location.search, this.viewPrefs)
+          const newUrl = `${window.location.pathname}${query ? `?${query}` : ''}${window.location.hash}`
+          window.history.replaceState(null, '', newUrl)
+        } catch {}
+      }, { detached: true })
+    },
   },
 })
-

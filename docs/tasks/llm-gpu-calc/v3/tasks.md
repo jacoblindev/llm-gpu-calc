@@ -41,7 +41,7 @@ Repo assessment (concise)
     - Gates: Tests (smoke), Boundaries.
     - Traceability: PRD Module Plan; ARCH‑v3 Key Contracts.
     - Est: 1h
-  - [ ] 1.3 `viewPrefs` in store + sync plugin (URL/localStorage)
+  - [x] 1.3 `viewPrefs` in store + sync plugin (URL/localStorage)
     - Acceptance: Sort/filter/density in store; persists across reloads; shareable via URL.
     - Gates: Tests (persist/restore), no direct component access to URL/localStorage.
     - Traceability: PRD Persistence; ARCH‑v3 Implementation Notes.
