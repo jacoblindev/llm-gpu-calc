@@ -18,8 +18,9 @@ Repo assessment (concise)
     - Gates: Boundaries (ARCH‑v3); no new runtime deps.
     - Traceability: PRD Module Plan; ARCH‑v3 UI Composition.
     - Est: 2h
-  - [ ] 0.2 Feature‑flag new shell; keep existing App path available
+  - [x] 0.2 Feature‑flag new shell; keep existing App path available
     - Acceptance: Toggle between current App and DashboardShell for incremental dev.
+      - Enabled via `?v3=1` or localStorage `useV3Shell=1`; env `VITE_V3_SHELL` also supported.
     - Gates: Tests (smoke), Boundaries.
     - Traceability: ARCH‑v3 Implementation Notes.
     - Est: 1h
