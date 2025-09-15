@@ -142,7 +142,7 @@ Repo assessment (concise)
     - Gates: Tests (composition), Persistence plugin verified.
     - Traceability: PRD Filters; Persistence.
     - Est: 2–3h
-  - [ ] 7.3 Optional group‑by vendor/type
+  - [ ] 7.3 (Stretch Goal) Group‑by vendor/type
     - Acceptance: Buckets rendered; sort within groups.
     - Gates: Tests (smoke).
     - Traceability: PRD Viz Controls (optional).
@@ -201,7 +201,7 @@ Repo assessment (concise)
     - Traceability: Rules — Align & prune tests.
     - Est: 0.5–1h
   - [ ] X.2 Add/adjust tests for new public behavior only (waffle mapping, viewPrefs, overlays a11y)
-    - Acceptance: Smoke tests cover waffle mapping, viewPrefs persistence, keyboard/overlay a11y; domain tests unaffected.
+    - Acceptance: Smoke tests cover waffle mapping, viewPrefs persistence, keyboard/overlay a11y; deep‑link behavior (clicking KPI “Warnings” updates viewPrefs Status filter and opens InsightsDrawer); domain tests unaffected.
     - Gates: Tests; Boundaries.
     - Traceability: PRD Test Strategy; ARCH‑v3.
     - Est: 1–2h
