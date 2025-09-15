@@ -30,7 +30,7 @@ Repo assessment (concise)
     - Traceability: PRD Dependency Policy; ADR‑0004; ADR‑0008/0009.
     - Est: 0.5h
 
-- [ ] 1.0 Pinia store + viewPrefs
+- [x] 1.0 Pinia store + viewPrefs
   - [x] 1.1 Consolidate app state into `useAppStore()`; wrap controller fns as actions
     - Acceptance: Store owns GPUs, models, deployments, prefs; actions: init, setUnit, loadUnitPreference, setGpuCount, incrementGpu, add/remove deployment, applySuggested…
     - Gates: Boundaries; Tests (basic store unit tests if feasible).
