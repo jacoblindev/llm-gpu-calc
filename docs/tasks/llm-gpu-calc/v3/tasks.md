@@ -12,19 +12,20 @@ Repo assessment (concise)
 
 ---
 
-- [ ] 0.0 Establish architecture scaffolding
-  - [ ] 0.1 Create layout & component stubs per ARCH‑v3 (UI→App boundaries)
+- [x] 0.0 Establish architecture scaffolding
+  - [x] 0.1 Create layout & component stubs per ARCH‑v3 (UI→App boundaries)
     - Acceptance: Stubs for DashboardShell, CommandStrip, VizCanvas, PerGpuWaffle, VizControls, ControlDock, InsightsDrawer, TileInspector, app/store.ts compile; app builds and typechecks.
     - Gates: Boundaries (ARCH‑v3); no new runtime deps.
     - Traceability: PRD Module Plan; ARCH‑v3 UI Composition.
     - Est: 2h
-  - [ ] 0.2 Feature‑flag new shell; keep existing App path available
+  - [x] 0.2 Feature‑flag new shell; keep existing App path available
     - Acceptance: Toggle between current App and DashboardShell for incremental dev.
+      - Enabled via `?v3=1` or localStorage `useV3Shell=1`; env `VITE_V3_SHELL` also supported.
     - Gates: Tests (smoke), Boundaries.
     - Traceability: ARCH‑v3 Implementation Notes.
     - Est: 1h
-  - [ ] 0.3 Confirm dependency policy (no new runtime deps); ADR required for exceptions
-    - Acceptance: Tasks/docs reflect policy; ADRs referenced.
+  - [x] 0.3 Confirm dependency policy (no new runtime deps); ADR required for exceptions
+    - Acceptance: Tasks/docs reflect policy; ADRs referenced. Confirmed: No new runtime deps in v3; any virtualization/positioning lib requires ADR per ADR‑0004.
     - Gates: Dependency policy.
     - Traceability: PRD Dependency Policy; ADR‑0004; ADR‑0008/0009.
     - Est: 0.5h

@@ -1,3 +1,12 @@
 export { default as TopBar } from './TopBar.vue'
 export { default as PreviewPanel } from './PreviewPanel.vue'
 export { default as FooterBar } from './FooterBar.vue'
+// v3 shell exports (stubs)
+export { default as DashboardShell } from './shell/DashboardShell.vue'
+export { default as CommandStrip } from './shell/CommandStrip.vue'
+export { default as VizCanvas } from './viz/VizCanvas.vue'
+export { default as PerGpuWaffle } from './viz/PerGpuWaffle.vue'
+export { default as VizControls } from './viz/VizControls.vue'
+export { default as ControlDock } from './dock/ControlDock.vue'
+export { default as InsightsDrawer } from './dock/InsightsDrawer.vue'
+export { default as TileInspector } from './inspector/TileInspector.vue'
