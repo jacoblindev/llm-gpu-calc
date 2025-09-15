@@ -13,7 +13,7 @@ Repo assessment (concise)
 ---
 
 - [ ] 0.0 Establish architecture scaffolding
-  - [ ] 0.1 Create layout & component stubs per ARCH‑v3 (UI→App boundaries)
+  - [x] 0.1 Create layout & component stubs per ARCH‑v3 (UI→App boundaries)
     - Acceptance: Stubs for DashboardShell, CommandStrip, VizCanvas, PerGpuWaffle, VizControls, ControlDock, InsightsDrawer, TileInspector, app/store.ts compile; app builds and typechecks.
     - Gates: Boundaries (ARCH‑v3); no new runtime deps.
     - Traceability: PRD Module Plan; ARCH‑v3 UI Composition.
