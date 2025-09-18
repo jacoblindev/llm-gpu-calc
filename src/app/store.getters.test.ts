@@ -59,4 +59,20 @@ describe('useAppStore getters delegate to controller', () => {
     const snapshot2 = JSON.stringify({ r1: store.resultsStub, b1: store.perGpuBars, f1: store.fitStatus })
     expect(snapshot2).toEqual(snapshot)
   })
+
+  it('auto-downgrades density to 10x10 when GPU count is high', () => {
+    const store = useAppStore()
+    store.init()
+    const typeId = store.gpuCatalog[0]?.id
+    expect(typeId).toBeTruthy()
+    if (!typeId) return
+
+    store.setDensity('20x20')
+    store.setGpuCount(typeId, 40)
+
+    expect(store.viewPrefs.density).toBe('20x20')
+    expect(store.effectiveDensity).toBe('10x10')
+    const cells = store.waffleCells
+    expect(cells.every((entry: any) => entry.gridSize === 10)).toBe(true)
+  })
 })

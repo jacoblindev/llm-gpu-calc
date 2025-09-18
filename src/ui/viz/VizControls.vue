@@ -53,8 +53,8 @@
           :key="option.value"
           type="button"
           class="chip"
-          :class="{ 'is-active': viewPrefs.density === option.value }"
-          :aria-pressed="viewPrefs.density === option.value"
+          :class="{ 'is-active': effectiveDensity === option.value }"
+          :aria-pressed="effectiveDensity === option.value"
           @click="setDensity(option.value)"
         >
           {{ option.label }}
@@ -69,11 +69,11 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { storeToRefs } from 'pinia'
-import { useAppStore } from '@app/store'
+import { useAppStore, type Density } from '@app/store'
 import Legend from '@ui/Legend.vue'
 
 const store = useAppStore()
-const { viewPrefs, gpuCatalog } = storeToRefs(store)
+const { viewPrefs, gpuCatalog, effectiveDensity } = storeToRefs(store)
 
 const sortOptions = [
   { value: 'status_used', label: 'Status → Used%' },
@@ -88,7 +88,7 @@ const statusOptions = [
   { value: 'over', label: 'Over' },
 ]
 
-const densityOptions = [
+const densityOptions: ReadonlyArray<{ value: Density; label: string }> = [
   { value: '10x10', label: 'Comfort' },
   { value: '20x20', label: 'Compact' },
 ]
@@ -119,7 +119,7 @@ function setVendor(value: string) {
   store.setVendorFilter(value)
 }
 
-function setDensity(value: '10x10' | '20x20') {
+function setDensity(value: Density) {
   if (viewPrefs.value.density === value) return
   store.setDensity(value)
 }
@@ -211,4 +211,3 @@ function setDensity(value: '10x10' | '20x20') {
   }
 }
 </style>
-

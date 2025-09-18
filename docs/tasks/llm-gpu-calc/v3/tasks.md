@@ -63,7 +63,7 @@ Repo assessment (concise)
     - Gates: Boundaries; Tests (store updates reflect in view).
     - Traceability: PRD Viz Controls; ARCH‑v3 Data Flow.
     - Est: 1–2h
-  - [ ] 2.4 Performance guard: auto‑downgrade density when GPU count high
+  - [x] 2.4 Performance guard: auto‑downgrade density when GPU count high
     - Acceptance: Threshold implemented (e.g., ≥32 GPUs → 10×10); smooth hover/scroll.
     - Gates: Manual perf check.
     - Traceability: PRD Performance; ARCH‑v3 Non‑Functionals.
