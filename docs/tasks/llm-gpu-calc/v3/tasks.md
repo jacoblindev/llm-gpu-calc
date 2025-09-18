@@ -48,12 +48,12 @@ Repo assessment (concise)
     - Est: 1–2h
 
 - [ ] 2.0 VizCanvas + Waffle visualization
-  - [ ] 2.1 Bytes→cells mapping with largest‑remainder rounding
+  - [x] 2.1 Bytes→cells mapping with largest‑remainder rounding
     - Acceptance: Used+Reserve+Free cells == N×N across representative inputs; stable under small changes.
     - Gates: Tests (mapping totals); Boundaries.
     - Traceability: PRD Visualization; ARCH‑v3 Risks & Mitigations.
     - Est: 2h
-  - [ ] 2.2 Render tiles grid (10×10 default; 20×20 compact)
+  - [x] 2.2 Render tiles grid (10×10 default; 20×20 compact)
     - Acceptance: Responsive auto‑fill grid; headers (name/capacity/status); footers with Used/Reserve/Free.
     - Gates: Visual check; A11y labels present.
     - Traceability: PRD Acceptance (Waffle Tiles).
