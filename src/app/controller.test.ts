@@ -7,8 +7,10 @@ import {
   utilizationByGpu,
   impliedReserveByGpu,
   computeDeploymentSuggestions,
+  computeResultsStub,
   buildPerGpuBars,
   buildPerGpuFitStatus,
+  buildPerGpuWaffleCells,
   validateDeployment,
   setGpuCount,
   incrementGpu,
@@ -18,6 +20,7 @@ import {
   applySuggestedMaxModelLen,
   applySuggestedMaxNumSeqs,
   computeDeploymentSuggestionsRaw,
+  mapBytesToWaffleCells,
 } from '@app/controller';
 import type { AppState } from '@app/state';
 import { createInitialState } from '@app/state';
@@ -291,6 +294,71 @@ describe('controller: bars and fit status', () => {
     const s = status[0];
     expect(s.ok).toBe(false);
     expect(s.reason || '').toMatch(/Minimal KV not met/);
+  });
+});
+
+describe('controller: waffle cell mapping', () => {
+  it('uses largest remainder rounding with deterministic tie-break', () => {
+    const counts = mapBytesToWaffleCells(30, 10, 20, 20, 10);
+    expect(counts.weights).toBe(38);
+    expect(counts.kv).toBe(12);
+    expect(counts.reserve).toBe(25);
+    expect(counts.free).toBe(25);
+    expect(Object.values(counts).reduce((sum, v) => sum + v, 0)).toBe(100);
+  });
+
+  it('assigns all cells to free when totals are zero or invalid', () => {
+    const counts = mapBytesToWaffleCells(NaN, -5, 0, 0, 10);
+    expect(counts).toEqual({ weights: 0, kv: 0, reserve: 0, free: 100 });
+  });
+
+  it('distributes remaining cells in remainder order even across multiple passes', () => {
+    const counts = mapBytesToWaffleCells(238, 336, 54, 372, 10);
+    // Floors: 23, 33, 5, 37 with remainders 0.8, 0.6, 0.4, 0.2 => +1 to weights, +1 to kv.
+    expect(counts).toEqual({ weights: 24, kv: 34, reserve: 5, free: 37 });
+    expect(Object.values(counts).reduce((sum, v) => sum + v, 0)).toBe(100);
+  });
+
+  it('aggregates controller data before rounding', () => {
+    const state = baseState();
+    const gpu = makeGpu('gpu#1', 'GPU #1', 80);
+    state.gpus = [gpu];
+    const model = makeModel();
+    state.models = [model];
+    const deployment: Deployment = {
+      id: 'dep',
+      modelId: model.id,
+      assignedGpuIds: ['gpu#1'],
+      tp: 1,
+      weightDtype: 'bf16',
+      kvDtype: 'fp16',
+      kvOverheadPct: 0.1,
+      replicationOverheadPct: 0.02,
+      maxModelLen: 2048,
+      maxNumSeqs: 2,
+      utilizationShare: 0.6,
+    };
+    state.deployments = [deployment];
+
+    const waffle = buildPerGpuWaffleCells(state, 10);
+    expect(waffle).toHaveLength(1);
+    const w = waffle[0];
+    expect(w.gridSize).toBe(10);
+    expect(w.totalCells).toBe(100);
+
+    const [r] = computeResultsStub(state);
+    const weightsBytes = r.parts.reduce((sum, part) => sum + part.weights, 0);
+    const kvBytes = r.parts.reduce((sum, part) => sum + part.kv, 0);
+    const reserveBytes = Math.max(0, r.impliedReserveFrac * r.capacityBytes);
+    const freeBytes = Math.max(0, r.capacityBytes - reserveBytes - r.usedBytes);
+    const expected = mapBytesToWaffleCells(weightsBytes, kvBytes, reserveBytes, freeBytes, 10);
+
+    expect(w.cells).toEqual(expected);
+    expect(w.weightsBytes).toBeCloseTo(weightsBytes, 6);
+    expect(w.kvBytes).toBeCloseTo(kvBytes, 6);
+    expect(w.reserveBytes).toBeCloseTo(reserveBytes, 6);
+    expect(w.freeBytes).toBeCloseTo(freeBytes, 6);
+    expect(Object.values(w.cells).reduce((sum, v) => sum + v, 0)).toBe(100);
   });
 });
 

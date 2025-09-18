@@ -12,6 +12,7 @@ import {
   computeResultsStub,
   buildPerGpuBars,
   buildPerGpuFitStatus,
+  buildPerGpuWaffleCells,
   applySuggestedMaxModelLen as applySuggestedMaxModelLenController,
   applySuggestedMaxNumSeqs as applySuggestedMaxNumSeqsController,
 } from './controller'
@@ -52,6 +53,11 @@ export const useAppStore = defineStore('app', {
     },
     fitStatus(state) {
       return buildPerGpuFitStatus(state as unknown as AppState)
+    },
+    waffleCells(state) {
+      const density = state.viewPrefs?.density ?? '10x10'
+      const gridSize = density === '20x20' ? 20 : 10
+      return buildPerGpuWaffleCells(state as unknown as AppState, gridSize)
     },
     kpis(state) {
       const results = computeResultsStub(state as unknown as AppState)

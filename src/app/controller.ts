@@ -216,6 +216,137 @@ export type PerGpuBar = {
   }>;
 };
 
+export type WaffleCategory = 'weights' | 'kv' | 'reserve' | 'free';
+
+export type WaffleCellCounts = Record<WaffleCategory, number>;
+
+const WAFFLE_TIE_BREAK_ORDER: WaffleCategory[] = ['weights', 'kv', 'reserve', 'free'];
+
+export function mapBytesToWaffleCells(
+  weightsBytes: number,
+  kvBytes: number,
+  reserveBytes: number,
+  freeBytes: number,
+  gridSize: number
+): WaffleCellCounts {
+  const dimension = Number.isFinite(gridSize) && gridSize > 0 ? Math.floor(gridSize) : 0;
+  const totalCells = dimension * dimension;
+  const counts: WaffleCellCounts = { weights: 0, kv: 0, reserve: 0, free: 0 };
+  if (totalCells === 0) return counts;
+
+  const categories: Array<{ key: WaffleCategory; bytes: number }> = [
+    { key: 'weights', bytes: Number.isFinite(weightsBytes) ? Math.max(0, weightsBytes) : 0 },
+    { key: 'kv', bytes: Number.isFinite(kvBytes) ? Math.max(0, kvBytes) : 0 },
+    { key: 'reserve', bytes: Number.isFinite(reserveBytes) ? Math.max(0, reserveBytes) : 0 },
+    { key: 'free', bytes: Number.isFinite(freeBytes) ? Math.max(0, freeBytes) : 0 },
+  ];
+
+  const totalBytes = categories.reduce((sum, { bytes }) => sum + bytes, 0);
+  if (!Number.isFinite(totalBytes) || totalBytes <= 0) {
+    counts.free = totalCells;
+    return counts;
+  }
+
+  let assigned = 0;
+  const remainders: Array<{ key: WaffleCategory; remainder: number }> = [];
+
+  for (const { key, bytes } of categories) {
+    const fraction = bytes / totalBytes;
+    const raw = fraction * totalCells;
+    const base = Math.floor(raw);
+    counts[key] = base;
+    assigned += base;
+    remainders.push({ key, remainder: raw - base });
+  }
+
+  let remaining = totalCells - assigned;
+  if (remaining <= 0) {
+    // Guard against any floating point drift that made us overshoot.
+    while (remaining < 0) {
+      // Remove from the smallest remainder / reverse tie-break order.
+      const adjusted = remainders
+        .slice()
+        .sort((a, b) => {
+          if (a.remainder !== b.remainder) return a.remainder - b.remainder;
+          return WAFFLE_TIE_BREAK_ORDER.indexOf(b.key) - WAFFLE_TIE_BREAK_ORDER.indexOf(a.key);
+        })
+        .some(({ key }) => {
+          if (counts[key] === 0) return false;
+          counts[key] -= 1;
+          remaining += 1;
+          return remaining >= 0;
+        });
+      if (!adjusted) {
+        remaining = 0;
+        break;
+      }
+    }
+    return counts;
+  }
+
+  const sorted = remainders
+    .slice()
+    .sort((a, b) => {
+      if (b.remainder !== a.remainder) return b.remainder - a.remainder;
+      return WAFFLE_TIE_BREAK_ORDER.indexOf(a.key) - WAFFLE_TIE_BREAK_ORDER.indexOf(b.key);
+    });
+
+  let idx = 0;
+  while (remaining > 0) {
+    const target = sorted[idx % sorted.length];
+    counts[target.key] += 1;
+    remaining -= 1;
+    idx += 1;
+  }
+
+  return counts;
+}
+
+export type PerGpuWaffleCells = {
+  gpuId: string;
+  gpuName: string;
+  capacityBytes: number;
+  weightsBytes: number;
+  kvBytes: number;
+  reserveBytes: number;
+  freeBytes: number;
+  gridSize: number;
+  totalCells: number;
+  cells: WaffleCellCounts;
+};
+
+export function buildPerGpuWaffleCells(state: AppState, gridSize: number): PerGpuWaffleCells[] {
+  const dimension = Number.isFinite(gridSize) && gridSize > 0 ? Math.floor(gridSize) : 0;
+  const totalCells = dimension * dimension;
+  const results = computeResultsStub(state);
+  return results.map((r) => {
+    let weightsBytes = 0;
+    let kvBytes = 0;
+    for (const part of r.parts) {
+      if (Number.isFinite(part.weights) && part.weights > 0) weightsBytes += part.weights;
+      if (Number.isFinite(part.kv) && part.kv > 0) kvBytes += part.kv;
+    }
+    weightsBytes = Math.max(0, weightsBytes);
+    kvBytes = Math.max(0, kvBytes);
+    const reserveBytes = Math.max(0, r.impliedReserveFrac * r.capacityBytes);
+    const usedBytes = Math.max(0, r.usedBytes);
+    const freeBytes = Math.max(0, r.capacityBytes - reserveBytes - usedBytes);
+    const cells = mapBytesToWaffleCells(weightsBytes, kvBytes, reserveBytes, freeBytes, dimension);
+    return {
+      gpuId: r.gpuId,
+      gpuName: r.gpuName,
+      capacityBytes: r.capacityBytes,
+      weightsBytes,
+      kvBytes,
+      reserveBytes,
+      freeBytes,
+      gridSize: dimension,
+      totalCells,
+      cells,
+    };
+  });
+}
+
 export function buildPerGpuBars(state: AppState): PerGpuBar[] {
   const results = computeResultsStub(state);
   return results.map((r) => {

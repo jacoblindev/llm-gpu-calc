@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach } from 'vitest'
 import { setActivePinia, createPinia } from 'pinia'
 import { useAppStore } from './store'
 import type { AppState } from './state'
-import { computeResultsStub, buildPerGpuBars, buildPerGpuFitStatus } from './controller'
+import { computeResultsStub, buildPerGpuBars, buildPerGpuFitStatus, buildPerGpuWaffleCells } from './controller'
 
 function asAppState(s: unknown): AppState {
   return s as AppState
@@ -44,11 +44,19 @@ describe('useAppStore getters delegate to controller', () => {
     const f2 = buildPerGpuFitStatus(state)
     expect(f1).toEqual(f2)
 
+    const w1 = store.waffleCells
+    const w2 = buildPerGpuWaffleCells(state, 10)
+    expect(w1).toEqual(w2)
+
     // Determinism: unrelated viewPref changes do not affect outputs
     const snapshot = JSON.stringify({ r1, b1, f1 })
     store.setDensity('20x20')
+    const stateAfter = asAppState(store)
+    const w3 = store.waffleCells
+    const w4 = buildPerGpuWaffleCells(stateAfter, 20)
+    expect(w3).toEqual(w4)
+
     const snapshot2 = JSON.stringify({ r1: store.resultsStub, b1: store.perGpuBars, f1: store.fitStatus })
     expect(snapshot2).toEqual(snapshot)
   })
 })
-
