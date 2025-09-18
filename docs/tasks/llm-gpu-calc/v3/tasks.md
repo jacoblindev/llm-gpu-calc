@@ -58,7 +58,7 @@ Repo assessment (concise)
     - Gates: Visual check; A11y labels present.
     - Traceability: PRD Acceptance (Waffle Tiles).
     - Est: 2h
-  - [ ] 2.3 Sticky controls row (sort/filter chips, legend) bound to `viewPrefs`
+  - [x] 2.3 Sticky controls row (sort/filter chips, legend) bound to `viewPrefs`
     - Acceptance: Controls update store; legend uses tokens; sticky in Viz only.
     - Gates: Boundaries; Tests (store updates reflect in view).
     - Traceability: PRD Viz Controls; ARCH‑v3 Data Flow.
