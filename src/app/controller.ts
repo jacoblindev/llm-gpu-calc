@@ -260,7 +260,7 @@ export function mapBytesToWaffleCells(
   }
 
   let remaining = totalCells - assigned;
-  if (remaining <= 0) {
+  if (remaining < 0) {
     // Guard against any floating point drift that made us overshoot.
     while (remaining < 0) {
       // Remove from the smallest remainder / reverse tie-break order.
