@@ -30,40 +30,40 @@ Repo assessment (concise)
     - Traceability: PRD Dependency Policy; ADR‑0004; ADR‑0008/0009.
     - Est: 0.5h
 
-- [ ] 1.0 Pinia store + viewPrefs
-  - [ ] 1.1 Consolidate app state into `useAppStore()`; wrap controller fns as actions
+- [x] 1.0 Pinia store + viewPrefs
+  - [x] 1.1 Consolidate app state into `useAppStore()`; wrap controller fns as actions
     - Acceptance: Store owns GPUs, models, deployments, prefs; actions: init, setUnit, loadUnitPreference, setGpuCount, incrementGpu, add/remove deployment, applySuggested…
     - Gates: Boundaries; Tests (basic store unit tests if feasible).
     - Traceability: PRD Reference Architecture; ARCH‑v3 Key Contracts.
     - Est: 2h
-  - [ ] 1.2 Getters for derived data (resultsStub, perGpuBars, fitStatus, kpis)
+  - [x] 1.2 Getters for derived data (resultsStub, perGpuBars, fitStatus, kpis)
     - Acceptance: Getters delegate to controller; deterministic given state; no UI logic in store.
     - Gates: Tests (smoke), Boundaries.
     - Traceability: PRD Module Plan; ARCH‑v3 Key Contracts.
     - Est: 1h
-  - [ ] 1.3 `viewPrefs` in store + sync plugin (URL/localStorage)
+  - [x] 1.3 `viewPrefs` in store + sync plugin (URL/localStorage)
     - Acceptance: Sort/filter/density in store; persists across reloads; shareable via URL.
     - Gates: Tests (persist/restore), no direct component access to URL/localStorage.
     - Traceability: PRD Persistence; ARCH‑v3 Implementation Notes.
     - Est: 1–2h
 
-- [ ] 2.0 VizCanvas + Waffle visualization
-  - [ ] 2.1 Bytes→cells mapping with largest‑remainder rounding
+- [x] 2.0 VizCanvas + Waffle visualization
+  - [x] 2.1 Bytes→cells mapping with largest‑remainder rounding
     - Acceptance: Used+Reserve+Free cells == N×N across representative inputs; stable under small changes.
     - Gates: Tests (mapping totals); Boundaries.
     - Traceability: PRD Visualization; ARCH‑v3 Risks & Mitigations.
     - Est: 2h
-  - [ ] 2.2 Render tiles grid (10×10 default; 20×20 compact)
+  - [x] 2.2 Render tiles grid (10×10 default; 20×20 compact)
     - Acceptance: Responsive auto‑fill grid; headers (name/capacity/status); footers with Used/Reserve/Free.
     - Gates: Visual check; A11y labels present.
     - Traceability: PRD Acceptance (Waffle Tiles).
     - Est: 2h
-  - [ ] 2.3 Sticky controls row (sort/filter chips, legend) bound to `viewPrefs`
+  - [x] 2.3 Sticky controls row (sort/filter chips, legend) bound to `viewPrefs`
     - Acceptance: Controls update store; legend uses tokens; sticky in Viz only.
     - Gates: Boundaries; Tests (store updates reflect in view).
     - Traceability: PRD Viz Controls; ARCH‑v3 Data Flow.
     - Est: 1–2h
-  - [ ] 2.4 Performance guard: auto‑downgrade density when GPU count high
+  - [x] 2.4 Performance guard: auto‑downgrade density when GPU count high
     - Acceptance: Threshold implemented (e.g., ≥32 GPUs → 10×10); smooth hover/scroll.
     - Gates: Manual perf check.
     - Traceability: PRD Performance; ARCH‑v3 Non‑Functionals.
