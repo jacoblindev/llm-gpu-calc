@@ -70,7 +70,8 @@ Repo assessment (concise)
     - Est: 1h
 
 - [ ] 3.0 ControlDock (left overlay)
-  - [ ] 3.1 Tabbed editor wrapping existing GPUs / Deployments / Workload
+  - [x] 3.1 Tabbed editor wrapping existing GPUs / Deployments / Workload
+    - Notes: ControlDock now renders as synthwave overlay with tabbed panels, CommandStrip toggle/shortcuts, and `useControlDockState` tests for focus restoration.
     - Acceptance: Editors work as before; no layout shift; return focus to toggle on close.
     - Gates: Boundaries; Tests (smoke interactions).
     - Traceability: PRD Layout & Navigation; ARCH‑v3 UI Composition.
