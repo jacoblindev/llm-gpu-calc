@@ -109,7 +109,7 @@ const emit = defineEmits<{ (e: 'close'): void; (e: 'change-tab', tab: ControlDoc
 
 const tabs = CONTROL_DOCK_TABS
 const store = useAppStore()
-const appState = store as unknown as AppState
+const appState: AppState = store.$state
 
 const rootRef = ref<HTMLElement | null>(null)
 const liveMessage = ref('')

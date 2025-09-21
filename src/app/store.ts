@@ -35,7 +35,9 @@ export interface ViewPrefs {
   search: string
 }
 
-type StoreState = AppState & { viewPrefs: ViewPrefs }
+export interface StoreState extends AppState {
+  viewPrefs: ViewPrefs
+}
 
 const AUTO_DOWNGRADE_GPU_THRESHOLD = 32
 
@@ -57,22 +59,22 @@ export const useAppStore = defineStore('app', {
   getters: {
     effectiveDensity: (state): Density => computeEffectiveDensity(state),
     resultsStub: (state): ReturnType<typeof computeResultsStub> => {
-      return computeResultsStub(state as unknown as AppState)
+      return computeResultsStub(state)
     },
     perGpuBars: (state) => {
-      return buildPerGpuBars(state as unknown as AppState)
+      return buildPerGpuBars(state)
     },
     fitStatus: (state) => {
-      return buildPerGpuFitStatus(state as unknown as AppState)
+      return buildPerGpuFitStatus(state)
     },
     waffleCells: (state) => {
       const density = computeEffectiveDensity(state)
       const gridSize = density === '20x20' ? 20 : 10
-      return buildPerGpuWaffleCells(state as unknown as AppState, gridSize)
+      return buildPerGpuWaffleCells(state, gridSize)
     },
     kpis: (state) => {
-      const results = computeResultsStub(state as unknown as AppState)
-      const fitEntries = buildPerGpuFitStatus(state as unknown as AppState)
+      const results = computeResultsStub(state)
+      const fitEntries = buildPerGpuFitStatus(state)
       const fit = new Map(fitEntries.map((entry) => [entry.gpuId, entry]))
       let totalCapacity = 0
       let totalUsed = 0
@@ -97,31 +99,31 @@ export const useAppStore = defineStore('app', {
 
   actions: {
     init() {
-      initController(this as unknown as AppState)
+      initController(this.$state)
     },
     loadUnitPreference() {
-      loadUnitPreferenceController(this as unknown as AppState)
+      loadUnitPreferenceController(this.$state)
     },
     setUnit(unit: UnitPreference) {
-      setUnitController(this as unknown as AppState, unit)
+      setUnitController(this.$state, unit)
     },
     setGpuCount(typeId: string, n: number) {
-      setGpuCountController(this as unknown as AppState, typeId, n)
+      setGpuCountController(this.$state, typeId, n)
     },
     incrementGpu(typeId: string, delta: number) {
-      incrementGpuController(this as unknown as AppState, typeId, delta)
+      incrementGpuController(this.$state, typeId, delta)
     },
     addDeployment() {
-      addDeploymentController(this as unknown as AppState)
+      addDeploymentController(this.$state)
     },
     removeDeployment(id: string) {
-      removeDeploymentController(this as unknown as AppState, id)
+      removeDeploymentController(this.$state, id)
     },
     applySuggestedMaxModelLen(id: string) {
-      applySuggestedMaxModelLenController(this as unknown as AppState, id)
+      applySuggestedMaxModelLenController(this.$state, id)
     },
     applySuggestedMaxNumSeqs(id: string) {
-      applySuggestedMaxNumSeqsController(this as unknown as AppState, id)
+      applySuggestedMaxNumSeqsController(this.$state, id)
     },
     setDensity(density: Density) {
       this.viewPrefs.density = density
