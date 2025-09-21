@@ -35,11 +35,44 @@
         </header>
 
         <div class="inspector__body" role="document">
-          <p v-if="!selection" class="inspector__placeholder">Select a GPU to inspect usage details.</p>
-          <div v-else class="inspector__placeholder">
-            <strong>{{ selection.name }}</strong>
-            <span class="inspector__placeholder-sub">Detailed metrics arrive in Task 5.2.</span>
-          </div>
+          <template v-if="selection">
+            <div v-if="rows.length" class="inspector__cards">
+              <article v-for="row in rows" :key="row.id" class="inspector__card">
+                <header class="inspector__card-head">
+                  <span class="inspector__card-deployment">{{ row.id }}</span>
+                  <span class="inspector__card-model">{{ row.modelName }}</span>
+                </header>
+                <dl class="inspector__card-metrics">
+                  <div>
+                    <dt>Weights</dt>
+                    <dd>{{ row.weights }}</dd>
+                  </div>
+                  <div>
+                    <dt>KV</dt>
+                    <dd>{{ row.kv }}</dd>
+                  </div>
+                </dl>
+              </article>
+              <article class="inspector__card inspector__card--total">
+                <header class="inspector__card-head">
+                  <span class="inspector__card-deployment">Totals</span>
+                  <span class="inspector__card-model">Across deployments</span>
+                </header>
+                <dl class="inspector__card-metrics">
+                  <div>
+                    <dt>Weights</dt>
+                    <dd>{{ totals.weights }}</dd>
+                  </div>
+                  <div>
+                    <dt>KV</dt>
+                    <dd>{{ totals.kv }}</dd>
+                  </div>
+                </dl>
+              </article>
+            </div>
+            <p v-else class="inspector__placeholder">No deployments assigned to this GPU yet.</p>
+          </template>
+          <p v-else class="inspector__placeholder">Select a GPU to inspect usage details.</p>
         </div>
       </section>
     </transition>
@@ -48,7 +81,12 @@
 
 <script setup lang="ts">
 import { computed, nextTick, ref, watch } from 'vue'
+import { storeToRefs } from 'pinia'
 import { FOCUSABLE_SELECTOR, getNextFocusable, isFocusableCandidate } from '../dock/focusLoop'
+import { useAppStore } from '@app/store'
+import { computeResultsStub } from '@app/controller'
+import { formatBytes } from '@shared/units'
+import type { AppState } from '@app/state'
 
 const props = defineProps<{
   open: boolean
@@ -57,6 +95,34 @@ const props = defineProps<{
 
 const emit = defineEmits<{ (e: 'close'): void }>()
 const rootRef = ref<HTMLElement | null>(null)
+const store = useAppStore()
+const { unit } = storeToRefs(store)
+
+const perGpuResults = computed(() => computeResultsStub(store.$state as AppState))
+
+const rows = computed(() => {
+  if (!props.selection) return [] as Array<{ id: string; modelName: string; weights: string; kv: string }>
+  const entry = perGpuResults.value.find((result) => result.gpuId === props.selection?.id)
+  if (!entry) return []
+  return entry.parts.map((part) => ({
+    id: part.deploymentId,
+    modelName: part.modelName,
+    weights: formatBytes(part.weights, unit.value, 1),
+    kv: formatBytes(part.kv, unit.value, 1),
+  }))
+})
+
+const totals = computed(() => {
+  if (!props.selection) return { weights: '0', kv: '0' }
+  const entry = perGpuResults.value.find((result) => result.gpuId === props.selection?.id)
+  if (!entry) return { weights: '0', kv: '0' }
+  const weights = entry.parts.reduce((sum, part) => sum + part.weights, 0)
+  const kv = entry.parts.reduce((sum, part) => sum + part.kv, 0)
+  return {
+    weights: formatBytes(weights, unit.value, 1),
+    kv: formatBytes(kv, unit.value, 1),
+  }
+})
 
 const focusables = computed(() => {
   const root = rootRef.value
@@ -172,13 +238,76 @@ function onKeydown(event: KeyboardEvent) {
   stroke-linecap: round;
 }
 
+
 .inspector__body {
   flex: 1;
   padding: 0 2rem 2rem;
   overflow-y: auto;
   display: flex;
-  align-items: center;
-  justify-content: center;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.inspector__cards {
+  display: grid;
+  gap: 1rem;
+}
+
+.inspector__card {
+  border-radius: 18px;
+  border: 1px solid rgba(148, 163, 184, 0.24);
+  background: linear-gradient(135deg, rgba(24, 31, 49, 0.9) 0%, rgba(12, 16, 27, 0.9) 100%);
+  padding: 1.1rem 1.2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  box-shadow: 0 12px 30px rgba(7, 10, 18, 0.35);
+}
+
+.inspector__card--total {
+  border-color: rgba(56, 189, 248, 0.55);
+  background: linear-gradient(135deg, rgba(56, 189, 248, 0.18) 0%, rgba(99, 102, 241, 0.18) 100%);
+}
+
+.inspector__card-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: baseline;
+}
+
+.inspector__card-deployment {
+  font-size: 0.88rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(148, 163, 184, 0.85);
+}
+
+.inspector__card-model {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: rgba(248, 250, 252, 0.94);
+}
+
+.inspector__card-metrics {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 0.75rem;
+}
+
+.inspector__card-metrics dt {
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(148, 163, 184, 0.78);
+  margin: 0 0 0.25rem;
+}
+
+.inspector__card-metrics dd {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: rgba(248, 250, 252, 0.96);
 }
 
 .inspector__placeholder {
@@ -187,6 +316,7 @@ function onKeydown(event: KeyboardEvent) {
   gap: 0.45rem;
   text-align: center;
   font-size: 1rem;
+  color: rgba(148, 163, 184, 0.85);
 }
 
 .inspector__placeholder-sub {

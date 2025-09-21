@@ -116,7 +116,8 @@ Repo assessment (concise)
     - Gates: Accessibility.
     - Traceability: PRD Layout & Navigation.
     - Est: 1–2h
-  - [ ] 5.2 MUST show per‑deployment vRAM breakdown (weights + KV) for selected GPU
+  - [x] 5.2 MUST show per‑deployment vRAM breakdown (weights + KV) for selected GPU
+    - Notes: Inspector now reads `computeResultsStub` parts and renders per-deployment table with weights/KV totals formatted by unit.
     - Acceptance: Table lists deployments assigned to GPU with weights/KV bytes; sums align with Used.
     - Gates: Tests (data integrity); Boundaries.
     - Traceability: PRD Visualization (Inspector detail); ARCH‑v3 UI Composition.
