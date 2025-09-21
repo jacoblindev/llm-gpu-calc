@@ -122,7 +122,8 @@ Repo assessment (concise)
     - Gates: Tests (data integrity); Boundaries.
     - Traceability: PRD Visualization (Inspector detail); ARCH‑v3 UI Composition.
     - Est: 1–2h
-  - [ ] 5.3 Optional quick‑apply suggestions from Inspector
+  - [x] 5.3 Optional quick‑apply suggestions from Inspector
+    - Notes: Added per-deployment suggestion cards with Apply buttons wired to store actions; reuses suggestion helper filtered to selected GPU.
     - Acceptance: Action applies suggestion via store and closes/updates view.
     - Gates: Tests (apply path), Boundaries.
     - Traceability: PRD Suggestions; ARCH‑v3.

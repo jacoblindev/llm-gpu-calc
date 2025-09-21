@@ -97,4 +97,17 @@ describe('buildInsightSuggestions', () => {
     const rows = buildInsightSuggestions({ state })
     expect(rows).toHaveLength(0)
   })
+
+  it('filters suggestions when gpuId supplied', () => {
+    const state = makeState()
+    state.deployments[0].assignedGpuIds = ['ga']
+    state.deployments[1].assignedGpuIds = ['gb']
+    vi.mocked(computeDeploymentSuggestions).mockImplementation((s, id) => {
+      if (id === 'dep-1') return { maxModelLen: 8192, maxNumSeqs: 4 }
+      return { maxModelLen: s.deployments.find((d) => d.id === id)?.maxModelLen ?? 0, maxNumSeqs: s.deployments.find((d) => d.id === id)?.maxNumSeqs ?? 0 }
+    })
+    const rows = buildInsightSuggestions({ state, gpuId: 'ga' })
+    expect(rows).toHaveLength(1)
+    expect(rows[0].id).toBe('dep-1')
+  })
 })

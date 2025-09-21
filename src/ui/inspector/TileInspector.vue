@@ -71,6 +71,38 @@
               </article>
             </div>
             <p v-else class="inspector__placeholder">No deployments assigned to this GPU yet.</p>
+
+            <section class="inspector__suggestions" aria-live="polite">
+              <header class="inspector__suggestions-head">
+                <h3>Suggestions</h3>
+                <p>Adjust limits to reclaim headroom on this GPU.</p>
+              </header>
+              <template v-if="suggestions.length">
+                <article v-for="suggestion in suggestions" :key="suggestion.id" class="inspector__sugg-card">
+                  <header class="inspector__sugg-card-head">
+                    <span class="inspector__sugg-deployment">{{ suggestion.id }}</span>
+                    <span class="inspector__sugg-model">{{ suggestion.modelName ?? 'Deployment' }}</span>
+                  </header>
+                  <ul class="inspector__sugg-actions">
+                    <li v-for="action in suggestion.actions" :key="action.field" class="inspector__sugg-action">
+                      <div>
+                        <span class="inspector__sugg-label">{{ action.field === 'max_model_len' ? 'max_model_len' : 'max_num_seqs' }}</span>
+                        <span class="inspector__sugg-values">{{ action.current }} → <strong>{{ action.suggested }}</strong></span>
+                      </div>
+                      <button
+                        type="button"
+                        class="inspector__apply"
+                        :disabled="!action.canApply"
+                        @click="applySuggestion(suggestion.id, action.field)"
+                      >
+                        Apply
+                      </button>
+                    </li>
+                  </ul>
+                </article>
+              </template>
+              <p v-else class="inspector__placeholder">No tuning suggestions for this GPU.</p>
+            </section>
           </template>
           <p v-else class="inspector__placeholder">Select a GPU to inspect usage details.</p>
         </div>
@@ -87,6 +119,7 @@ import { useAppStore } from '@app/store'
 import { computeResultsStub } from '@app/controller'
 import { formatBytes } from '@shared/units'
 import type { AppState } from '@app/state'
+import { buildInsightSuggestions } from '../dock/insightsSuggestions'
 
 const props = defineProps<{
   open: boolean
@@ -124,6 +157,11 @@ const totals = computed(() => {
   }
 })
 
+const suggestions = computed(() => {
+  if (!props.selection) return []
+  return buildInsightSuggestions({ state: store.$state as AppState, gpuId: props.selection.id })
+})
+
 const focusables = computed(() => {
   const root = rootRef.value
   if (!root) return [] as HTMLElement[]
@@ -157,6 +195,14 @@ function onKeydown(event: KeyboardEvent) {
   if (!next) return
   event.preventDefault()
   next.focus()
+}
+
+function applySuggestion(id: string, field: 'max_model_len' | 'max_num_seqs') {
+  if (field === 'max_model_len') {
+    store.applySuggestedMaxModelLen(id)
+  } else {
+    store.applySuggestedMaxNumSeqs(id)
+  }
 }
 </script>
 
@@ -308,6 +354,98 @@ function onKeydown(event: KeyboardEvent) {
   font-size: 1rem;
   font-weight: 600;
   color: rgba(248, 250, 252, 0.96);
+}
+
+.inspector__suggestions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+.inspector__suggestions-head h3 {
+  margin: 0;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(148, 163, 184, 0.85);
+}
+
+.inspector__suggestions-head p {
+  margin: 0.25rem 0 0;
+  font-size: 0.82rem;
+  color: rgba(148, 163, 184, 0.78);
+}
+
+.inspector__sugg-card {
+  border-radius: 18px;
+  border: 1px solid rgba(148, 163, 184, 0.24);
+  background: linear-gradient(135deg, rgba(24, 31, 49, 0.9) 0%, rgba(12, 16, 27, 0.9) 100%);
+  padding: 1rem 1.1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.inspector__sugg-card-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: baseline;
+}
+
+.inspector__sugg-deployment {
+  font-size: 0.82rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(148, 163, 184, 0.82);
+}
+
+.inspector__sugg-model {
+  font-size: 1rem;
+  font-weight: 600;
+  color: rgba(248, 250, 252, 0.94);
+}
+
+.inspector__sugg-actions {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.65rem;
+}
+
+.inspector__sugg-action {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: center;
+}
+
+.inspector__sugg-label {
+  display: block;
+  font-size: 0.74rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(148, 163, 184, 0.78);
+}
+
+.inspector__sugg-values {
+  font-size: 0.95rem;
+  color: rgba(248, 250, 252, 0.95);
+}
+
+.inspector__apply {
+  border-radius: 999px;
+  border: 1px solid rgba(56, 189, 248, 0.5);
+  background: linear-gradient(90deg, rgba(56, 189, 248, 0.22), rgba(99, 102, 241, 0.32));
+  color: #f8fafc;
+  font-weight: 600;
+  padding: 0.4rem 1.05rem;
+}
+
+.inspector__apply:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
 }
 
 .inspector__placeholder {
