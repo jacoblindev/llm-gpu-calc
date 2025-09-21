@@ -12,7 +12,9 @@
     "types": ["node", "vitest"],
     "baseUrl": ".",
     "paths": {
+      "@ui": ["src/ui/index.ts"],
       "@ui/*": ["src/ui/*"],
+      "@app": ["src/app/index.ts"],
       "@app/*": ["src/app/*"],
       "@domain/*": ["src/domain/*"],
       "@data/*": ["src/data/*"],
