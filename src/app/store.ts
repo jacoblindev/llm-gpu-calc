@@ -83,7 +83,7 @@ export const useAppStore = defineStore('app', {
         totalUsed += Math.max(0, r.usedBytes)
         totalReserve += Math.max(0, r.impliedReserveFrac * r.capacityBytes)
         const f = fit.get(r.gpuId)
-        if (f && f.ok === false) warnings += 1
+        if (f && !f.ok) warnings += 1
       }
       return {
         gpus: results.length,
