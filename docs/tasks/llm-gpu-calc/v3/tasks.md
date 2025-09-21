@@ -90,7 +90,8 @@ Repo assessment (concise)
     - Est: 0.5–1h
 
 - [ ] 4.0 InsightsDrawer (right overlay)
-  - [ ] 4.1 Fit status list from `buildPerGpuFitStatus`
+  - [x] 4.1 Fit status list from `buildPerGpuFitStatus`
+    - Notes: Implemented InsightsDrawer overlay with fit status list, reusable badge helper, and insights rows utility + tests.
     - Acceptance: Deterministic display; status badges reflect reasons.
     - Gates: Tests (smoke), Boundaries.
     - Traceability: PRD Acceptance (Layout & Navigation), ARCH‑v3 Key Contracts.

@@ -14,7 +14,7 @@
         @close="closeDock"
         @change-tab="setActiveTab"
       />
-      <InsightsDrawer class="hidden" />
+      <InsightsDrawer :open="isInsightsOpen" @close="closeInsights" />
       <TileInspector class="hidden" />
     </main>
     <FooterBar />
@@ -36,6 +36,7 @@ import { resolveDockShortcut } from '../dock/shortcutResolver'
 const { isOpen, activeTab, open, close, setTab } = useControlDockState('gpus')
 const isDockOpen = isOpen
 const commandToggleRef = ref<HTMLElement | null>(null)
+const isInsightsOpen = ref(false)
 
 interface DockTabSelection {
   tab: ControlDockTab
@@ -74,6 +75,10 @@ function closeDock() {
 
 function setActiveTab(tab: ControlDockTab) {
   setTab(tab)
+}
+
+function closeInsights() {
+  isInsightsOpen.value = false
 }
 
 function onCommandStripToggle(trigger?: HTMLElement | null) {

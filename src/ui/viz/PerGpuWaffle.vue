@@ -41,30 +41,10 @@ import { storeToRefs } from 'pinia'
 import { useAppStore } from '@app/store'
 import { gpuCapacityLabel, type WaffleCategory } from '@app/controller'
 import type { Gpu } from '@shared/types'
+import { resolveFitBadge } from '../status/fitBadge'
 
 const store = useAppStore()
 const { waffleCells, fitStatus } = storeToRefs(store)
-
-type TileStatus = {
-  text: 'Over' | 'Warning' | 'OK'
-  class: string
-  title: string
-}
-
-function resolveStatus(gpuId: string): TileStatus {
-  const status = fitStatus.value.find((s) => s.gpuId === gpuId)
-  if (!status) {
-    return { text: 'OK', class: 'is-ok', title: 'No status available' }
-  }
-  const reason = status.reason ?? ''
-  if (!status.ok) {
-    return { text: 'Over', class: 'is-over', title: reason || 'Over capacity or no headroom' }
-  }
-  if (reason.includes('High utilization')) {
-    return { text: 'Warning', class: 'is-warn', title: reason }
-  }
-  return { text: 'OK', class: 'is-ok', title: reason || 'Within capacity' }
-}
 
 const order: WaffleCategory[] = ['weights', 'kv', 'reserve', 'free']
 
@@ -87,7 +67,8 @@ function percentOf(value: number, capacity: number): string {
 
 const tiles = computed(() => {
   return (waffleCells.value ?? []).map((entry) => {
-    const status = resolveStatus(entry.gpuId)
+    const rawStatus = fitStatus.value.find((s) => s.gpuId === entry.gpuId)
+    const badge = rawStatus ? resolveFitBadge(rawStatus) : { variant: 'ok', label: 'OK', title: 'No status available' }
     const totalCells = entry.totalCells || entry.gridSize ** 2
     const cells = expandCells(entry.cells, totalCells)
     const usedBytes = entry.weightsBytes + entry.kvBytes
@@ -104,9 +85,9 @@ const tiles = computed(() => {
       gpuId: entry.gpuId,
       gpuName: entry.gpuName,
       capacityLabel: gpuCapacityLabel(gpuMeta),
-      statusText: status.text,
-      statusClass: status.class,
-      statusTitle: status.title,
+      statusText: badge.label,
+      statusClass: badge.variant === 'over' ? 'is-over' : badge.variant === 'warn' ? 'is-warn' : 'is-ok',
+      statusTitle: badge.title,
       gridSize: entry.gridSize,
       cells,
       usedPercent,
