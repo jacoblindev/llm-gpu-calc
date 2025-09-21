@@ -45,7 +45,7 @@ describe('resolveDockShortcut', () => {
   })
 
   it('returns insights toggle for F key', () => {
-    expect(resolveDockShortcut(makeEvent({ key: 'F' }))).toEqual({ type: 'insights' })
+    expect(resolveDockShortcut(makeEvent({ key: 'f' }))).toEqual({ type: 'insights' })
   })
 
   it('ignores events with modifier keys', () => {
