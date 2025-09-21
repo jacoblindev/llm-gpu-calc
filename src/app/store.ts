@@ -39,7 +39,9 @@ export interface StoreState extends AppState {
   viewPrefs: ViewPrefs
 }
 
-const AUTO_DOWNGRADE_GPU_THRESHOLD = 32
+// Auto-downgrade waffle density when GPU count exceeds this threshold.
+// Derived from usability testing: 20×20 tiles past 32 GPUs cause perceptible jank.
+export const AUTO_DOWNGRADE_GPU_THRESHOLD = 32
 
 function computeEffectiveDensity(state: StoreState): Density {
   const desired = state.viewPrefs?.density ?? '10x10'
