@@ -2,7 +2,14 @@
   <Teleport to="body">
     <div class="sr-only" aria-live="polite" aria-atomic="true">{{ liveMessage }}</div>
     <transition name="control-dock-fade">
-      <div v-if="open" class="control-dock__scrim" aria-hidden="true" />
+      <button
+        v-if="open"
+        type="button"
+        class="control-dock__scrim"
+        aria-hidden="true"
+        tabindex="-1"
+        @click="onClose"
+      />
     </transition>
     <transition name="control-dock-slide">
       <aside
@@ -25,7 +32,9 @@
             </p>
           </div>
           <button type="button" class="control-dock__close" aria-label="Close Control Dock" @click="onClose">
-            <span aria-hidden="true">&times;</span>
+            <svg aria-hidden="true" viewBox="0 0 16 16" class="control-dock__close-icon">
+              <path d="M3.2 3.2L12.8 12.8M12.8 3.2L3.2 12.8" />
+            </svg>
           </button>
         </header>
 
@@ -196,13 +205,18 @@ function onKeydown(event: KeyboardEvent) {
   background: rgba(9, 12, 18, 0.46);
   backdrop-filter: blur(12px);
   z-index: 40;
+  border: none;
+  margin: 0;
+  padding: 0;
+  cursor: pointer;
 }
 
 .control-dock {
   position: fixed;
-  inset-y: 0;
+  top: 0;
+  bottom: 0;
   left: 0;
-  width: min(420px, 92vw);
+  width: min(60vw, 760px);
   background: linear-gradient(180deg, rgba(17, 24, 39, 0.96) 0%, rgba(11, 15, 23, 0.96) 100%);
   border-right: 1px solid rgba(148, 163, 184, 0.28);
   box-shadow: 0 20px 60px rgba(7, 10, 18, 0.55);
@@ -224,37 +238,45 @@ function onKeydown(event: KeyboardEvent) {
   margin: 0.35rem 0 0;
   font-size: 1.35rem;
   letter-spacing: 0.01em;
+  color: rgba(248, 250, 252, 0.94);
 }
 
 .control-dock__eyebrow {
   font-size: 0.75rem;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: rgba(148, 163, 184, 0.8);
+  color: rgba(226, 232, 240, 0.82);
 }
 
 .control-dock__subtitle {
   margin: 0.35rem 0 0;
   font-size: 0.85rem;
-  color: rgba(148, 163, 184, 0.9);
+  color: rgba(226, 232, 240, 0.92);
 }
 
 .control-dock__close {
   border: 1px solid rgba(148, 163, 184, 0.35);
   background: rgba(15, 23, 42, 0.45);
-  color: inherit;
-  width: 2.25rem;
-  height: 2.25rem;
+  color: rgba(248, 250, 252, 0.92);
+  width: 2.35rem;
+  aspect-ratio: 1 / 1;
   border-radius: 999px;
-  display: grid;
-  place-items: center;
-  font-size: 1.6rem;
-  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .control-dock__close:hover {
   border-color: rgba(148, 163, 184, 0.6);
   background: rgba(31, 41, 55, 0.6);
+}
+
+.control-dock__close-icon {
+  width: 1.15rem;
+  height: 1.15rem;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
 }
 
 .control-dock__tabs {
@@ -269,7 +291,7 @@ function onKeydown(event: KeyboardEvent) {
   border-radius: 12px;
   background: rgba(31, 41, 55, 0.55);
   border: 1px solid rgba(148, 163, 184, 0.28);
-  color: rgba(226, 232, 240, 0.9);
+  color: rgba(226, 232, 240, 0.88);
   font-size: 0.82rem;
   font-weight: 600;
   letter-spacing: 0.02em;
@@ -279,7 +301,7 @@ function onKeydown(event: KeyboardEvent) {
 .control-dock__tab.is-active {
   background: linear-gradient(90deg, rgba(34, 211, 238, 0.22), rgba(99, 102, 241, 0.28));
   border-color: rgba(56, 189, 248, 0.65);
-  color: #f8fafc;
+  color: rgba(248, 250, 252, 0.96);
   box-shadow: 0 0 18px rgba(56, 189, 248, 0.35);
 }
 
@@ -300,12 +322,13 @@ function onKeydown(event: KeyboardEvent) {
   margin: 0;
   font-size: 1.05rem;
   font-weight: 600;
+  color: rgba(248, 250, 252, 0.94);
 }
 
 .control-dock__panel-header p {
   margin: 0.35rem 0 0;
   font-size: 0.85rem;
-  color: rgba(148, 163, 184, 0.85);
+  color: rgba(226, 232, 240, 0.88);
 }
 
 .control-dock__panel-content {
@@ -346,7 +369,7 @@ function onKeydown(event: KeyboardEvent) {
 
 @media (max-width: 960px) {
   .control-dock {
-    width: min(400px, 88vw);
+    width: min(520px, 90vw);
   }
 }
 
