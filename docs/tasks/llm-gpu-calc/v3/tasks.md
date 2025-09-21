@@ -130,7 +130,8 @@ Repo assessment (concise)
     - Est: 0.5–1h
 
 - [ ] 6.0 CommandStrip + KPI ribbon
-  - [ ] 6.1 KPIs from getters; Warnings deep‑link
+  - [x] 6.1 KPIs from getters; Warnings deep‑link
+    - Notes: KPI ribbon moved to `VizSummary` (lighter synthwave chips), powered by store getters/format helper; warnings chip opens Insights with `warn` filter.
     - Acceptance: KPIs accurate; clicking Warnings opens Insights with Status filter set.
     - Gates: Tests (smoke), Boundaries.
     - Traceability: PRD Top Bar & KPIs; ARCH‑v3 Data Flow.

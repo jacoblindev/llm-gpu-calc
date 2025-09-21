@@ -2,24 +2,9 @@
   <header class="command-strip" role="banner">
     <div class="command-strip__brand">
       <div class="command-strip__glyph" aria-hidden="true">◇</div>
-      <div>
+      <div class="command-strip__titles">
         <p class="command-strip__eyebrow">LLM GPU vRAM Calculator</p>
         <h1>Viz Command Center</h1>
-      </div>
-    </div>
-
-    <div class="command-strip__summary" role="group" aria-label="Current system snapshot">
-      <div class="command-strip__stat">
-        <span class="command-strip__stat-label">GPUs</span>
-        <span class="command-strip__stat-value">{{ kpis.gpus }}</span>
-      </div>
-      <div class="command-strip__stat">
-        <span class="command-strip__stat-label">Capacity</span>
-        <span class="command-strip__stat-value">{{ formattedCapacity }}</span>
-      </div>
-      <div class="command-strip__stat command-strip__stat--warnings" :class="{ 'has-alert': kpis.warnings > 0 }">
-        <span class="command-strip__stat-label">Warnings</span>
-        <span class="command-strip__stat-value">{{ kpis.warnings }}</span>
       </div>
     </div>
 
@@ -43,19 +28,17 @@
         class="command-strip__toggle"
         :class="{ 'is-active': dockOpen }"
         @click="onToggleDock"
+        aria-label="Toggle editor drawer"
       >
         <span class="command-strip__toggle-kicker">E</span>
-        Editor
+        <span class="command-strip__toggle-label">Editor</span>
       </button>
     </div>
   </header>
 </template>
 
 <script setup lang="ts">
-import { computed, reactive, ref } from 'vue'
-import { storeToRefs } from 'pinia'
-import { useAppStore } from '@app/store'
-import { formatBytes } from '@shared/units'
+import { reactive, ref } from 'vue'
 import { CONTROL_DOCK_TABS, type ControlDockTab } from '../dock/dockTypes'
 
 const props = defineProps<{ dockOpen: boolean; activeTab: ControlDockTab }>()
@@ -64,8 +47,6 @@ const emit = defineEmits<{
   (e: 'select-dock-tab', payload: { tab: ControlDockTab; trigger?: HTMLElement | null }): void
 }>()
 
-const store = useAppStore()
-const { kpis, unit } = storeToRefs(store)
 const tabs = CONTROL_DOCK_TABS
 
 const toggleRef = ref<HTMLButtonElement | null>(null)
@@ -78,8 +59,6 @@ const tabButtonRefs = reactive<Record<ControlDockTab, HTMLButtonElement | null>>
 function setTabButtonRef(tab: ControlDockTab, el: HTMLButtonElement | null) {
   tabButtonRefs[tab] = el
 }
-
-const formattedCapacity = computed(() => formatBytes(kpis.value.totalCapacity, unit.value, 1))
 
 function onToggleDock() {
   emit('toggle-dock', toggleRef.value)
@@ -96,13 +75,13 @@ function onTabShortcut(tab: ControlDockTab) {
   top: 0;
   z-index: 30;
   display: grid;
-  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
-  gap: 1.5rem;
-  padding: 1.1rem 1.75rem;
-  background: linear-gradient(90deg, rgba(10, 16, 27, 0.9), rgba(24, 33, 54, 0.92));
-  border-bottom: 1px solid rgba(148, 163, 184, 0.25);
-  backdrop-filter: blur(12px);
+  gap: 1.2rem;
+  padding: 0.75rem 1.5rem;
+  background: linear-gradient(90deg, rgba(10, 16, 27, 0.82), rgba(21, 31, 52, 0.88));
+  border-bottom: 1px solid rgba(86, 108, 147, 0.35);
+  backdrop-filter: blur(14px);
 }
 
 .command-strip__brand {
@@ -112,15 +91,15 @@ function onTabShortcut(tab: ControlDockTab) {
 }
 
 .command-strip__glyph {
-  width: 2.75rem;
-  height: 2.75rem;
-  border-radius: 14px;
+  width: 2.4rem;
+  height: 2.4rem;
+  border-radius: 12px;
   display: grid;
   place-items: center;
   font-size: 1.2rem;
-  color: rgba(56, 189, 248, 0.95);
-  background: linear-gradient(180deg, rgba(56, 189, 248, 0.16), rgba(20, 184, 166, 0.18));
-  box-shadow: 0 0 22px rgba(56, 189, 248, 0.25);
+  color: rgba(56, 189, 248, 0.92);
+  background: linear-gradient(180deg, rgba(56, 189, 248, 0.2), rgba(110, 108, 236, 0.18));
+  box-shadow: 0 0 18px rgba(56, 189, 248, 0.25);
 }
 
 .command-strip__eyebrow {
@@ -138,52 +117,23 @@ function onTabShortcut(tab: ControlDockTab) {
   color: #f8fafc;
 }
 
-.command-strip__summary {
-  display: flex;
-  justify-content: center;
-  gap: 1.35rem;
-  padding: 0.6rem 1.15rem;
-  border-radius: 14px;
-  border: 1px solid rgba(148, 163, 184, 0.25);
-  background: rgba(15, 23, 42, 0.6);
-}
-
-.command-strip__stat {
+.command-strip__titles {
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
-  min-width: 4.5rem;
-  text-align: center;
-}
-
-.command-strip__stat-label {
-  font-size: 0.72rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: rgba(148, 163, 184, 0.75);
-}
-
-.command-strip__stat-value {
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: #f8fafc;
-}
-
-.command-strip__stat--warnings.has-alert .command-strip__stat-value {
-  color: #f97316;
 }
 
 .command-strip__actions {
   display: flex;
   align-items: center;
-  gap: 0.85rem;
+  gap: 0.75rem;
 }
 
 .command-strip__shortcuts {
   display: flex;
   gap: 0.35rem;
-  background: rgba(15, 23, 42, 0.6);
-  border: 1px solid rgba(148, 163, 184, 0.24);
+  background: rgba(15, 24, 40, 0.4);
+  border: 1px solid rgba(148, 163, 184, 0.2);
   border-radius: 999px;
   padding: 0.25rem;
 }
@@ -200,15 +150,15 @@ function onTabShortcut(tab: ControlDockTab) {
 }
 
 .command-strip__shortcut.is-active {
-  background: linear-gradient(90deg, rgba(34, 211, 238, 0.16), rgba(99, 102, 241, 0.2));
-  color: #f8fafc;
+  background: linear-gradient(90deg, rgba(34, 211, 238, 0.18), rgba(99, 102, 241, 0.2));
+  color: rgba(248, 250, 252, 0.95);
 }
 
 .command-strip__toggle {
   display: inline-flex;
   align-items: center;
   gap: 0.6rem;
-  padding: 0.65rem 1.35rem;
+  padding: 0.55rem 1.2rem;
   border-radius: 999px;
   border: 1px solid rgba(56, 189, 248, 0.5);
   background: linear-gradient(90deg, rgba(56, 189, 248, 0.22), rgba(99, 102, 241, 0.32));
@@ -234,61 +184,25 @@ function onTabShortcut(tab: ControlDockTab) {
   font-weight: 700;
 }
 
-@media (max-width: 1080px) {
-  .command-strip {
-    grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
-    grid-template-rows: auto auto;
-  }
-
-  .command-strip__actions {
-    justify-self: end;
-  }
-
-  .command-strip__summary {
-    justify-self: start;
-  }
+.command-strip__toggle-label {
+  display: inline-block;
 }
 
 @media (max-width: 820px) {
   .command-strip {
     grid-template-columns: 1fr;
-    grid-template-rows: repeat(3, auto);
-    gap: 1rem;
-  }
-
-  .command-strip__summary {
-    justify-content: flex-start;
-  }
-
-  .command-strip__actions {
-    justify-content: space-between;
-  }
-}
-
-@media (max-width: 640px) {
-  .command-strip {
-    padding: 1rem 1.1rem;
-  }
-
-  .command-strip__summary {
-    width: 100%;
-    gap: 0.85rem;
-    padding: 0.5rem 0.85rem;
-  }
-
-  .command-strip__actions {
-    flex-direction: column;
-    align-items: stretch;
     gap: 0.75rem;
-  }
-
-  .command-strip__shortcuts {
+    }
+  .command-strip__actions {
     justify-content: space-between;
   }
 
   .command-strip__toggle {
-    justify-content: center;
-    width: 100%;
+    padding: 0.5rem 0.85rem;
+  }
+
+  .command-strip__toggle-label {
+    display: none;
   }
 }
 </style>

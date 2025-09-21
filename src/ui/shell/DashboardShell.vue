@@ -7,7 +7,7 @@
       @select-dock-tab="onCommandStripSelectTab"
     />
     <main class="dashboard-shell__main">
-      <VizCanvas class="dashboard-shell__canvas" @inspect="onInspect" />
+      <VizCanvas class="dashboard-shell__canvas" @inspect="onInspect" @open-warnings="openWarnings" />
       <ControlDock
         :open="isDockOpen"
         :active-tab="activeTab"
@@ -133,6 +133,10 @@ function onCommandStripSelectTab({ tab, trigger }: DockTabSelection) {
 
 function onInspect(event: { gpuId: string; name: string; trigger: HTMLElement | null }) {
   openInspector({ gpuId: event.gpuId, name: event.name }, event.trigger)
+}
+
+function openWarnings() {
+  openInsights(undefined, true)
 }
 
 function onGlobalKeydown(event: KeyboardEvent) {
