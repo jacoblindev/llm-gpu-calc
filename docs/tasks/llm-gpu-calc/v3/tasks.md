@@ -69,18 +69,21 @@ Repo assessment (concise)
     - Traceability: PRD Performance; ARCH‑v3 Non‑Functionals.
     - Est: 1h
 
-- [ ] 3.0 ControlDock (left overlay)
-  - [ ] 3.1 Tabbed editor wrapping existing GPUs / Deployments / Workload
+- [x] 3.0 ControlDock (left overlay)
+  - [x] 3.1 Tabbed editor wrapping existing GPUs / Deployments / Workload
+    - Notes: ControlDock now renders as synthwave overlay with tabbed panels, CommandStrip toggle/shortcuts, and `useControlDockState` tests for focus restoration.
     - Acceptance: Editors work as before; no layout shift; return focus to toggle on close.
     - Gates: Boundaries; Tests (smoke interactions).
     - Traceability: PRD Layout & Navigation; ARCH‑v3 UI Composition.
     - Est: 2–3h
-  - [ ] 3.2 Overlay a11y (focus trap, ESC, return‑focus)
+  - [x] 3.2 Overlay a11y (focus trap, ESC, return‑focus)
+    - Notes: Added keyboard trap/escape handling, polite live announcements, and focusable-loop utility with unit tests.
     - Acceptance: Verified with keyboard only; screen reader announces open/close.
     - Gates: Accessibility.
     - Traceability: PRD Accessibility.
     - Est: 1h
-  - [ ] 3.3 Keyboard shortcuts: `E` toggle; `G/M/W` jump tabs
+  - [x] 3.3 Keyboard shortcuts: `E` toggle; `G/M/W` jump tabs
+    - Notes: Global shortcut resolver honors focused inputs, toggles dock with return focus, and jumps directly to tabs; covered by shortcut unit tests.
     - Acceptance: Shortcuts work; respects focused inputs (no stealing focus).
     - Gates: Accessibility.
     - Traceability: PRD Keyboard Shortcuts.

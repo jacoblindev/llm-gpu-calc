@@ -126,7 +126,7 @@ function cellStyle(kind: WaffleCategory, size: string) {
       ? 'var(--color-kv)'
       : kind === 'reserve'
       ? 'var(--color-reserve)'
-      : 'var(--color-unallocated)'
+      : 'var(--color-free)'
   return {
     width: size,
     height: size,
