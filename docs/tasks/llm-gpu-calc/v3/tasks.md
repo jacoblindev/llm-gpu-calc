@@ -69,7 +69,7 @@ Repo assessment (concise)
     - Traceability: PRD Performance; ARCH‑v3 Non‑Functionals.
     - Est: 1h
 
-- [ ] 3.0 ControlDock (left overlay)
+- [x] 3.0 ControlDock (left overlay)
   - [x] 3.1 Tabbed editor wrapping existing GPUs / Deployments / Workload
     - Notes: ControlDock now renders as synthwave overlay with tabbed panels, CommandStrip toggle/shortcuts, and `useControlDockState` tests for focus restoration.
     - Acceptance: Editors work as before; no layout shift; return focus to toggle on close.
