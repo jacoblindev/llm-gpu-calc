@@ -14,7 +14,7 @@
         @close="closeDock"
         @change-tab="setActiveTab"
       />
-      <InsightsDrawer class="hidden" />
+      <InsightsDrawer :open="isInsightsOpen" @close="closeInsights" />
       <TileInspector class="hidden" />
     </main>
     <FooterBar />
@@ -22,7 +22,7 @@
 </template>
 
 <script setup lang="ts">
-import { onBeforeUnmount, onMounted, ref } from 'vue'
+import { nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
 import CommandStrip from './CommandStrip.vue'
 import VizCanvas from '../viz/VizCanvas.vue'
 import ControlDock from '../dock/ControlDock.vue'
@@ -32,10 +32,14 @@ import FooterBar from '../FooterBar.vue'
 import type { ControlDockTab } from '../dock/dockTypes'
 import { useControlDockState } from '../dock/useControlDockState'
 import { resolveDockShortcut } from '../dock/shortcutResolver'
+import { useAppStore } from '@app/store'
 
 const { isOpen, activeTab, open, close, setTab } = useControlDockState('gpus')
 const isDockOpen = isOpen
 const commandToggleRef = ref<HTMLElement | null>(null)
+const isInsightsOpen = ref(false)
+const insightsLastTrigger = ref<HTMLElement | null>(null)
+const store = useAppStore()
 
 interface DockTabSelection {
   tab: ControlDockTab
@@ -76,6 +80,24 @@ function setActiveTab(tab: ControlDockTab) {
   setTab(tab)
 }
 
+function openInsights(trigger?: HTMLElement | null, setWarnings = false) {
+  if (setWarnings) {
+    store.setStatusFilter('warn')
+  }
+  const resolved = resolveTrigger(trigger)
+  if (resolved) insightsLastTrigger.value = resolved
+  isInsightsOpen.value = true
+}
+
+function closeInsights() {
+  if (!isInsightsOpen.value) return
+  isInsightsOpen.value = false
+  const trigger = insightsLastTrigger.value
+  if (trigger) {
+    nextTick(() => trigger.focus?.())
+  }
+}
+
 function onCommandStripToggle(trigger?: HTMLElement | null) {
   if (trigger) commandToggleRef.value = trigger
   toggleDock(trigger)
@@ -95,7 +117,19 @@ function onGlobalKeydown(event: KeyboardEvent) {
     toggleDock(invoker)
     return
   }
-  activateDockTab(action.tab, invoker)
+  if (action.type === 'tab') {
+    activateDockTab(action.tab, invoker)
+    return
+  }
+  if (action.type === 'insights') {
+    const warningsActive = store.viewPrefs.statusFilter === 'warn'
+    if (isInsightsOpen.value && warningsActive) {
+      store.setStatusFilter('all')
+      closeInsights()
+    } else {
+      openInsights(invoker, true)
+    }
+  }
 }
 
 onMounted(() => {

@@ -89,18 +89,21 @@ Repo assessment (concise)
     - Traceability: PRD Keyboard Shortcuts.
     - Est: 0.5–1h
 
-- [ ] 4.0 InsightsDrawer (right overlay)
-  - [ ] 4.1 Fit status list from `buildPerGpuFitStatus`
+- [x] 4.0 InsightsDrawer (right overlay)
+  - [x] 4.1 Fit status list from `buildPerGpuFitStatus`
+    - Notes: Implemented InsightsDrawer overlay with fit status list, reusable badge helper, and insights rows utility + tests.
     - Acceptance: Deterministic display; status badges reflect reasons.
     - Gates: Tests (smoke), Boundaries.
     - Traceability: PRD Acceptance (Layout & Navigation), ARCH‑v3 Key Contracts.
     - Est: 1–2h
-  - [ ] 4.2 Suggestions with Apply actions
+  - [x] 4.2 Suggestions with Apply actions
+    - Notes: Added suggestions helper + tests, surfaced apply buttons in InsightsDrawer, wired to store actions so deployments update immediately.
     - Acceptance: Apply updates state via store actions; re-renders Viz.
     - Gates: Tests (apply paths), Boundaries.
     - Traceability: PRD Acceptance (Suggestions via Insights), ARCH‑v3.
     - Est: 1–2h
-  - [ ] 4.3 “Only warnings” chip integrates with `viewPrefs` and opens drawer (`F`)
+  - [x] 4.3 “Only warnings” chip integrates with `viewPrefs` and opens drawer (`F`)
+    - Notes: Added toggle chip + `F` shortcut wiring to set `viewPrefs.statusFilter='warn'`, open/close Insights, and updated shortcut resolver/tests.
     - Acceptance: Clicking KPI Warnings sets filter + opens drawer; keyboard `F` toggles.
     - Gates: Accessibility; Tests (interaction).
     - Traceability: PRD KPI Deep‑links; Viz Controls.
