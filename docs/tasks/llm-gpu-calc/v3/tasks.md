@@ -102,7 +102,8 @@ Repo assessment (concise)
     - Gates: Tests (apply paths), Boundaries.
     - Traceability: PRD Acceptance (Suggestions via Insights), ARCH‑v3.
     - Est: 1–2h
-  - [ ] 4.3 “Only warnings” chip integrates with `viewPrefs` and opens drawer (`F`)
+  - [x] 4.3 “Only warnings” chip integrates with `viewPrefs` and opens drawer (`F`)
+    - Notes: Added toggle chip + `F` shortcut wiring to set `viewPrefs.statusFilter='warn'`, open/close Insights, and updated shortcut resolver/tests.
     - Acceptance: Clicking KPI Warnings sets filter + opens drawer; keyboard `F` toggles.
     - Gates: Accessibility; Tests (interaction).
     - Traceability: PRD KPI Deep‑links; Viz Controls.

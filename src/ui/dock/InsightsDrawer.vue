@@ -27,11 +27,21 @@
             <h2 id="insights-title">Fit Status Overview</h2>
             <p class="insights__subtitle">Monitor capacity pressure across selected GPUs.</p>
           </div>
-          <button type="button" class="insights__close" aria-label="Close Insights" @click="onClose">
-            <svg aria-hidden="true" viewBox="0 0 16 16" class="insights__close-icon">
-              <path d="M3.2 3.2L12.8 12.8M12.8 3.2L3.2 12.8" />
-            </svg>
-          </button>
+          <div class="insights__header-actions">
+            <button
+              type="button"
+              class="insights__chip"
+              :class="{ 'is-active': onlyWarningsActive }"
+              @click="toggleOnlyWarnings"
+            >
+              Only warnings
+            </button>
+            <button type="button" class="insights__close" aria-label="Close Insights" @click="onClose">
+              <svg aria-hidden="true" viewBox="0 0 16 16" class="insights__close-icon">
+                <path d="M3.2 3.2L12.8 12.8M12.8 3.2L3.2 12.8" />
+              </svg>
+            </button>
+          </div>
         </header>
 
         <section class="insights__content" aria-live="polite" aria-busy="false">
@@ -117,7 +127,7 @@ const emit = defineEmits<{ (e: 'close'): void }>()
 
 const rootRef = ref<HTMLElement | null>(null)
 const store = useAppStore()
-const { fitStatus, gpus, gpuCatalog, unit, deployments } = storeToRefs(store)
+const { fitStatus, gpus, gpuCatalog, unit, deployments, viewPrefs } = storeToRefs(store)
 
 const rows = computed(() =>
   buildInsightRows({
@@ -133,6 +143,8 @@ const suggestions = computed(() =>
     state: { ...store.$state, deployments: deployments.value } as AppState,
   })
 )
+
+const onlyWarningsActive = computed(() => viewPrefs.value.statusFilter === 'warn')
 
 watch(
   () => props.open,
@@ -179,6 +191,14 @@ function applySuggestion(id: string, field: 'max_model_len' | 'max_num_seqs') {
     store.applySuggestedMaxNumSeqs(id)
   }
 }
+
+function toggleOnlyWarnings() {
+  if (onlyWarningsActive.value) {
+    store.setStatusFilter('all')
+  } else {
+    store.setStatusFilter('warn')
+  }
+}
 </script>
 
 <style scoped>
@@ -219,6 +239,12 @@ function applySuggestion(id: string, field: 'max_model_len' | 'max_num_seqs') {
   display: flex;
   flex-direction: column;
   gap: 0.4rem;
+}
+
+.insights__header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
 }
 
 .insights__eyebrow {
@@ -263,6 +289,24 @@ function applySuggestion(id: string, field: 'max_model_len' | 'max_num_seqs') {
   stroke: currentColor;
   stroke-width: 1.8;
   stroke-linecap: round;
+}
+
+.insights__chip {
+  border-radius: 999px;
+  border: 1px solid rgba(148, 163, 184, 0.4);
+  background: rgba(15, 23, 42, 0.45);
+  color: rgba(226, 232, 240, 0.9);
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 0.4rem 0.9rem;
+}
+
+.insights__chip.is-active {
+  border-color: rgba(56, 189, 248, 0.55);
+  background: linear-gradient(90deg, rgba(56, 189, 248, 0.18), rgba(99, 102, 241, 0.28));
+  color: #f8fafc;
 }
 
 .insights__content {

@@ -5,6 +5,7 @@ const BLOCKED_TAGS = new Set(['INPUT', 'TEXTAREA', 'SELECT'])
 export type DockShortcut =
   | { type: 'toggle' }
   | { type: 'tab'; tab: ControlDockTab }
+  | { type: 'insights' }
 
 function isInputLike(target: HTMLElement | null): boolean {
   if (!target) return false
@@ -30,5 +31,6 @@ export function resolveDockShortcut(event: KeyboardEvent): DockShortcut | null {
   if (key === 'g') return { type: 'tab', tab: 'gpus' }
   if (key === 'm') return { type: 'tab', tab: 'models' }
   if (key === 'w') return { type: 'tab', tab: 'workload' }
+  if (key === 'f') return { type: 'insights' }
   return null
 }
