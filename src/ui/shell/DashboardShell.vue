@@ -42,13 +42,18 @@ interface DockTabSelection {
   trigger?: HTMLElement | null
 }
 
+function resolveTrigger(preferred?: HTMLElement | null) {
+  if (preferred) return preferred
+  if (commandToggleRef.value) return commandToggleRef.value
+  return document.activeElement instanceof HTMLElement ? document.activeElement : null
+}
+
 function toggleDock(trigger?: HTMLElement | null) {
   if (isDockOpen.value) {
     close()
     return
   }
-  const fallback = trigger ?? (document.activeElement instanceof HTMLElement ? document.activeElement : null)
-  open(activeTab.value, fallback)
+  open(activeTab.value, resolveTrigger(trigger))
 }
 
 function activateDockTab(tab: ControlDockTab, trigger?: HTMLElement | null) {
@@ -57,8 +62,7 @@ function activateDockTab(tab: ControlDockTab, trigger?: HTMLElement | null) {
     return
   }
   if (!isDockOpen.value) {
-    const fallback = document.activeElement instanceof HTMLElement ? document.activeElement : null
-    open(tab, fallback)
+    open(tab, resolveTrigger())
     return
   }
   setTab(tab)
@@ -74,19 +78,19 @@ function setActiveTab(tab: ControlDockTab) {
 
 function onCommandStripToggle(trigger?: HTMLElement | null) {
   if (trigger) commandToggleRef.value = trigger
-  toggleDock(trigger ?? commandToggleRef.value ?? null)
+  toggleDock(trigger)
 }
 
 function onCommandStripSelectTab({ tab, trigger }: DockTabSelection) {
   if (trigger) commandToggleRef.value = trigger
-  activateDockTab(tab, trigger ?? commandToggleRef.value ?? null)
+  activateDockTab(tab, trigger)
 }
 
 function onGlobalKeydown(event: KeyboardEvent) {
   const action = resolveDockShortcut(event)
   if (!action) return
   event.preventDefault()
-  const invoker = commandToggleRef.value ?? (document.activeElement instanceof HTMLElement ? document.activeElement : null)
+  const invoker = resolveTrigger()
   if (action.type === 'toggle') {
     toggleDock(invoker)
     return
