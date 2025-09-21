@@ -136,7 +136,8 @@ Repo assessment (concise)
     - Gates: Tests (smoke), Boundaries.
     - Traceability: PRD Top Bar & KPIs; ARCH‑v3 Data Flow.
     - Est: 1h
-  - [ ] 6.2 Quick chips (Sort, Filter, Density, Search) update `viewPrefs`
+  - [x] 6.2 Quick chips (Sort, Filter, Density, Search) update `viewPrefs`
+    - Notes: VizControls chips now update store; added horizontal scroll layout and search pill backed by `setSearch` + tests.
     - Acceptance: Chips reflect state and update store; Search filters tiles.
     - Gates: Tests (store updates), Accessibility (focus).
     - Traceability: PRD Viz Controls; Persistence.
