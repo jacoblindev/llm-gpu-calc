@@ -109,18 +109,21 @@ Repo assessment (concise)
     - Traceability: PRD KPI Deep‑links; Viz Controls.
     - Est: 0.5–1h
 
-- [ ] 5.0 TileInspector (modal)
-  - [ ] 5.1 Modal open (click/Enter) and full‑screen on mobile
+- [x] 5.0 TileInspector (modal)
+  - [x] 5.1 Modal open (click/Enter) and full‑screen on mobile
+    - Notes: TileInspector now teleports with scrim, focus trap, trigger restoration, click/Enter handlers wired via waffle tiles and shell tests rely on manual verification.
     - Acceptance: Works on desktop/mobile; traps focus; ESC closes; restores focus.
     - Gates: Accessibility.
     - Traceability: PRD Layout & Navigation.
     - Est: 1–2h
-  - [ ] 5.2 MUST show per‑deployment vRAM breakdown (weights + KV) for selected GPU
+  - [x] 5.2 MUST show per‑deployment vRAM breakdown (weights + KV) for selected GPU
+    - Notes: Inspector now reads `computeResultsStub` parts and renders per-deployment table with weights/KV totals formatted by unit.
     - Acceptance: Table lists deployments assigned to GPU with weights/KV bytes; sums align with Used.
     - Gates: Tests (data integrity); Boundaries.
     - Traceability: PRD Visualization (Inspector detail); ARCH‑v3 UI Composition.
     - Est: 1–2h
-  - [ ] 5.3 Optional quick‑apply suggestions from Inspector
+  - [x] 5.3 Optional quick‑apply suggestions from Inspector
+    - Notes: Added per-deployment suggestion cards with Apply buttons wired to store actions; reuses suggestion helper filtered to selected GPU.
     - Acceptance: Action applies suggestion via store and closes/updates view.
     - Gates: Tests (apply path), Boundaries.
     - Traceability: PRD Suggestions; ARCH‑v3.

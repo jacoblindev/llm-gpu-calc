@@ -7,7 +7,7 @@
       @select-dock-tab="onCommandStripSelectTab"
     />
     <main class="dashboard-shell__main">
-      <VizCanvas class="dashboard-shell__canvas" />
+      <VizCanvas class="dashboard-shell__canvas" @inspect="onInspect" />
       <ControlDock
         :open="isDockOpen"
         :active-tab="activeTab"
@@ -15,7 +15,11 @@
         @change-tab="setActiveTab"
       />
       <InsightsDrawer :open="isInsightsOpen" @close="closeInsights" />
-      <TileInspector class="hidden" />
+      <TileInspector
+        :open="isInspectorOpen"
+        :selection="inspectorSelection"
+        @close="closeInspector"
+      />
     </main>
     <FooterBar />
   </div>
@@ -40,6 +44,9 @@ const commandToggleRef = ref<HTMLElement | null>(null)
 const isInsightsOpen = ref(false)
 const insightsLastTrigger = ref<HTMLElement | null>(null)
 const store = useAppStore()
+const isInspectorOpen = ref(false)
+const inspectorSelection = ref<{ id: string; name: string } | null>(null)
+const inspectorLastTrigger = ref<HTMLElement | null>(null)
 
 interface DockTabSelection {
   tab: ControlDockTab
@@ -98,6 +105,22 @@ function closeInsights() {
   }
 }
 
+function openInspector(payload: { gpuId: string; name: string }, trigger?: HTMLElement | null) {
+  inspectorSelection.value = { id: payload.gpuId, name: payload.name }
+  const resolved = trigger ?? resolveTrigger()
+  if (resolved) inspectorLastTrigger.value = resolved
+  isInspectorOpen.value = true
+}
+
+function closeInspector() {
+  if (!isInspectorOpen.value) return
+  isInspectorOpen.value = false
+  const trigger = inspectorLastTrigger.value
+  if (trigger) {
+    nextTick(() => trigger.focus?.())
+  }
+}
+
 function onCommandStripToggle(trigger?: HTMLElement | null) {
   if (trigger) commandToggleRef.value = trigger
   toggleDock(trigger)
@@ -106,6 +129,10 @@ function onCommandStripToggle(trigger?: HTMLElement | null) {
 function onCommandStripSelectTab({ tab, trigger }: DockTabSelection) {
   if (trigger) commandToggleRef.value = trigger
   activateDockTab(tab, trigger)
+}
+
+function onInspect(event: { gpuId: string; name: string; trigger: HTMLElement | null }) {
+  openInspector({ gpuId: event.gpuId, name: event.name }, event.trigger)
 }
 
 function onGlobalKeydown(event: KeyboardEvent) {

@@ -19,6 +19,7 @@ export interface InsightSuggestion {
 
 interface BuildSuggestionsInput {
   state: AppState
+  gpuId?: string
 }
 
 function createAction(field: SuggestionAction['field'], current: number, suggested: number): SuggestionAction {
@@ -27,11 +28,12 @@ function createAction(field: SuggestionAction['field'], current: number, suggest
   return { field, current, suggested, delta, canApply }
 }
 
-export function buildInsightSuggestions({ state }: BuildSuggestionsInput): InsightSuggestion[] {
+export function buildInsightSuggestions({ state, gpuId }: BuildSuggestionsInput): InsightSuggestion[] {
   const modelsById = new Map(state.models.map((m) => [m.id, m]))
   const suggestions: InsightSuggestion[] = []
 
   for (const deployment of state.deployments) {
+    if (gpuId && !deployment.assignedGpuIds.includes(gpuId)) continue
     const next = computeDeploymentSuggestions(state, deployment.id)
     const len = createAction('max_model_len', deployment.maxModelLen, next.maxModelLen)
     const seqs = createAction('max_num_seqs', deployment.maxNumSeqs, next.maxNumSeqs)
