@@ -47,7 +47,7 @@ Repo assessment (concise)
     - Traceability: PRD Persistence; ARCH‑v3 Implementation Notes.
     - Est: 1–2h
 
-- [ ] 2.0 VizCanvas + Waffle visualization
+- [x] 2.0 VizCanvas + Waffle visualization
   - [x] 2.1 Bytes→cells mapping with largest‑remainder rounding
     - Acceptance: Used+Reserve+Free cells == N×N across representative inputs; stable under small changes.
     - Gates: Tests (mapping totals); Boundaries.
