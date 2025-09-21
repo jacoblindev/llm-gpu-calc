@@ -1,6 +1,17 @@
 <template>
   <div class="viz-waffle-grid">
-    <article v-for="tile in tiles" :key="tile.gpuId" class="tile">
+    <article
+      v-for="tile in tiles"
+      :key="tile.gpuId"
+      class="tile"
+      role="button"
+      tabindex="0"
+      :aria-label="`${tile.gpuName} status ${tile.statusText}`"
+      aria-haspopup="dialog"
+      :data-gpu-id="tile.gpuId"
+      @click="onTileClick(tile, $event)"
+      @keydown="onTileKeydown(tile, $event)"
+    >
       <header class="tile__header">
         <div class="tile__title">
           <span class="tile__name">{{ tile.gpuName }}</span>
@@ -43,8 +54,28 @@ import { gpuCapacityLabel, type WaffleCategory } from '@app/controller'
 import type { Gpu } from '@shared/types'
 import { resolveFitBadge } from '../status/fitBadge'
 
+interface TileViewModel {
+  gpuId: string
+  gpuName: string
+  capacityLabel: string
+  statusText: string
+  statusClass: string
+  statusTitle: string
+  gridSize: number
+  cells: WaffleCategory[]
+  usedPercent: string
+  reservePercent: string
+  freePercent: string
+  ariaLabel: string
+  cellSize: string
+}
+
 const store = useAppStore()
 const { waffleCells, fitStatus } = storeToRefs(store)
+
+const emit = defineEmits<{
+  (e: 'inspect', payload: { gpuId: string; name: string; trigger: HTMLElement | null }): void
+}>()
 
 const order: WaffleCategory[] = ['weights', 'kv', 'reserve', 'free']
 
@@ -65,7 +96,7 @@ function percentOf(value: number, capacity: number): string {
   return pct >= 99.5 ? '100' : pct <= 0.5 ? '0' : pct.toFixed(0)
 }
 
-const tiles = computed(() => {
+const tiles = computed<TileViewModel[]>(() => {
   return (waffleCells.value ?? []).map((entry) => {
     const rawStatus = fitStatus.value.find((s) => s.gpuId === entry.gpuId)
     const badge = rawStatus ? resolveFitBadge(rawStatus) : { variant: 'ok', label: 'OK', title: 'No status available' }
@@ -95,7 +126,7 @@ const tiles = computed(() => {
       freePercent,
       ariaLabel,
       cellSize,
-    }
+    } satisfies TileViewModel
   })
 })
 
@@ -112,6 +143,21 @@ function cellStyle(kind: WaffleCategory, size: string) {
     width: size,
     height: size,
     backgroundColor: color,
+  }
+}
+
+function openInspector(tile: TileViewModel, trigger: HTMLElement | null) {
+  emit('inspect', { gpuId: tile.gpuId, name: tile.gpuName, trigger })
+}
+
+function onTileClick(tile: TileViewModel, event: MouseEvent) {
+  openInspector(tile, event.currentTarget as HTMLElement | null)
+}
+
+function onTileKeydown(tile: TileViewModel, event: KeyboardEvent) {
+  if (event.key === 'Enter' || event.key === ' ') {
+    event.preventDefault()
+    openInspector(tile, event.currentTarget as HTMLElement | null)
   }
 }
 </script>

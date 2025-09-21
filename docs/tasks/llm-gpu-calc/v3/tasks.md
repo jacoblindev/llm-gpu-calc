@@ -110,7 +110,8 @@ Repo assessment (concise)
     - Est: 0.5–1h
 
 - [ ] 5.0 TileInspector (modal)
-  - [ ] 5.1 Modal open (click/Enter) and full‑screen on mobile
+  - [x] 5.1 Modal open (click/Enter) and full‑screen on mobile
+    - Notes: TileInspector now teleports with scrim, focus trap, trigger restoration, click/Enter handlers wired via waffle tiles and shell tests rely on manual verification.
     - Acceptance: Works on desktop/mobile; traps focus; ESC closes; restores focus.
     - Gates: Accessibility.
     - Traceability: PRD Layout & Navigation.
