@@ -1,5 +1,6 @@
 <template>
   <Teleport to="body">
+    <div class="sr-only" aria-live="polite" aria-atomic="true">{{ liveMessage }}</div>
     <transition name="control-dock-fade">
       <div v-if="open" class="control-dock__scrim" aria-hidden="true" />
     </transition>
@@ -10,13 +11,16 @@
         role="dialog"
         aria-modal="true"
         aria-labelledby="control-dock-title"
+        aria-describedby="control-dock-description"
         data-test="control-dock"
+        ref="rootRef"
+        @keydown.capture="onKeydown"
       >
         <header class="control-dock__header">
           <div class="control-dock__titles">
             <span class="control-dock__eyebrow">Input Editor</span>
             <h2 id="control-dock-title">Control Dock</h2>
-            <p class="control-dock__subtitle">
+            <p id="control-dock-description" class="control-dock__subtitle">
               Tune GPUs, deployments, and workload without leaving the visualization.
             </p>
           </div>
@@ -82,13 +86,14 @@
 </template>
 
 <script setup lang="ts">
-import { computed, nextTick, reactive, watch } from 'vue'
+import { computed, nextTick, reactive, ref, watch } from 'vue'
 import { useAppStore } from '@app/store'
 import type { AppState } from '@app/state'
 import GpuSelector from '@ui/GpuSelector.vue'
 import DeploymentModels from '@ui/DeploymentModels.vue'
 import DeploymentWorkload from '@ui/DeploymentWorkload.vue'
 import { CONTROL_DOCK_TABS, type ControlDockTab } from './dockTypes'
+import { FOCUSABLE_SELECTOR, getNextFocusable, isFocusableCandidate } from './focusLoop'
 
 const props = defineProps<{ open: boolean; activeTab: ControlDockTab }>()
 const emit = defineEmits<{ (e: 'close'): void; (e: 'change-tab', tab: ControlDockTab): void }>()
@@ -97,6 +102,8 @@ const tabs = CONTROL_DOCK_TABS
 const store = useAppStore()
 const appState = store as unknown as AppState
 
+const rootRef = ref<HTMLElement | null>(null)
+const liveMessage = ref('')
 const tabRefs = reactive<Record<ControlDockTab, HTMLButtonElement | null>>({
   gpus: null,
   models: null,
@@ -110,8 +117,13 @@ function setTabRef(tab: ControlDockTab, el: HTMLButtonElement | null) {
 watch(
   () => props.open,
   (open) => {
-    if (!open) return
+    const message = open
+      ? 'Control Dock opened. Use Tab to move between editor tabs. Press Escape to close.'
+      : 'Control Dock closed.'
+    liveMessage.value = ''
     nextTick(() => {
+      liveMessage.value = message
+      if (!open) return
       const focusTarget = tabRefs[props.activeTab] ?? tabRefs.gpus
       focusTarget?.focus()
     })
@@ -139,6 +151,31 @@ function onAddDeployment() {
 
 function onRemoveDeployment(id: string) {
   store.removeDeployment(id)
+}
+
+function getFocusableElements(): HTMLElement[] {
+  const root = rootRef.value
+  if (!root) return []
+  const nodes = Array.from(root.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR))
+  return nodes.filter(isFocusableCandidate)
+}
+
+function onKeydown(event: KeyboardEvent) {
+  if (event.key === 'Escape') {
+    event.preventDefault()
+    emit('close')
+    return
+  }
+
+  if (event.key !== 'Tab') return
+
+  const focusables = getFocusableElements()
+  if (!focusables.length) return
+  const current = document.activeElement as HTMLElement | null
+  const next = getNextFocusable(focusables, current, event.shiftKey)
+  if (!next) return
+  event.preventDefault()
+  next.focus()
 }
 </script>
 

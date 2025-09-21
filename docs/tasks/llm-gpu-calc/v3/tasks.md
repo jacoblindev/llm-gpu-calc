@@ -76,7 +76,8 @@ Repo assessment (concise)
     - Gates: Boundaries; Tests (smoke interactions).
     - Traceability: PRD Layout & Navigation; ARCH‑v3 UI Composition.
     - Est: 2–3h
-  - [ ] 3.2 Overlay a11y (focus trap, ESC, return‑focus)
+  - [x] 3.2 Overlay a11y (focus trap, ESC, return‑focus)
+    - Notes: Added keyboard trap/escape handling, polite live announcements, and focusable-loop utility with unit tests.
     - Acceptance: Verified with keyboard only; screen reader announces open/close.
     - Gates: Accessibility.
     - Traceability: PRD Accessibility.
