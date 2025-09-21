@@ -3,8 +3,8 @@
     <CommandStrip
       :dock-open="isDockOpen"
       :active-tab="activeTab"
-      @toggle-dock="onToggleDock"
-      @select-dock-tab="onSelectDockTab"
+      @toggle-dock="onCommandStripToggle"
+      @select-dock-tab="onCommandStripSelectTab"
     />
     <main class="dashboard-shell__main">
       <VizCanvas class="dashboard-shell__canvas" />
@@ -22,6 +22,7 @@
 </template>
 
 <script setup lang="ts">
+import { onBeforeUnmount, onMounted, ref } from 'vue'
 import CommandStrip from './CommandStrip.vue'
 import VizCanvas from '../viz/VizCanvas.vue'
 import ControlDock from '../dock/ControlDock.vue'
@@ -30,16 +31,18 @@ import TileInspector from '../inspector/TileInspector.vue'
 import FooterBar from '../FooterBar.vue'
 import type { ControlDockTab } from '../dock/dockTypes'
 import { useControlDockState } from '../dock/useControlDockState'
+import { resolveDockShortcut } from '../dock/shortcutResolver'
 
 const { isOpen, activeTab, open, close, setTab } = useControlDockState('gpus')
 const isDockOpen = isOpen
+const commandToggleRef = ref<HTMLElement | null>(null)
 
 interface DockTabSelection {
   tab: ControlDockTab
   trigger?: HTMLElement | null
 }
 
-function onToggleDock(trigger?: HTMLElement | null) {
+function toggleDock(trigger?: HTMLElement | null) {
   if (isDockOpen.value) {
     close()
     return
@@ -48,7 +51,7 @@ function onToggleDock(trigger?: HTMLElement | null) {
   open(activeTab.value, fallback)
 }
 
-function onSelectDockTab({ tab, trigger }: DockTabSelection) {
+function activateDockTab(tab: ControlDockTab, trigger?: HTMLElement | null) {
   if (trigger) {
     open(tab, trigger)
     return
@@ -68,6 +71,36 @@ function closeDock() {
 function setActiveTab(tab: ControlDockTab) {
   setTab(tab)
 }
+
+function onCommandStripToggle(trigger?: HTMLElement | null) {
+  if (trigger) commandToggleRef.value = trigger
+  toggleDock(trigger ?? commandToggleRef.value ?? null)
+}
+
+function onCommandStripSelectTab({ tab, trigger }: DockTabSelection) {
+  if (trigger) commandToggleRef.value = trigger
+  activateDockTab(tab, trigger ?? commandToggleRef.value ?? null)
+}
+
+function onGlobalKeydown(event: KeyboardEvent) {
+  const action = resolveDockShortcut(event)
+  if (!action) return
+  event.preventDefault()
+  const invoker = commandToggleRef.value ?? (document.activeElement instanceof HTMLElement ? document.activeElement : null)
+  if (action.type === 'toggle') {
+    toggleDock(invoker)
+    return
+  }
+  activateDockTab(action.tab, invoker)
+}
+
+onMounted(() => {
+  window.addEventListener('keydown', onGlobalKeydown, { capture: true })
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('keydown', onGlobalKeydown, { capture: true })
+})
 </script>
 
 <style scoped>

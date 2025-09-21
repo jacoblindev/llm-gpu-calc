@@ -82,7 +82,8 @@ Repo assessment (concise)
     - Gates: Accessibility.
     - Traceability: PRD Accessibility.
     - Est: 1h
-  - [ ] 3.3 Keyboard shortcuts: `E` toggle; `G/M/W` jump tabs
+  - [x] 3.3 Keyboard shortcuts: `E` toggle; `G/M/W` jump tabs
+    - Notes: Global shortcut resolver honors focused inputs, toggles dock with return focus, and jumps directly to tabs; covered by shortcut unit tests.
     - Acceptance: Shortcuts work; respects focused inputs (no stealing focus).
     - Gates: Accessibility.
     - Traceability: PRD Keyboard Shortcuts.

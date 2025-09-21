@@ -130,6 +130,16 @@ watch(
   }
 )
 
+watch(
+  () => props.activeTab,
+  (tab) => {
+    if (!props.open) return
+    nextTick(() => {
+      tabRefs[tab]?.focus()
+    })
+  }
+)
+
 const selectedGpuCount = computed(() => store.gpus.length)
 const deploymentCount = computed(() => store.deployments.length)
 
