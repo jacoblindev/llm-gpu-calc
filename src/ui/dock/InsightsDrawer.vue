@@ -35,30 +35,68 @@
         </header>
 
         <section class="insights__content" aria-live="polite" aria-busy="false">
-          <template v-if="rows.length">
-            <article v-for="row in rows" :key="row.id" class="insights__row">
-              <div class="insights__row-head">
-                <div>
-                  <h3 class="insights__row-name">{{ row.name }}</h3>
-                  <p class="insights__row-reason">{{ row.reason }}</p>
+          <div class="insights__section">
+            <h3 class="insights__section-title">Fit Status</h3>
+            <template v-if="rows.length">
+              <article v-for="row in rows" :key="row.id" class="insights__row">
+                <div class="insights__row-head">
+                  <div>
+                    <h4 class="insights__row-name">{{ row.name }}</h4>
+                    <p class="insights__row-reason">{{ row.reason }}</p>
+                  </div>
+                  <span :class="['insights__badge', `is-${row.badge.variant}`]" :title="row.badge.title">
+                    {{ row.badge.label }}
+                  </span>
                 </div>
-                <span :class="['insights__badge', `is-${row.badge.variant}`]" :title="row.badge.title">
-                  {{ row.badge.label }}
-                </span>
-              </div>
-              <dl class="insights__metrics">
-                <div>
-                  <dt>Used</dt>
-                  <dd>{{ row.usedLabel }}</dd>
+                <dl class="insights__metrics">
+                  <div>
+                    <dt>Used</dt>
+                    <dd>{{ row.usedLabel }}</dd>
+                  </div>
+                  <div>
+                    <dt>Free</dt>
+                    <dd>{{ row.freeLabel }}</dd>
+                  </div>
+                </dl>
+              </article>
+            </template>
+            <p v-else class="insights__empty">No GPUs selected yet. Pick a GPU to see fit diagnostics.</p>
+          </div>
+
+          <div class="insights__section">
+            <h3 class="insights__section-title">Suggestions</h3>
+            <template v-if="suggestions.length">
+              <article v-for="suggestion in suggestions" :key="suggestion.id" class="insights__suggestion">
+                <div class="insights__suggestion-head">
+                  <div>
+                    <h4 class="insights__suggestion-name">
+                      {{ suggestion.modelName ?? 'Deployment' }}
+                    </h4>
+                    <p class="insights__suggestion-meta">ID: {{ suggestion.id }}</p>
+                  </div>
                 </div>
-                <div>
-                  <dt>Free</dt>
-                  <dd>{{ row.freeLabel }}</dd>
-                </div>
-              </dl>
-            </article>
-          </template>
-          <p v-else class="insights__empty">No GPUs selected yet. Pick a GPU to see fit diagnostics.</p>
+                <ul class="insights__suggestion-actions">
+                  <li v-for="action in suggestion.actions" :key="action.field" class="insights__suggestion-action">
+                    <div>
+                      <span class="insights__action-label">{{ action.field === 'max_model_len' ? 'max_model_len' : 'max_num_seqs' }}</span>
+                      <span class="insights__action-values">
+                        {{ action.current }} → <strong>{{ action.suggested }}</strong>
+                      </span>
+                    </div>
+                    <button
+                      type="button"
+                      class="insights__apply"
+                      :disabled="!action.canApply"
+                      @click="applySuggestion(suggestion.id, action.field)"
+                    >
+                      Apply
+                    </button>
+                  </li>
+                </ul>
+              </article>
+            </template>
+            <p v-else class="insights__empty">No tuning suggestions at the moment.</p>
+          </div>
         </section>
       </aside>
     </transition>
@@ -70,14 +108,16 @@ import { computed, nextTick, ref, watch } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useAppStore } from '@app/store'
 import { buildInsightRows } from './insightsRows'
+import { buildInsightSuggestions } from './insightsSuggestions'
 import { FOCUSABLE_SELECTOR, getNextFocusable, isFocusableCandidate } from './focusLoop'
+import type { AppState } from '@app/state'
 
 const props = defineProps<{ open: boolean }>()
 const emit = defineEmits<{ (e: 'close'): void }>()
 
 const rootRef = ref<HTMLElement | null>(null)
 const store = useAppStore()
-const { fitStatus, gpus, gpuCatalog, unit } = storeToRefs(store)
+const { fitStatus, gpus, gpuCatalog, unit, deployments } = storeToRefs(store)
 
 const rows = computed(() =>
   buildInsightRows({
@@ -85,6 +125,12 @@ const rows = computed(() =>
     gpus: gpus.value,
     gpuCatalog: gpuCatalog.value,
     unit: unit.value,
+  })
+)
+
+const suggestions = computed(() =>
+  buildInsightSuggestions({
+    state: { ...store.$state, deployments: deployments.value } as AppState,
   })
 )
 
@@ -124,6 +170,14 @@ function onKeydown(event: KeyboardEvent) {
 
 function onClose() {
   emit('close')
+}
+
+function applySuggestion(id: string, field: 'max_model_len' | 'max_num_seqs') {
+  if (field === 'max_model_len') {
+    store.applySuggestedMaxModelLen(id)
+  } else {
+    store.applySuggestedMaxNumSeqs(id)
+  }
 }
 </script>
 
@@ -217,7 +271,16 @@ function onClose() {
   padding: 0 1.5rem 1.75rem;
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 1.5rem;
+}
+
+.insights__section-title {
+  margin: 0 0 0.75rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: rgba(148, 163, 184, 0.82);
 }
 
 .insights__row {
@@ -303,6 +366,71 @@ function onClose() {
   margin: 2rem 0;
   text-align: center;
   color: rgba(148, 163, 184, 0.85);
+}
+
+.insights__suggestion {
+  padding: 1rem 1.1rem;
+  border-radius: 16px;
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  background: rgba(15, 23, 42, 0.55);
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+.insights__suggestion-name {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: rgba(248, 250, 252, 0.94);
+}
+
+.insights__suggestion-meta {
+  margin: 0.25rem 0 0;
+  font-size: 0.8rem;
+  color: rgba(148, 163, 184, 0.78);
+}
+
+.insights__suggestion-actions {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.insights__suggestion-action {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: center;
+}
+
+.insights__action-label {
+  font-size: 0.82rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(148, 163, 184, 0.82);
+  display: block;
+}
+
+.insights__action-values {
+  font-size: 0.95rem;
+  color: rgba(248, 250, 252, 0.94);
+}
+
+.insights__apply {
+  border-radius: 999px;
+  border: 1px solid rgba(56, 189, 248, 0.5);
+  background: linear-gradient(90deg, rgba(56, 189, 248, 0.22), rgba(99, 102, 241, 0.32));
+  color: #f8fafc;
+  font-weight: 600;
+  padding: 0.45rem 1.1rem;
+}
+
+.insights__apply:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
 }
 
 .insights-fade-enter-active,
